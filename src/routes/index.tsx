@@ -1,9 +1,11 @@
 import { component$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
+import Accordin from "~/components/accordin/Accordin";
 import Card from "~/components/card/Card";
 import Section from "~/components/section/Section";
 import { default as PROJECTS_CONFIG } from "~/constants/projects.config";
 import { default as SOCIAL_CONFIG } from "~/constants/social.config";
+import { default as WORK_CONFIG } from "~/constants/work.config";
 
 export default component$(() => {
   return (
@@ -40,7 +42,13 @@ export default component$(() => {
         </div>
         <div class={"blurBgEffect"}></div>
       </div>
-      <Section heading="Work" subHeading="Where I've Worked"></Section>
+      <Section heading="Work" subHeading="Where I've Worked">
+        <div class={"no-scrollbar py-10 pr-14 flex flex-col flex-nowrap gap-12 w-[95vw] overflow-scroll"}>
+          {WORK_CONFIG.map((work) => {
+            return <Accordin key={work.heading} heading={work.heading} description={work.description} defaultState={work.defaultState} />;
+          })}
+        </div>
+      </Section>
       <Section heading="Projects" subHeading="Selected Projects">
         <div class={"no-scrollbar py-10 pr-14 flex flex-row flex-nowrap gap-6 w-[95vw] overflow-scroll"}>
           {PROJECTS_CONFIG.map((project) => {
