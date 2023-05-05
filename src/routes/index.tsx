@@ -27,7 +27,7 @@ export default component$(() => {
           })}
         </div>
       </div>
-      <div class={"mr-[7rem] mt-[3rem] w-[20rem] h-[27rem] bg-matte dark:bg-white rounded-t-full bg-cover overflow-hidden flex border-[1px] border-matte dark:border-darkGreen"}>
+      <div class={"mr-[7rem] mt-[3rem] w-[20rem] h-[27rem] bg-matte dark:bg-white rounded-t-full bg-cover overflow-hidden flex border-[1px] border-matte dark:border-darkGreen  outline outline-darkGreen dark:outline-green outline-offset-4 outline-[1px]"}>
         <img src="https://nparashar150.com/static/media/AboutImage.9dccddd7.png" alt="Naman" />
       </div>
       <div class={"blurBgEffect"}></div>
