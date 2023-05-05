@@ -79,7 +79,7 @@ body {
   width: 90vw;
   height: 50vh;
   opacity: 0.5;
-  position: absolute;
+  position: fixed;
   filter: blur(100px);
   border-top-right-radius: 50%;
   transform: translate(-50%, -50%);
