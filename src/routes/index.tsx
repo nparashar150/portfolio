@@ -1,6 +1,8 @@
 import { component$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
+import Card from "~/components/card/Card";
 import Section from "~/components/section/Section";
+import { default as PROJECTS_CONFIG } from "~/constants/projects.config";
 import { default as SOCIAL_CONFIG } from "~/constants/social.config";
 
 export default component$(() => {
@@ -39,7 +41,13 @@ export default component$(() => {
         <div class={"blurBgEffect"}></div>
       </div>
       <Section heading="Work" subHeading="Where I've Worked"></Section>
-      <Section heading="Projects" subHeading="Selected Projects"></Section>
+      <Section heading="Projects" subHeading="Selected Projects">
+        <div class={"no-scrollbar py-10 pr-14 flex flex-row flex-nowrap gap-6 w-[95vw] overflow-scroll"}>
+          {PROJECTS_CONFIG.map((project) => {
+            return <Card key={project.title} title={project.title} description={project.description} url={project.url} urlText={project.urlText} />;
+          })}
+        </div>
+      </Section>
     </>
   );
 });
