@@ -82,10 +82,7 @@ body {
   transform: rotateY(0deg) rotate(-15deg);
 }
 
-/* prefers color scheme */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #161313;
-    color: #fff;
-  }
+.dark {
+  background-color: #161313;
+  color: #fff;
 }
