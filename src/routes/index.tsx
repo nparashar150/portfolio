@@ -35,7 +35,7 @@ export default component$(() => {
         </div>
         <div
           class={
-            "mr-[7rem] -mt-[2rem] w-[20rem] h-[27rem] bg-matte dark:bg-white rounded-t-full bg-cover overflow-hidden flex border-[1px] border-matte dark:border-darkGreen  outline outline-darkGreen dark:outline-green outline-offset-4 outline-[1px]"
+            "mr-[7rem] -mt-[2rem] w-[20rem] h-[27rem] bg-matte dark:bg-white rounded-t-full bg-cover overflow-hidden flex border-[1px] border-matte dark:border-darkGreen  outline outline-darkGreen dark:outline-green outline-offset-4 outline-[1px] before:w-[20rem] before:h-[27rem] before:bg-darkGreen before:bg-green before:absolute before:rounded-t-full before:opacity-25 before:hover:opacity-0 before:transition-all before:duration-300"
           }
         >
           <img src="/naman-parashar-profile.avif" alt="Naman" />

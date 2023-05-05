@@ -11,8 +11,8 @@ export default component$(() => {
 
   useVisibleTask$(async () => {
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      document.body.classList.add("dark");
-      isDarkTheme.value = true;
+      // document.body.classList.add("dark");
+      // isDarkTheme.value = true;
     }
   });
 
