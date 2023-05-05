@@ -1,112 +1,67 @@
-import { component$ } from '@builder.io/qwik';
-import type { DocumentHead } from '@builder.io/qwik-city';
-
-import Counter from '~/components/starter/counter/counter';
-import Hero from '~/components/starter/hero/hero';
-import Infobox from '~/components/starter/infobox/infobox';
-import Starter from '~/components/starter/next-steps/next-steps';
+import { component$ } from "@builder.io/qwik";
+import type { DocumentHead } from "@builder.io/qwik-city";
+import { default as SOCIAL_CONFIG } from "~/constants/social.config";
 
 export default component$(() => {
   return (
-    <>
-      <Hero />
-      <Starter />
-
-      <div role="presentation" class="ellipsis"></div>
-      <div role="presentation" class="ellipsis ellipsis-purple"></div>
-
-      <div class="container container-center container-spacing-xl">
-        <h3>
-          You can <span class="highlight">count</span>
-          <br /> on me
-        </h3>
-        <Counter />
-      </div>
-
-      <div class="container container-flex">
-        <Infobox>
-          <div q:slot="title" class="icon icon-cli">
-            CLI Commands
-          </div>
-          <>
-            <p>
-              <code>npm run dev</code>
-              <br />
-              Starts the development server and watches for changes
-            </p>
-            <p>
-              <code>npm run preview</code>
-              <br />
-              Creates production build and starts a server to preview it
-            </p>
-            <p>
-              <code>npm run build</code>
-              <br />
-              Creates production build
-            </p>
-            <p>
-              <code>npm run qwik add</code>
-              <br />
-              Runs the qwik CLI to add integrations
-            </p>
-          </>
-        </Infobox>
-
-        <div>
-          <Infobox>
-            <div q:slot="title" class="icon icon-apps">
-              Example Apps
-            </div>
-            <p>
-              Have a look at the <a href="/demo/flower">Flower App</a> or the{' '}
-              <a href="/demo/todolist">Todo App</a>.
-            </p>
-          </Infobox>
-
-          <Infobox>
-            <div q:slot="title" class="icon icon-community">
-              Community
-            </div>
-            <ul>
-              <li>
-                <span>Questions or just want to say hi? </span>
-                <a href="https://qwik.builder.io/chat" target="_blank">
-                  Chat on discord!
-                </a>
-              </li>
-              <li>
-                <span>Follow </span>
-                <a href="https://twitter.com/QwikDev" target="_blank">
-                  @QwikDev
-                </a>
-                <span> on Twitter</span>
-              </li>
-              <li>
-                <span>Open issues and contribute on </span>
-                <a href="https://github.com/BuilderIO/qwik" target="_blank">
-                  GitHub
-                </a>
-              </li>
-              <li>
-                <span>Watch </span>
-                <a href="https://qwik.builder.io/media/" target="_blank">
-                  Presentations, Podcasts, Videos, etc.
-                </a>
-              </li>
-            </ul>
-          </Infobox>
+    <div
+      class={"h-100 min-h-[70vh] flex flex-row justify-between items-center"}
+    >
+      <div class={"w-7/12 flex flex-col justify-center items-start gap-4"}>
+        <h1 class={"text-[6rem] text-matte"}>Hi, I am Naman</h1>
+        <p class={"w-10/12 text-[1.15rem] leading-7 font-WorkSans text-matte"}>
+          I'm a full stack Software Engineer. I am passionate about creating a
+          user-centered design, gathering and translating user data into design
+          decisions and products.
+        </p>
+        <div
+          class={
+            "mt-2 font-Vollkorn font-[1.15rem] flex justify-center items-center gap-8"
+          }
+        >
+          {SOCIAL_CONFIG.map((social) => {
+            return (
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href={social.route}
+                key={social.route}
+                class={
+                  "flex group hover:text-darkGreen justify-center items-center cursor-pointer group transition-all duration-300 ease-in-out"
+                }
+              >
+                {social.label}
+                <img
+                  class={"group-hover:rotate-12"}
+                  src="/top-arrow-right.svg"
+                  alt="arrow"
+                />
+              </a>
+            );
+          })}
         </div>
       </div>
-    </>
+      <div
+        class={
+          "mr-[7rem] mt-[3rem] w-[20rem] h-[27rem] bg-matte rounded-t-full bg-cover overflow-hidden flex border-[1px]"
+        }
+      >
+        <img
+          src="https://nparashar150.com/static/media/AboutImage.9dccddd7.png"
+          alt="Naman"
+        />
+      </div>
+      <div class={"blurBgEffect"}></div>
+    </div>
   );
 });
 
 export const head: DocumentHead = {
-  title: 'Welcome to Qwik',
+  title: "Naman | Home",
   meta: [
     {
-      name: 'description',
-      content: 'Qwik site description',
+      name: "description",
+      content: "Naman | Home",
     },
   ],
 };
