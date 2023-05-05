@@ -8,7 +8,7 @@ interface SectionProps {
 
 export default component$<SectionProps>(({ heading, subHeading, description }) => {
   return (
-    <div class={"h-100 min-h-[80vh] flex flex-col justify-start items-start"}>
+    <div class={"h-100 min-h-[80vh] mb-10 flex flex-col justify-start items-start"}>
       <div id={heading} class={"min-w-full flex flex-row justify-between items-center text-matte dark:text-white"}>
         <div class={"w-9/12 flex flex-col justify-center items-start text-matte dark:text-white"}>
           <h1 class={"text-[6rem] text-matte dark:text-white opacity-10"}>{heading}</h1>
