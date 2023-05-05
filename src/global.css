@@ -31,6 +31,10 @@ body {
   line-height: inherit;
 }
 
+* {
+  transition: all 0.175s ease-in-out;
+}
+
 /**
  * WHAT IS THIS FILE?
  *
