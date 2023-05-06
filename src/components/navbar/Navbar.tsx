@@ -11,14 +11,14 @@ export default component$(() => {
 
   useVisibleTask$(async () => {
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      // document.body.classList.add("dark");
-      // isDarkTheme.value = true;
+      document.body.classList.add("dark");
+      isDarkTheme.value = true;
     }
   });
 
   return (
-    <nav class={"pl-20 flex justify-between items-center border-b-[1px] border-matte dark:border-white w-[100vw] -ml-20"}>
-      <div onClick$={() => (window.location.pathname = "/")} class={"cursor-pointer pt-10 pb-8 text-[36px] text-matte dark:text-white"}>
+    <nav class={"flex justify-between items-center border-b-[1px] border-matte dark:border-white -ml-10 mb-24 sm:mb-0 w-[100vw] sm:-ml-20 sm:pl-20"}>
+      <div onClick$={() => (window.location.pathname = "/")} class={"cursor-pointer pl-6 pt-10 pb-8 text-[36px] text-matte dark:text-white sm:pl-0"}>
         Naman <span class={"-ml-2 text-green"}>.</span>
       </div>
       <div class={`w-6/12 flex ${NAVBAR_CONFIG.length > 0 ? "justify-between" : "justify-end"} items-center text-matte dark:text-white`}>
