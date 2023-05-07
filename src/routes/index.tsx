@@ -29,7 +29,7 @@ export default component$(() => {
         </div>
         <div
           class={
-            "mx-auto w-[75vw] h-auto bg-matte dark:bg-white rounded-t-full bg-cover overflow-hidden flex border-[1px] border-matte dark:border-darkGreen  outline outline-darkGreen dark:outline-green outline-offset-4 outline-[1px] before:sm:w-[20rem] before:sm:h-[27rem] before:bg-darkGreen before:dark:bg-green before:absolute before:rounded-t-full before:opacity-25 before:hover:opacity-0 before:transition-all before:duration-300 sm:mr-[7rem] sm:-mt-[2rem] sm:w-[20rem] sm:h-[27rem]"
+            "mx-auto w-[75vw] h-auto bg-matte dark:bg-white rounded-t-full bg-cover overflow-hidden flex border-[1px] border-matte dark:border-darkGreen  outline outline-darkGreen dark:outline-green outline-offset-4 outline-[1px] sm:mr-[7rem] sm:-mt-[2rem] sm:w-[20rem] sm:h-[27rem]"
           }
         >
           <img src="/naman-parashar-profile.avif" alt="Naman" />
