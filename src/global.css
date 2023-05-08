@@ -21,8 +21,7 @@ html {
   -moz-tab-size: 4;
   -o-tab-size: 4;
   tab-size: 4;
-  font-family: Vollkorn, ui-serif, Georgia, Cambria, "Times New Roman", Times,
-    serif;
+  font-family: Vollkorn, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 body {
@@ -48,8 +47,7 @@ html {
   -moz-tab-size: 4;
   -o-tab-size: 4;
   tab-size: 4;
-  font-family: Vollkorn, ui-serif, Georgia, Cambria, "Times New Roman", Times,
-    serif;
+  font-family: Vollkorn, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 body {
@@ -59,21 +57,9 @@ body {
 
 .blurBgEffect {
   background: rgb(0, 117, 75);
-  background: -moz-linear-gradient(
-    200deg,
-    rgba(0, 117, 75, 1) 30%,
-    rgba(30, 210, 145, 1) 100%
-  );
-  background: -webkit-linear-gradient(
-    200deg,
-    rgba(0, 117, 75, 1) 30%,
-    rgba(30, 210, 145, 1) 100%
-  );
-  background: linear-gradient(
-    200deg,
-    rgba(0, 117, 75, 1) 30%,
-    rgba(30, 210, 145, 1) 100%
-  );
+  background: -moz-linear-gradient(200deg, rgba(0, 117, 75, 1) 30%, rgba(30, 210, 145, 1) 100%);
+  background: -webkit-linear-gradient(200deg, rgba(0, 117, 75, 1) 30%, rgba(30, 210, 145, 1) 100%);
+  background: linear-gradient(200deg, rgba(0, 117, 75, 1) 30%, rgba(30, 210, 145, 1) 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#00754b",endColorstr="#1ed291",GradientType=1);
   z-index: -1;
   width: 90vw;
@@ -118,6 +104,6 @@ body {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

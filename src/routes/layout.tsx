@@ -4,7 +4,7 @@ import Navbar from "~/components/navbar/Navbar";
 
 export default component$(() => {
   return (
-    <div class={"containe sm:px-20 px-10"}>
+    <div class={"containe px-10 sm:px-20"}>
       <Navbar />
       <main>
         <Slot />

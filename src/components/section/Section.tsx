@@ -8,13 +8,13 @@ interface SectionProps {
 
 export default component$<SectionProps>(({ heading, subHeading, description }) => {
   return (
-    <div class={"h-100 min-h-[80vh] my-16 sm:mb-10 sm:mt-0 flex flex-col justify-start items-start"}>
-      <div id={heading} class={"min-w-full flex flex-row justify-between items-center text-matte dark:text-white"}>
-        <div class={"w-9/12 flex flex-col justify-center items-start text-matte dark:text-white"}>
-          <h1 class={"text-[4.5rem] text-matte dark:text-white opacity-10 sm:text-[6rem]"}>{heading}</h1>
-          <p class={"text-[1.15rem] font-WorkSans text-matte dark:text-white"}>{subHeading}</p>
+    <div class={"h-100 my-16 flex min-h-[80vh] flex-col items-start justify-start sm:mb-10 sm:mt-0"}>
+      <div id={heading} class={"flex min-w-full flex-row items-center justify-between text-matte dark:text-white"}>
+        <div class={"flex w-9/12 flex-col items-start justify-center text-matte dark:text-white"}>
+          <h1 class={"text-[4.5rem] text-matte opacity-10 dark:text-white sm:text-[6rem]"}>{heading}</h1>
+          <p class={"font-WorkSans text-[1.15rem] text-matte dark:text-white"}>{subHeading}</p>
         </div>
-        <p class={"w-3/12 text-right text-[1.15rem] leading-7 font-WorkSans text-matte dark:text-white"}>{description}</p>
+        <p class={"w-3/12 text-right font-WorkSans text-[1.15rem] leading-7 text-matte dark:text-white"}>{description}</p>
       </div>
       <Slot />
     </div>
