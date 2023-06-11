@@ -31,9 +31,9 @@ export default component$(() => {
         })}
         <div class={"min-w-[13%] border-l-[1px] border-matte px-6 py-9 dark:border-white"}>
           {!isDarkTheme.value ? (
-            <img alt={"Theme Toggle"} class={"-mb-2 cursor-pointer"} src={"/theme-toggle-to-dark.svg"} onClick$={() => toggleDarkTheme()} />
+            <img alt={"Theme Toggle"} class={"-mb-2 mx-auto cursor-pointer"} src={"/theme-toggle-to-dark.svg"} onClick$={() => toggleDarkTheme()} />
           ) : (
-            <img alt={"Theme Toggle"} class={"-mb-2 cursor-pointer"} src={"/theme-toggle-to-light.svg"} onClick$={() => toggleDarkTheme()} />
+            <img alt={"Theme Toggle"} class={"-mb-2 mx-auto cursor-pointer"} src={"/theme-toggle-to-light.svg"} onClick$={() => toggleDarkTheme()} />
           )}
         </div>
       </div>
