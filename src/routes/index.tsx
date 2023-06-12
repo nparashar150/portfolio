@@ -1,5 +1,5 @@
-import { component$ } from "@builder.io/qwik";
-import type { DocumentHead } from "@builder.io/qwik-city";
+import { $, component$, useSignal } from "@builder.io/qwik";
+import { type DocumentHead } from "@builder.io/qwik-city";
 import Accordin from "~/components/accordin/Accordin";
 import Card from "~/components/card/Card";
 import Link from "~/components/link/Link";
@@ -9,6 +9,15 @@ import { default as SOCIAL_CONFIG } from "~/constants/social.config";
 import { default as WORK_CONFIG } from "~/constants/work.config";
 
 export default component$(() => {
+  const userContatInfo = useSignal({ name: "", email: "", message: "" });
+
+  const onChangeHandler = $((event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const name = target.name;
+    const value = target.value;
+    userContatInfo.value = { ...userContatInfo.value, [name]: value };
+  });
+
   return (
     <>
       <div class={"h-100 flex min-h-[80vh] flex-col justify-start gap-12 sm:flex-row sm:items-center sm:justify-between sm:gap-4"}>
@@ -49,6 +58,28 @@ export default component$(() => {
             return <Card key={project.title} title={project.title} description={project.description} url={project.url} urlText={project.urlText} />;
           })}
         </div>
+      </Section>
+      <Section heading={`Do you have any ideas?\nLet's create the future`} subHeading="">
+        <label class={"mt-[3rem] text-[1rem] text-matte dark:text-white"}>Name</label>
+        <input name="name" value={userContatInfo.value.name} onInput$={onChangeHandler} type="text" style={"background: transparent"} class={"h-[2.75rem] w-[90vw] border-b-[1px] border-matte outline-none dark:border-white sm:w-[50vw]"} />
+        <label class={"mt-[3rem] text-[1rem] text-matte dark:text-white"}>Email</label>
+        <input name="email" value={userContatInfo.value.email} onInput$={onChangeHandler} type="text" style={"background: transparent"} class={"h-[2.75rem] w-[90vw] border-b-[1px] border-matte outline-none dark:border-white sm:w-[50vw]"} />
+        <label class={"mt-[3rem] text-[1rem] text-matte dark:text-white"}>Message</label>
+        <textarea
+          name="message"
+          value={userContatInfo.value.message}
+          onInput$={onChangeHandler}
+          style={"background: transparent"}
+          class={"mt-[1rem] h-[2.75rem] w-[90vw] border-b-[1px] border-matte outline-none dark:border-white sm:w-[50vw]"}
+        />
+        <button
+          preventdefault:click
+          onClick$={$(() => window.open(`mailto:?&body=${userContatInfo.value.message}&cc=${userContatInfo.value.email}`))}
+          class={"group group mt-[2rem] flex cursor-pointer items-center justify-center transition-all duration-300 ease-in-out hover:text-darkGreen dark:hover:text-green"}
+        >
+          SEND
+          <img class={"group-hover:rotate-12 dark:invert"} src="/top-arrow-right.svg" alt="arrow" />
+        </button>
       </Section>
     </>
   );
