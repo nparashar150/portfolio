@@ -38,7 +38,7 @@ export default component$(() => {
         </div>
         <div
           class={
-            "mx-auto flex h-auto w-[75vw] overflow-hidden rounded-t-full border-[1px] border-matte bg-matte bg-cover outline outline-[1px]  outline-offset-4 outline-darkGreen dark:border-darkGreen dark:bg-white dark:outline-green sm:-mt-[2rem] sm:mr-[7rem] sm:h-[27rem] sm:w-[20rem]"
+            "flex h-auto w-[75vw] overflow-hidden border-[1px] border-matte bg-matte bg-cover outline outline-[1px] outline-offset-4 outline-darkGreen dark:outline-green dark:border-darkGreen dark:bg-white sm:mx-auto sm:-mt-[2rem] sm:mr-[7rem] sm:h-[27rem] sm:w-[20rem]"
           }
         >
           <img src="/naman-parashar-profile.avif" alt="Naman" />
@@ -90,7 +90,7 @@ export const head: DocumentHead = {
   meta: [
     {
       name: "description",
-      content: "Naman | Home",
+      content: "I'm a full stack Software Engineer. I am passionate about creating a user-centered design, gathering and translating user data into design decisions and products.",
     },
   ],
 };

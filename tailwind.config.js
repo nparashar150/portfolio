@@ -9,8 +9,8 @@ module.exports = {
       WorkSans: ["Work Sans", "sans-serif"],
     },
     colors: {
-      green: "#1ED291",
-      darkGreen: "#00754B",
+      green: "#14b8a5",
+      darkGreen: "#115e59",
       matte: "#161313",
       dark: "#000000",
       white: "#FFFFFF",
