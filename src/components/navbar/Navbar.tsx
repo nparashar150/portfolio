@@ -21,19 +21,19 @@ export default component$(() => {
       <div onClick$={() => (window.location.pathname = "/")} class={"cursor-pointer pb-8 pl-6 pt-10 text-[36px] text-matte dark:text-white sm:pl-0"}>
         Naman <span class={"-ml-2 text-green"}>.</span>
       </div>
-      <div class={`flex w-6/12 ${NAVBAR_CONFIG.length > 0 ? "justify-between" : "justify-end"} items-center text-matte dark:text-white`}>
-        {NAVBAR_CONFIG.map((item) => {
+      <div class={`flex w-6/12 ${NAVBAR_CONFIG.length > 0 && "justify-end"} items-center text-matte dark:text-white`}>
+        {NAVBAR_CONFIG.map((item, index) => {
           return (
-            <div key={item.route} class={"pb-8 pt-10 font-WorkSans text-[16px] transition-all duration-300 ease-in-out hover:text-darkGreen dark:hover:text-green"}>
+            <div key={item.route} class={`${NAVBAR_CONFIG.length === index + 1 && "pr-6"} pb-8 pt-10 font-WorkSans text-[16px] transition-all duration-300 ease-in-out hover:text-darkGreen dark:hover:text-green`}>
               <a href={item.route}>{item.label}</a>
             </div>
           );
         })}
         <div class={"min-w-[13%] border-l-[1px] border-matte px-6 py-9 dark:border-white"}>
           {!isDarkTheme.value ? (
-            <img alt={"Theme Toggle"} class={"-mb-2 mx-auto cursor-pointer"} src={"/theme-toggle-to-dark.svg"} onClick$={() => toggleDarkTheme()} />
+            <img alt={"Theme Toggle"} class={"mx-auto -mb-2 cursor-pointer"} src={"/theme-toggle-to-dark.svg"} onClick$={() => toggleDarkTheme()} />
           ) : (
-            <img alt={"Theme Toggle"} class={"-mb-2 mx-auto cursor-pointer"} src={"/theme-toggle-to-light.svg"} onClick$={() => toggleDarkTheme()} />
+            <img alt={"Theme Toggle"} class={"mx-auto -mb-2 cursor-pointer"} src={"/theme-toggle-to-light.svg"} onClick$={() => toggleDarkTheme()} />
           )}
         </div>
       </div>

@@ -30,10 +30,10 @@ export default [
   //   showOnSmallScreen: true,
   //   showOnLargeScreen: true,
   // },
-  // {
-  //   route: "/resume",
-  //   label: "My Resume",
-  //   showOnSmallScreen: true,
-  //   showOnLargeScreen: true,
-  // },
+  {
+    route: "/static/Naman_Parashar_Resume_28-08-2023-09-36-51.pdf",
+    label: "Resume",
+    showOnSmallScreen: true,
+    showOnLargeScreen: true,
+  },
 ] as NavbarConfig[];
