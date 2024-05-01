@@ -17,4 +17,10 @@ export default [
     showOnSmallScreen: true,
     showOnLargeScreen: true,
   },
+  {
+    route: "https://medium.com/@nparashar150",
+    label: "Blogs",
+    showOnSmallScreen: true,
+    showOnLargeScreen: true,
+  },
 ];
