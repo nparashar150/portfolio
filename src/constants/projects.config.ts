@@ -1,5 +1,11 @@
 export default [
   {
+    title: "The Startup Template",
+    description: "Everything you need to build, launch, and grow your web app effortlessly. Focus on your vision, and start making your first $ faster.",
+    urlText: "View Website",
+    url: "https://side.quik.run",
+  },
+  {
     title: "QuikRun App",
     description: "QuikRun streamlines code management by providing seamless and efficient options for saving, distributing and executing your code.",
     urlText: "View Website",
