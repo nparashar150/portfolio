@@ -38,7 +38,7 @@ export default component$(() => {
         </div>
         <div
           class={
-            "flex h-auto w-[75vw] overflow-hidden border-[1px] border-matte bg-matte bg-cover outline outline-[1px] outline-offset-4 outline-darkGreen dark:outline-green dark:border-darkGreen dark:bg-white sm:mx-auto sm:-mt-[2rem] sm:mr-[7rem] sm:h-[27rem] sm:w-[20rem]"
+            "flex h-auto w-[75vw] overflow-hidden border-[1px] border-matte bg-matte bg-cover outline outline-[1px] outline-offset-4 outline-darkGreen dark:border-darkGreen dark:bg-white dark:outline-green sm:mx-auto sm:-mt-[2rem] sm:mr-[7rem] sm:h-[27rem] sm:w-[20rem]"
           }
         >
           <img src="/naman-parashar-profile.avif" alt="Naman" />
@@ -60,16 +60,39 @@ export default component$(() => {
         </div>
       </Section>
       <Section heading={`Do you have any ideas?\nLet's create the future`} subHeading="">
-        <label class={"mt-[3rem] text-[1rem] text-matte dark:text-white"}>Name</label>
-        <input name="name" value={userContatInfo.value.name} onInput$={onChangeHandler} type="text" style={"background: transparent"} class={"h-[2.75rem] w-[90vw] border-b-[1px] border-matte outline-none dark:border-white sm:w-[50vw]"} />
-        <label class={"mt-[3rem] text-[1rem] text-matte dark:text-white"}>Email</label>
-        <input name="email" value={userContatInfo.value.email} onInput$={onChangeHandler} type="text" style={"background: transparent"} class={"h-[2.75rem] w-[90vw] border-b-[1px] border-matte outline-none dark:border-white sm:w-[50vw]"} />
-        <label class={"mt-[3rem] text-[1rem] text-matte dark:text-white"}>Message</label>
-        <textarea
-          name="message"
-          value={userContatInfo.value.message}
+        <label for="name" class={"mt-[3rem] text-[1rem] text-matte dark:text-white"}>
+          Name
+        </label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          onInput$={onChangeHandler}
+          value={userContatInfo.value.name}
+          style={"background: transparent"}
+          class={"h-[2.75rem] w-[90vw] border-b-[1px] border-matte outline-none dark:border-white sm:w-[50vw]"}
+        />
+        <label for="email" class={"mt-[3rem] text-[1rem] text-matte dark:text-white"}>
+          Email
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="text"
           onInput$={onChangeHandler}
           style={"background: transparent"}
+          value={userContatInfo.value.email}
+          class={"h-[2.75rem] w-[90vw] border-b-[1px] border-matte outline-none dark:border-white sm:w-[50vw]"}
+        />
+        <label for="message" class={"mt-[3rem] text-[1rem] text-matte dark:text-white"}>
+          Message
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          onInput$={onChangeHandler}
+          style={"background: transparent"}
+          value={userContatInfo.value.message}
           class={"mt-[1rem] h-[2.75rem] w-[90vw] border-b-[1px] border-matte outline-none dark:border-white sm:w-[50vw]"}
         />
         <button

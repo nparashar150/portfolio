@@ -12,7 +12,7 @@ export default component$<SectionProps>(({ heading, subHeading, description }) =
       <div id={heading} class={"flex min-w-full flex-row items-center justify-between text-matte dark:text-white"}>
         <div class={"flex w-9/12 flex-col items-start justify-center text-matte dark:text-white"}>
           {heading?.split(/\r?\n/).map((line, index) => (
-            <h1 key={index} class={"text-[4.5rem] text-matte opacity-10 dark:text-white sm:text-[6rem]"}>
+            <h1 key={index} class={"text-[4.5rem] text-matte opacity-40 dark:text-white sm:text-[6rem]"}>
               {line}
             </h1>
           ))}
