@@ -7,6 +7,17 @@ import Section from "~/components/section/Section";
 import { default as PROJECTS_CONFIG } from "~/constants/projects.config";
 import { default as SOCIAL_CONFIG } from "~/constants/social.config";
 import { default as WORK_CONFIG } from "~/constants/work.config";
+import { Image } from "qwik-image";
+
+export const head: DocumentHead = {
+  title: "Naman | Home",
+  meta: [
+    {
+      name: "description",
+      content: "I'm a full stack Software Engineer. I am passionate about creating a user-centered design, gathering and translating user data into design decisions and products.",
+    },
+  ],
+};
 
 export default component$(() => {
   const userContatInfo = useSignal({ name: "", email: "", message: "" });
@@ -36,12 +47,8 @@ export default component$(() => {
             })}
           </div>
         </div>
-        <div
-          class={
-            "flex h-auto w-[75vw] overflow-hidden border-[1px] border-matte bg-matte bg-cover outline outline-[1px] outline-offset-4 outline-darkGreen dark:border-darkGreen dark:bg-white dark:outline-green sm:mx-auto sm:-mt-[2rem] sm:mr-[7rem] sm:h-[27rem] sm:w-[20rem]"
-          }
-        >
-          <img src="/naman-parashar-profile.avif" alt="Naman" />
+        <div class={"flex h-[30rem] w-[21rem] overflow-hidden border-[1px] border-matte bg-matte bg-cover outline outline-[1px] outline-offset-4 outline-darkGreen dark:border-darkGreen dark:bg-white dark:outline-green"}>
+          <Image alt="Naman's" placeholder="#e6e6e6" src="/naman-parashar-profile.avif" layout="constrained" objectFit="cover" width={420} height={560}  />
         </div>
         <div class={"blurBgEffect"}></div>
       </div>
@@ -107,13 +114,3 @@ export default component$(() => {
     </>
   );
 });
-
-export const head: DocumentHead = {
-  title: "Naman | Home",
-  meta: [
-    {
-      name: "description",
-      content: "I'm a full stack Software Engineer. I am passionate about creating a user-centered design, gathering and translating user data into design decisions and products.",
-    },
-  ],
-};
