@@ -31,7 +31,7 @@ export default [
   //   showOnLargeScreen: true,
   // },
   {
-    route: "/static/Naman_Parashar_Resume_28-08-2023-09-36-51.pdf",
+    route: "/static/Naman-Parashar-Resume.pdf",
     label: "Resume",
     showOnSmallScreen: true,
     showOnLargeScreen: true,
