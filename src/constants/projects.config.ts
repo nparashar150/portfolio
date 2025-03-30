@@ -1,9 +1,9 @@
 export default [
   {
-    title: "TailwindMD",
-    description: "Style your Markdown with ease—add Tailwind classes and get beautiful HTML instantly.",
+    title: "Pixio",
+    description: "A platform that transforms long videos into engaging, captioned shorts optimized for social media.",
     urlText: "View Website",
-    url: "https://tailwindmd.vercel.app",
+    url: "https://www.pixio.tech/",
   },
   {
     title: "The Startup",
