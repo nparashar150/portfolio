@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://nparashar150.val.run/$1",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/build/(.*)",
