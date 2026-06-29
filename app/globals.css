@@ -57,3 +57,36 @@ body {
 }
 
 /* custom cursor: hide the native one on fine pointers once active */
+@media (pointer: fine) {
+  html.cursor-on,
+  html.cursor-on * {
+    cursor: none !important;
+  }
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.animate-blink {
+  animation: blink 1.05s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
