@@ -93,3 +93,27 @@ export const config = {
     "Remotion",
     "Micro-Frontends",
     "Monorepo",
+    "Playwright",
+    "Voice AI",
+  ],
+
+  socials: [
+    { name: "GitHub", handle: "@nparashar150", url: "https://github.com/nparashar150" },
+    {
+      name: "LinkedIn",
+      handle: "nparashar150",
+      url: "https://www.linkedin.com/in/nparashar150",
+    },
+    { name: "X (Twitter)", handle: "@nparashar150", url: "https://x.com/nparashar150" },
+    { name: "Medium", handle: "@nparashar150", url: "https://medium.com/@nparashar150" },
+  ],
+
+  agentPrompts: [
+    "Who is Naman?",
+    "Show me your work",
+    "Your tech stack",
+    "Are you hireable?",
+  ],
+};
+
+export type Config = typeof config;
