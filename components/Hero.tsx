@@ -33,3 +33,19 @@ export function Hero() {
           <div className="mb-5 h-px w-10 bg-green" />
           <p className="text-base leading-relaxed text-muted-2 md:text-lg">
             {config.headline}
+          </p>
+        </div>
+        <dl className="flex shrink-0 gap-8 sm:gap-12">
+          {config.meta.map((m) => (
+            <div key={m.label} className="flex flex-col gap-2.5">
+              <dt className="font-mono text-[12px] tracking-[0.08em] text-muted uppercase">
+                {m.label}
+              </dt>
+              <dd className="text-base font-semibold text-cream">{m.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+  );
+}
