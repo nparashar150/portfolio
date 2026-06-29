@@ -94,3 +94,20 @@ export function Projects() {
                 <h3 className="font-display text-[26px] font-extrabold tracking-[-0.02em] text-cream">
                   {p.name}
                 </h3>
+                <p className="text-[15px] leading-relaxed text-muted-2">{p.desc}</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[12px] tracking-[0.04em] text-muted">
+                  {p.stack}
+                </span>
+                <span className="text-xl text-cream transition-transform group-hover:translate-x-1">
+                  ↗
+                </span>
+              </div>
+            </a>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
