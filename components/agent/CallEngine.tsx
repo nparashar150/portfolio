@@ -76,3 +76,56 @@ export function CallEngine({
       <ChatBridge />
     </RoomContext.Provider>
   );
+}
+
+// reads the agent's live audio into per-band volumes for the visualizer
+function BandReader() {
+  const remotes = useRemoteParticipants();
+  const track = remotes[0]?.getTrackPublication(Track.Source.Microphone)
+    ?.track as RemoteAudioTrack | undefined;
+  const volumes = useMultibandTrackVolume(track, { bands: 34 });
+  bandsRef.current = volumes;
+  return null;
+}
+
+// streams the live transcript (user STT + agent) into the store
+function TranscriptReader() {
+  // useTranscriptions returns TextStreamData[]; shape is loosely typed across versions
+  const lines = useTranscriptions() as Array<{
+    text?: string;
+    participantInfo?: { identity?: string };
+    streamInfo?: { id?: string };
+  }>;
+  const { localParticipant } = useLocalParticipant();
+
+  useEffect(() => {
+    const localId = localParticipant?.identity;
+    const mapped: TranscriptLine[] = lines
+      .filter((t) => (t?.text ?? "").trim().length > 0)
+      .map((t, i) => ({
+        id: String(t?.streamInfo?.id ?? i),
+        role:
+          t?.participantInfo?.identity && t.participantInfo.identity === localId
+            ? "you"
+            : "agent",
+        text: (t.text ?? "").trim(),
+      }));
+    transcriptStore.set(mapped);
+  }, [lines, localParticipant?.identity]);
+
+  return null;
+}
+
+// exposes the chat send fn so the console input can message the agent mid-call
+function ChatBridge() {
+  const { send } = useChat();
+  useEffect(() => {
+    sendRef.current = (text: string) => {
+      void send(text);
+    };
+    return () => {
+      sendRef.current = null;
+    };
+  }, [send]);
+  return null;
+}
