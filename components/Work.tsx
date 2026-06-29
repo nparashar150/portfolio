@@ -19,3 +19,22 @@ export function Work() {
         <span className="hidden font-mono text-[13px] tracking-[0.04em] text-muted sm:block">
           [ {config.work.length.toString().padStart(2, "0")} ROLES ]
         </span>
+      </div>
+
+      <div>
+        {config.work.map((job, i) => (
+          <Reveal key={job.company} delay={i * 0.05}>
+            <a
+              href="#contact"
+              className="group flex flex-col gap-3 border-b border-line py-7 md:flex-row md:items-center md:gap-10"
+            >
+              <span className="w-28 shrink-0 font-mono text-[13px] tracking-[0.04em] text-muted">
+                {job.period}
+              </span>
+              <h3 className="w-full shrink-0 font-display text-[24px] font-bold tracking-[-0.02em] text-cream transition-colors group-hover:text-green md:w-64 md:text-[28px]">
+                {job.company}
+              </h3>
+              <div className="flex flex-1 flex-col gap-1.5">
+                <span className="font-mono text-[11px] font-bold tracking-[0.06em] text-green">
+                  {job.role.toUpperCase()}
+                </span>
