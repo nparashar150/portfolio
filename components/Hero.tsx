@@ -15,3 +15,21 @@ export function Hero() {
           </span>
         </div>
         <span className="hidden font-mono text-[13px] tracking-[0.06em] text-muted sm:block">
+          {config.location}
+        </span>
+      </div>
+
+      {/* big name */}
+      <h1 className="font-display font-black uppercase leading-[0.88] tracking-[-0.045em] text-cream text-[clamp(44px,10.5vw,128px)]">
+        Naman
+        <br />
+        <span>Parashar</span>
+        <span className="text-green">.</span>
+      </h1>
+
+      {/* lower band */}
+      <div className="flex flex-col items-start justify-between gap-8 pt-10 md:flex-row md:items-end md:gap-16">
+        <div className="max-w-lg">
+          <div className="mb-5 h-px w-10 bg-green" />
+          <p className="text-base leading-relaxed text-muted-2 md:text-lg">
+            {config.headline}
