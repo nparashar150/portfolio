@@ -65,3 +65,32 @@ export function Projects() {
             <span className="font-display text-5xl font-black tracking-[-0.05em] text-green md:text-6xl">
               {f.display}
             </span>
+            <span className="font-mono text-[13px] font-bold tracking-[0.04em] text-[#5a8a6e] transition-transform group-hover:translate-x-1">
+              {f.host.toUpperCase()} ↗
+            </span>
+          </div>
+        </a>
+      </Reveal>
+
+      {/* grid */}
+      <div className="grid grid-cols-1 gap-6 pt-6 md:grid-cols-3">
+        {config.projects.map((p, i) => (
+          <Reveal key={p.name} delay={i * 0.06}>
+            <a
+              href={p.url}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex h-full flex-col justify-between gap-7 rounded-lg border border-line-2 bg-surface p-8 transition-colors hover:border-green/40"
+            >
+              <div className="flex items-start justify-between">
+                <span className="font-mono text-[13px] tracking-[0.06em] text-muted">
+                  {(i + 2).toString().padStart(2, "0")}
+                </span>
+                <span className="rounded-full border border-line-3 px-3 py-1.5 font-mono text-[11px] font-bold tracking-[0.06em] text-green">
+                  {p.tag.toUpperCase()}
+                </span>
+              </div>
+              <div className="flex flex-col gap-3.5">
+                <h3 className="font-display text-[26px] font-extrabold tracking-[-0.02em] text-cream">
+                  {p.name}
+                </h3>
