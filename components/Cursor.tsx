@@ -54,3 +54,49 @@ export function Cursor() {
     };
 
     // when the mouse stops, let the tail recede one cell at a time (comet fade)
+    const decay = setInterval(() => {
+      if (history.length > 1 && performance.now() - lastMove > 55) {
+        history.pop();
+        render();
+      }
+    }, 55);
+
+    window.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseleave", onLeave);
+
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseleave", onLeave);
+      clearInterval(decay);
+      document.documentElement.classList.remove("cursor-on");
+    };
+  }, []);
+
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-[100] hidden opacity-0 transition-opacity duration-200 md:block [.cursor-on_&]:opacity-100"
+    >
+      {Array.from({ length: N }).map((_, i) => (
+        <div
+          key={i}
+          ref={(el) => {
+            dots.current[i] = el;
+          }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: SIZE - 2,
+            height: SIZE - 2,
+            margin: 1,
+            borderRadius: 3,
+            background: i === 0 ? "#4ade80" : "#22c55e",
+            opacity: 0,
+            willChange: "transform, opacity",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
