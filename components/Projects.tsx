@@ -31,3 +31,37 @@ export function Projects() {
           className="group flex flex-col overflow-hidden rounded-lg border border-line-2 bg-surface md:flex-row"
         >
           <div className="flex flex-1 flex-col justify-between gap-10 p-8 md:p-10">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[13px] tracking-[0.06em] text-muted">
+                FEATURED / 01
+              </span>
+              <span className="flex items-center gap-2 rounded-full border border-line-3 px-3 py-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-green" />
+                <span className="font-mono text-[11px] font-bold tracking-[0.06em] text-cream">
+                  {f.tag.toUpperCase()}
+                </span>
+              </span>
+            </div>
+            <div className="flex flex-col gap-4">
+              <h3 className="font-display text-4xl font-extrabold tracking-[-0.03em] text-cream">
+                {f.name}
+              </h3>
+              <p className="max-w-md text-[15px] leading-relaxed text-muted-2">
+                {f.desc}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              {f.tech.map((t) => (
+                <span
+                  key={t}
+                  className="rounded border border-line-2 px-2.5 py-1.5 font-mono text-[12px] text-muted"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="flex w-full flex-col justify-end gap-3 border-t border-l-0 border-[#1f3a2c] bg-[#0d1410] p-8 md:w-[44%] md:border-t-0 md:border-l">
+            <span className="font-display text-5xl font-black tracking-[-0.05em] text-green md:text-6xl">
+              {f.display}
+            </span>
