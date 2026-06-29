@@ -139,3 +139,68 @@ export function AgentConsole() {
           </div>
           <span className="font-mono text-xs tracking-[0.06em] text-muted">
             {status === "live" ? `● LIVE · ${fmt(seconds)}` : "IDLE · TAP TO TALK"}
+          </span>
+        </div>
+
+        {/* status line */}
+        <div className="flex items-center gap-3 pt-5 pb-6">
+          <span className="shrink-0 font-mono text-[13px] font-bold text-green">
+            AI ›
+          </span>
+          <p className="text-[15px] text-cream md:text-base">{COPY[status]}</p>
+        </div>
+
+        {/* the grid: commit graph ⇄ live waveform */}
+        <div className="rounded-xl border border-line bg-surface-2 p-4 md:p-6">
+          <Visualizer live={status === "live"} />
+          <div className="flex items-center justify-between pt-3.5">
+            <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
+              {status === "live"
+                ? "WAVEFORM · LIVE"
+                : "GITHUB CONTRIBUTIONS · LAST YEAR"}
+            </span>
+            <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
+              powered by RinggAI
+            </span>
+          </div>
+        </div>
+
+        {/* live transcript */}
+        {transcript.length > 0 && (
+          <div
+            ref={logRef}
+            className="mt-5 flex max-h-52 flex-col gap-3 overflow-y-auto rounded-xl border border-line bg-surface-2 p-5"
+          >
+            {transcript.map((line) => (
+              <div key={line.id} className="flex gap-3">
+                <span
+                  className={`mt-0.5 w-16 shrink-0 font-mono text-[10px] font-bold tracking-[0.06em] ${
+                    line.role === "agent" ? "text-green" : "text-muted"
+                  }`}
+                >
+                  {line.role === "agent" ? "NAMAN.AI" : "YOU"}
+                </span>
+                <p className="text-[14px] leading-relaxed text-cream">
+                  {line.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* controls */}
+        <div className="flex flex-col gap-3.5 pt-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              onClick={() => (active ? end() : start())}
+              disabled={status === "connecting"}
+              className="flex shrink-0 items-center gap-3 rounded-full border border-line-3 bg-[#141414] py-2.5 pr-6 pl-2.5 transition-colors hover:border-green/60 disabled:opacity-70"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green text-green-deep">
+                <span className="text-[11px]">{active ? "■" : "▶"}</span>
+              </span>
+              <span className="text-[15px] font-semibold text-cream">
+                {ctaLabel}
+              </span>
+            </button>
+            <div className="flex flex-1 items-center justify-between rounded-full border border-line-2 bg-surface py-2 pr-2.5 pl-5">
