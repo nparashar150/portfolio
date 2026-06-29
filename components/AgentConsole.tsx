@@ -204,3 +204,55 @@ export function AgentConsole() {
               </span>
             </button>
             <div className="flex flex-1 items-center justify-between rounded-full border border-line-2 bg-surface py-2 pr-2.5 pl-5">
+              <input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submit()}
+                placeholder={
+                  status === "live"
+                    ? "Type a message to the agent…"
+                    : "… or type to start a chat"
+                }
+                className="w-full bg-transparent text-[15px] text-cream outline-none placeholder:text-faint"
+              />
+              <button
+                onClick={submit}
+                className="flex shrink-0 items-center gap-2 rounded-full bg-line px-3.5 py-2 transition-colors hover:bg-line-3"
+              >
+                <span className="font-mono text-[11px] font-bold tracking-[0.06em] text-muted-2">
+                  SEND
+                </span>
+                <span className="text-sm text-green">→</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="pr-1 font-mono text-[11px] tracking-[0.06em] text-faint">
+              TRY:
+            </span>
+            {config.agentPrompts.map((p, idx) => (
+              <button
+                key={p}
+                onClick={() => (status === "live" ? sendRef.current?.(p) : start())}
+                className={
+                  idx === config.agentPrompts.length - 1
+                    ? "rounded-full bg-green px-3.5 py-1.5 font-mono text-xs font-bold text-green-deep transition-opacity hover:opacity-90"
+                    : "rounded-full border border-line-3 px-3.5 py-1.5 font-mono text-xs text-muted-2 transition-colors hover:border-green/50 hover:text-cream"
+                }
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {token && (
+        <div className="hidden">
+          <CallEngine token={token} onEnd={end} />
+        </div>
+      )}
+    </section>
+  );
+}
