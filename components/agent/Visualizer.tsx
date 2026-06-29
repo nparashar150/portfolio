@@ -48,3 +48,44 @@ export function Visualizer({ live }: { live: boolean }) {
           const vol = Math.min(1, (bands[col] ?? 0) * 3.6);
           const litRadius = Math.pow(vol, 0.45) * 3.6;
           const lit = Math.abs(row - CENTER) <= litRadius;
+          el.style.backgroundColor = lit
+            ? vol > 0.8
+              ? "#4ade80"
+              : "#22c55e"
+            : "#16321f";
+          el.style.transform = lit ? "scale(1)" : "scale(0.78)";
+        }
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // paint / restore the commit graph whenever we drop out of live
+  useEffect(() => {
+    if (!live) paintIdle();
+  }, [live, paintIdle]);
+
+  return (
+    <div
+      className="grid gap-[5px] md:gap-[6px]"
+      style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}
+      aria-hidden
+    >
+      {Array.from({ length: COLS * ROWS }).map((_, i) => (
+        <span
+          key={i}
+          ref={(el) => {
+            cells.current[i] = el;
+          }}
+          className="aspect-square rounded-[3px]"
+          style={{
+            backgroundColor: GH[commitLevel(i % COLS, Math.floor(i / COLS))],
+            transition: "background-color 130ms linear, transform 130ms linear",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
