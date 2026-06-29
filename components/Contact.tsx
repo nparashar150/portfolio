@@ -38,3 +38,36 @@ export function Contact() {
               <span className="shrink-0 text-green transition-transform group-hover:translate-x-1">
                 ↗
               </span>
+            </a>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span className="h-2 w-2 rounded-full bg-green animate-pulse" />
+            <span className="font-mono text-[13px] tracking-[0.04em] text-muted">
+              USUALLY REPLIES WITHIN A DAY
+            </span>
+          </div>
+        </div>
+
+        <div className="flex w-full shrink-0 flex-col md:w-[420px]">
+          <span className="pb-2 font-mono text-[12px] tracking-[0.1em] text-muted">
+            ELSEWHERE
+          </span>
+          {config.socials.map((s) => (
+            <a
+              key={s.name}
+              href={s.url}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex items-center justify-between border-b border-line py-[18px]"
+            >
+              <span className="text-lg font-medium text-cream transition-colors group-hover:text-green">
+                {s.name}
+              </span>
+              <span className="font-mono text-sm text-muted">{s.handle} ↗</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
