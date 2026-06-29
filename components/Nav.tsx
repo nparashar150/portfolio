@@ -19,3 +19,21 @@ export function Nav() {
               <a
                 key={l.href}
                 href={l.href}
+                className="font-mono text-[13px] tracking-[0.08em] text-muted transition-colors hover:text-cream"
+              >
+                {l.label}
+              </a>
+            ))}
+          </div>
+          <a
+            href="#contact"
+            className="flex items-center gap-2 rounded-full bg-green px-4 py-2.5 font-mono text-[13px] font-bold tracking-[0.04em] text-green-deep transition-opacity hover:opacity-90"
+          >
+            GET IN TOUCH
+            <span aria-hidden>↗</span>
+          </a>
+        </div>
+      </nav>
+    </header>
+  );
+}
