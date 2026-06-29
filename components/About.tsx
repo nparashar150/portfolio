@@ -23,3 +23,25 @@ export function About() {
           </p>
         </Reveal>
         <Reveal delay={0.1} className="w-full shrink-0 md:w-96">
+          <span className="font-mono text-[12px] tracking-[0.1em] text-muted">
+            WORKED WITH SO FAR
+          </span>
+          <div className="flex flex-wrap gap-2.5 pt-5">
+            {config.skills.map((s) => (
+              <span
+                key={s}
+                className={
+                  s === "Voice AI"
+                    ? "rounded-full bg-green px-3.5 py-1.5 text-sm font-medium text-green-deep"
+                    : "rounded-full border border-line-3 px-3.5 py-1.5 text-sm font-medium text-cream"
+                }
+              >
+                {s}
+              </span>
+            ))}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
