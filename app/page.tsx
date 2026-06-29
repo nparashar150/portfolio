@@ -13,3 +13,13 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
+        <AgentConsole />
+        <Work />
+        <Projects />
+        <About />
+        <Contact />
+      </main>
+      <Footer />
+    </div>
+  );
+}
