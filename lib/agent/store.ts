@@ -31,3 +31,25 @@ let transcript: TranscriptLine[] = EMPTY_TRANSCRIPT;
 const tSubs = new Set<() => void>();
 
 export const transcriptStore = {
+  get: (): TranscriptLine[] => transcript,
+  set: (lines: TranscriptLine[]) => {
+    transcript = lines;
+    tSubs.forEach((cb) => cb());
+  },
+  clear: () => {
+    if (transcript.length === 0) return;
+    transcript = EMPTY_TRANSCRIPT;
+    tSubs.forEach((cb) => cb());
+  },
+  subscribe: (cb: () => void) => {
+    tSubs.add(cb);
+    return () => {
+      tSubs.delete(cb);
+    };
+  },
+};
+
+// chat send fn, set by a component mounted inside the LiveKit room context
+export const sendRef: { current: ((text: string) => void) | null } = {
+  current: null,
+};
