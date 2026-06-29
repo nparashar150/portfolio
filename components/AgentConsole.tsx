@@ -75,3 +75,67 @@ export function AgentConsole() {
 
     // tie the mic permission to the user gesture (before any async work)
     try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop());
+    } catch {
+      agentStatus.set("error");
+      setTimeout(() => agentStatus.set("idle"), 2600);
+      busy.current = false;
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/webcall", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data?.user_token) throw new Error("token");
+      setToken(data.user_token);
+    } catch {
+      agentStatus.set("error");
+      setTimeout(() => agentStatus.set("idle"), 2600);
+    } finally {
+      busy.current = false;
+    }
+  }, [active]);
+
+  const end = useCallback(() => {
+    setToken(null);
+    agentStatus.set("idle");
+    transcriptStore.clear();
+  }, []);
+
+  const submit = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setDraft("");
+    if (status === "live" && sendRef.current) {
+      sendRef.current(text); // chat mid-voice-call
+    } else {
+      void start();
+    }
+  };
+
+  const ctaLabel =
+    status === "connecting"
+      ? "Connecting…"
+      : status === "live"
+        ? "End call"
+        : "Try an agent";
+
+  return (
+    <section className="mx-auto w-full max-w-[1240px] px-6 md:px-10 lg:px-16">
+      <div className="border-y border-line py-10 md:py-14">
+        {/* header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span
+              className={`h-2 w-2 rounded-full bg-green ${active ? "animate-pulse" : ""}`}
+            />
+            <span className="font-mono text-xs font-bold tracking-[0.06em] text-cream">
+              NAMAN.AI
+            </span>
+            <span className="hidden font-mono text-xs tracking-[0.06em] text-muted sm:block">
+              {status === "live" ? "/ LIVE · VOICE + CHAT" : "/ COMMITS → VOICE AGENT"}
+            </span>
+          </div>
+          <span className="font-mono text-xs tracking-[0.06em] text-muted">
+            {status === "live" ? `● LIVE · ${fmt(seconds)}` : "IDLE · TAP TO TALK"}
