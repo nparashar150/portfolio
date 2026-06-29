@@ -24,3 +24,26 @@ export function Footer() {
       {/* console easter egg */}
       <div className="mt-10 overflow-x-auto rounded-md border border-line bg-surface px-5 py-4">
         <code className="font-mono text-sm whitespace-nowrap">
+          <span className="text-muted">console.</span>
+          <span className="text-cream">log</span>
+          <span className="text-muted">(</span>
+          <span className="text-green">
+            &quot;psst, you scrolled the whole thing. let&apos;s build something
+            together → nparashar150@gmail.com&quot;
+          </span>
+          <span className="text-muted">)</span>
+        </code>
+      </div>
+
+      {/* meta strip */}
+      <div className="mt-8 flex flex-col gap-3 border-t border-line pt-8 font-mono text-[12px] tracking-[0.04em] text-muted md:flex-row md:items-center md:justify-between">
+        <span>© 2026 NAMAN PARASHAR · ALL RIGHTS RESERVED</span>
+        <span className="hidden lg:block">v3.0.0 · BUILD 2026.06.30 · commit a1b9f3c</span>
+        <span className="flex items-center gap-2.5">
+          28.61°N 77.21°E
+          <span className="font-bold tracking-[0.06em] text-green">MADE IN INDIA</span>
+        </span>
+      </div>
+    </footer>
+  );
+}
