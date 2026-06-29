@@ -38,3 +38,17 @@ export function Work() {
                 <span className="font-mono text-[11px] font-bold tracking-[0.06em] text-green">
                   {job.role.toUpperCase()}
                 </span>
+                <p className="max-w-xl text-[15px] leading-relaxed text-muted-2">
+                  {job.desc}
+                </p>
+              </div>
+              <span className="hidden shrink-0 text-xl text-muted transition-all group-hover:translate-x-1 group-hover:text-cream md:block">
+                ↗
+              </span>
+            </a>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
