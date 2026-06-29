@@ -27,3 +27,27 @@ export async function POST(req: Request) {
       },
       // exact body shape the official widget sends (no is_demo)
       body: JSON.stringify({
+        agent_id: AGENT_ID,
+        custom_args_values: {},
+        media_type: mediaType,
+      }),
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      return NextResponse.json(
+        { error: `upstream_${res.status}`, detail: detail.slice(0, 200) },
+        { status: 502 },
+      );
+    }
+
+    const data = (await res.json()) as { user_token?: string };
+    if (!data?.user_token) {
+      return NextResponse.json({ error: "no_token" }, { status: 502 });
+    }
+    return NextResponse.json({ user_token: data.user_token });
+  } catch {
+    return NextResponse.json({ error: "request_failed" }, { status: 500 });
+  }
+}
