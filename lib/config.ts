@@ -33,3 +33,33 @@ export const config = {
       tech: ["TypeScript", "React", "Node.js"],
     },
     {
+      period: "Mar → Jul 2022",
+      role: "Product Engineering Intern",
+      company: "Antler India",
+      desc: "Frontend MVPs and product validation at the residency.",
+      tech: ["React", "TypeScript", "Node.js"],
+    },
+    {
+      period: "May → Aug 2022",
+      role: "Software Developer",
+      company: "CareFi",
+      desc: "Built the CareCred frontend MVP from zero.",
+      tech: ["React", "TypeScript", "Firebase"],
+    },
+  ],
+
+  featured: {
+    name: "Pixio",
+    tag: "Live",
+    desc: "Long-form video into captioned shorts for Reels, TikTok and Shorts.",
+    tech: ["Next.js", "FFmpeg", "Gemini", "AWS S3"],
+    display: "long → short",
+    host: "pixio.tech",
+    url: "https://www.pixio.tech/",
+  },
+
+  projects: [
+    {
+      name: "QuikRun",
+      tag: "Case study",
+      desc: "Run TypeScript with packages inside no-code tools. 100+ early users.",
