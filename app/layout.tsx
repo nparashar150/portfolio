@@ -27,3 +27,28 @@ export const metadata: Metadata = {
   description:
     "Day-zero engineer building AI-first web products from scratch. Currently deep in voice AI at ringg.ai.",
   metadataBase: new URL("https://nparashar150.dev"),
+  openGraph: {
+    title: "Naman Parashar — Frontend & Product Engineer",
+    description:
+      "Day-zero engineer building AI-first web products. Voice AI at ringg.ai.",
+    type: "website",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${archivo.variable} ${inter.variable} ${spaceMono.variable}`}
+    >
+      <body>
+        <Cursor />
+        {children}
+      </body>
+    </html>
+  );
+}
