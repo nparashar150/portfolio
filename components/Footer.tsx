@@ -1,4 +1,5 @@
 import { Wordmark } from "./Wordmark";
+import { Previewable } from "./preview/Previewable";
 
 export function Footer() {
   return (
@@ -40,7 +41,13 @@ export function Footer() {
         <span>© 2026 NAMAN PARASHAR · ALL RIGHTS RESERVED</span>
         <span className="hidden lg:block">v3.0.0 · BUILD 2026.06.30 · commit a1b9f3c</span>
         <span className="flex items-center gap-2.5">
-          28.61°N 77.21°E
+          <Previewable
+            kind="map"
+            label="New Delhi, India"
+            className="cursor-help transition-colors hover:text-cream"
+          >
+            28.61°N 77.21°E
+          </Previewable>
           <span className="font-bold tracking-[0.06em] text-green">MADE IN INDIA</span>
         </span>
       </div>

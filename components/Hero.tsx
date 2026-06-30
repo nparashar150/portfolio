@@ -1,4 +1,5 @@
 import { config } from "@/lib/config";
+import { Previewable } from "./preview/Previewable";
 
 export function Hero() {
   return (
@@ -14,9 +15,13 @@ export function Hero() {
             {config.status.toUpperCase()}
           </span>
         </div>
-        <span className="hidden font-mono text-[13px] tracking-[0.06em] text-muted sm:block">
+        <Previewable
+          kind="map"
+          label="New Delhi, India"
+          className="hidden cursor-help font-mono text-[13px] tracking-[0.06em] text-muted transition-colors hover:text-cream sm:block"
+        >
           {config.location}
-        </span>
+        </Previewable>
       </div>
 
       {/* big name */}

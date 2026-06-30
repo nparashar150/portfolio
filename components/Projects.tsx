@@ -1,5 +1,6 @@
 import { config } from "@/lib/config";
 import { Reveal } from "./Reveal";
+import { Previewable } from "./preview/Previewable";
 
 export function Projects() {
   const f = config.featured;
@@ -24,10 +25,11 @@ export function Projects() {
 
       {/* featured */}
       <Reveal>
-        <a
+        <Previewable
           href={f.url}
           target="_blank"
-          rel="noreferrer"
+          preview={f.preview}
+          label={f.name}
           className="group flex flex-col overflow-hidden rounded-lg border border-line-2 bg-surface md:flex-row"
         >
           <div className="flex flex-1 flex-col justify-between gap-10 p-8 md:p-10">
@@ -69,17 +71,18 @@ export function Projects() {
               {f.host.toUpperCase()} ↗
             </span>
           </div>
-        </a>
+        </Previewable>
       </Reveal>
 
       {/* grid */}
       <div className="grid grid-cols-1 gap-6 pt-6 md:grid-cols-3">
         {config.projects.map((p, i) => (
           <Reveal key={p.name} delay={i * 0.06}>
-            <a
+            <Previewable
               href={p.url}
               target="_blank"
-              rel="noreferrer"
+              preview={p.preview}
+              label={p.name}
               className="group flex h-full flex-col justify-between gap-7 rounded-lg border border-line-2 bg-surface p-8 transition-colors hover:border-green/40"
             >
               <div className="flex items-start justify-between">
@@ -104,7 +107,7 @@ export function Projects() {
                   ↗
                 </span>
               </div>
-            </a>
+            </Previewable>
           </Reveal>
         ))}
       </div>
