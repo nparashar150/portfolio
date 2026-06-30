@@ -8,7 +8,7 @@ export function Work() {
       id="work"
       className="mx-auto w-full max-w-[1240px] px-6 pt-36 md:px-10 lg:px-16"
     >
-      <div className="flex items-end justify-between border-b border-line-3 pb-8">
+      <div className="flex items-end justify-between pb-2">
         <div className="flex flex-col gap-3.5">
           <span className="font-mono text-xs tracking-[0.1em] text-green">
             01 / WHERE I&apos;VE WORKED
@@ -22,7 +22,7 @@ export function Work() {
         </span>
       </div>
 
-      <div>
+      <div className="flex flex-col gap-4 pt-6">
         {config.work.map((job, i) => (
           <Reveal key={job.company} delay={i * 0.05}>
             <Previewable
@@ -30,7 +30,7 @@ export function Work() {
               target="_blank"
               preview={job.preview}
               label={job.company}
-              className="group flex flex-col gap-3 border-b border-line py-7 md:flex-row md:items-center md:gap-10"
+              className="group flex flex-col gap-4 rounded-2xl border border-line bg-surface p-6 shadow-[0_14px_50px_-26px_rgba(0,0,0,0.8)] transition-all hover:-translate-y-0.5 hover:border-green/40 md:flex-row md:items-center md:gap-10 md:p-7"
             >
               <span className="w-28 shrink-0 font-mono text-[13px] tracking-[0.04em] text-muted">
                 {job.period}
