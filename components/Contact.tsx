@@ -48,8 +48,8 @@ export function Contact() {
           </div>
         </div>
 
-        <div className="flex w-full shrink-0 flex-col md:w-[420px]">
-          <span className="pb-2 font-mono text-[12px] tracking-[0.1em] text-muted">
+        <div className="flex w-full shrink-0 flex-col gap-2.5 md:w-[420px]">
+          <span className="pb-1 font-mono text-[12px] tracking-[0.1em] text-muted">
             ELSEWHERE
           </span>
           {config.socials.map((s) => (
@@ -58,12 +58,14 @@ export function Contact() {
               href={s.url}
               target="_blank"
               rel="noreferrer"
-              className="group flex items-center justify-between border-b border-line py-[18px]"
+              className="group flex items-center justify-between rounded-xl border border-line bg-surface px-5 py-4 shadow-[0_14px_50px_-26px_rgba(0,0,0,0.8)] transition-all hover:-translate-y-0.5 hover:border-green/40"
             >
               <span className="text-lg font-medium text-cream transition-colors group-hover:text-green">
                 {s.name}
               </span>
-              <span className="font-mono text-sm text-muted">{s.handle} ↗</span>
+              <span className="font-mono text-sm text-muted transition-colors group-hover:text-muted-2">
+                {s.handle} ↗
+              </span>
             </a>
           ))}
         </div>
