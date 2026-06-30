@@ -1,11 +1,11 @@
 export const config = {
   name: "Naman Parashar",
   first: "naman",
-  role: "Frontend & Product Engineer",
+  role: "Engineer",
   status: "Open to work",
   location: "28.6139° N, 77.2090° E / Delhi, IND",
   headline:
-    "Day-zero engineer. I take AI-first products from an empty repo to real users, currently in the trenches on voice AI at ringg.ai.",
+    "Just an engineer who likes building products. I love playing with UI, and I've spent a while deep in the voice AI space.",
   email: "nparashar150@gmail.com",
 
   meta: [
@@ -22,47 +22,32 @@ export const config = {
       period: "Aug 2023 → Now",
       role: "Product & Frontend Consultant",
       company: "Ringg AI",
-      desc: "There since day 0. Led the frontend for RinggAI (voice AI calling) and DesiVocal (TTS).",
-      details: [
-        "Owned agent workflows, campaign setup, real-time call dashboards and analytics.",
-        "Built the core frontend: routing, component system, Zustand state and the embedded call flow.",
-        "Shipped DesiVocal's TTS interface powering 7M+ voice generations.",
-      ],
+      desc: "Led the RinggAI and DesiVocal frontends. Shipped a TTS interface at 7M+ generations.",
+      preview: "/previews/ringg.png",
       tech: ["React", "Next.js", "TypeScript", "Zustand", "AWS"],
     },
     {
       period: "Nov 2022 → Now",
       role: "Software Engineer II",
       company: "Sylva, NY",
-      desc: "Product engineering across teams and stakeholders, often chief-of-staff style.",
-      details: [
-        "Led the HubSpot to Attio migration: 500+ automations rebuilt, 500K+ records moved, six figures saved a year.",
-        "Built integrations across Slack, LinkedIn and Discord to unify CRM and community data.",
-        "Scaled Miitra to 20+ communities with segmentation, analytics and an AI writer that 2x'd engagement.",
-      ],
+      desc: "Ran the HubSpot to Attio migration of 500K+ records and scaled Miitra to 20+ communities.",
+      preview: "/previews/sylva.png",
       tech: ["TypeScript", "React", "Node.js"],
     },
     {
       period: "Feb 2022 → May 2023",
       role: "Product Engineer (Intern)",
       company: "Antler",
-      desc: "Product engineering at the venture accelerator.",
-      details: [
-        "Built internal tools used by 500+ portfolio companies for demo days.",
-        "Improved issue-tracking with Slackbots and Notion automation.",
-        "Automated migration of 250+ blogs and datasets.",
-      ],
+      desc: "Built internal tools for 500+ portfolio companies and automated their content migrations.",
+      preview: "/previews/antler.png",
       tech: ["React", "TypeScript", "Node.js"],
     },
     {
       period: "May → Aug 2022",
       role: "Software Developer",
       company: "CareFi",
-      desc: "Built CareCred, a fintech health-finance MVP.",
-      details: [
-        "Shipped complex onboarding and dashboards that helped secure early-stage funding.",
-        "Shaped product flows and UX to speed up release timelines.",
-      ],
+      desc: "Built CareCred's onboarding and dashboards, helping secure early-stage funding.",
+      preview: "/previews/carefi.png",
       tech: ["React", "TypeScript", "Firebase"],
     },
   ],
@@ -75,6 +60,7 @@ export const config = {
     display: "long → short",
     host: "pixio.tech",
     url: "https://www.pixio.tech/",
+    preview: "/previews/pixio.png",
   },
 
   projects: [
@@ -84,6 +70,7 @@ export const config = {
       desc: "Run TypeScript with packages inside no-code tools. 100+ early users.",
       stack: "TypeScript · No-Code",
       url: "https://www.quik.run/",
+      preview: "/previews/quikrun.png",
     },
     {
       name: "ACE Monorepo",
@@ -91,6 +78,7 @@ export const config = {
       desc: "Rebuilt vipsace.org with micro-frontends. 45% faster, 15+ devs led.",
       stack: "Gatsby · GraphQL",
       url: "https://github.com/ACE-VSIT/website",
+      preview: "/previews/ace.png",
     },
     {
       name: "Miitra",
@@ -98,6 +86,7 @@ export const config = {
       desc: "Customer-data tooling across 20+ communities. 2x engagement.",
       stack: "React · Node · Data",
       url: "https://www.joinmiitra.com/",
+      preview: "/previews/miitra.png",
     },
   ],
 
