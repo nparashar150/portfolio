@@ -1,11 +1,26 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { preview, type PreviewState } from "@/lib/preview";
 import { MiniMap } from "./MiniMap";
 
 const SERVER: PreviewState = { kind: null, x: 0, y: 0 };
 const WIDTH = 360;
+
+// fades in once the screenshot has decoded (re-keyed per src in the layer)
+function PreviewImage({ src }: { src: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      onLoad={() => setLoaded(true)}
+      className="relative h-full w-full object-contain"
+      style={{ opacity: loaded ? 1 : 0, transition: "opacity 350ms ease" }}
+    />
+  );
+}
 
 export function PreviewLayer() {
   const s = useSyncExternalStore(preview.subscribe, preview.get, () => SERVER);
@@ -40,17 +55,7 @@ export function PreviewLayer() {
               preview coming soon
             </span>
           </div>
-          {s.src ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={s.src}
-              alt=""
-              className="relative h-full w-full object-contain"
-              onError={(e) => {
-                e.currentTarget.style.opacity = "0";
-              }}
-            />
-          ) : null}
+          {s.src ? <PreviewImage key={s.src} src={s.src} /> : null}
         </div>
       ) : null}
     </div>
