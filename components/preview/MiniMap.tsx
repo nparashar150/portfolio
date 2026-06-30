@@ -40,7 +40,7 @@ export function MiniMap({ label }: { label?: string }) {
 
       <div className="flex items-center justify-between border-t border-line px-4 py-2.5">
         <span className="font-mono text-[11px] tracking-[0.06em] text-cream">
-          {label ?? "Raj Nagar Ext, Ghaziabad"}
+          {label ?? "Delhi, India"}
         </span>
         <span className="font-mono text-[11px] tracking-[0.06em] text-green">
           28.68°N 77.38°E
