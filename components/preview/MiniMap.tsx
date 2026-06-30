@@ -1,8 +1,8 @@
 // real dark-mode map: CARTO "dark_all" raster tiles (free, no API key),
 // composited and centered on the given coordinates with a green pin.
-const LAT = 28.6789;
-const LON = 77.376;
-const Z = 13;
+const LAT = 28.7035087;
+const LON = 77.4174775;
+const Z = 14;
 const W = 360;
 const H = 184;
 const TILE = 256;
@@ -66,10 +66,10 @@ export function MiniMap({ label }: { label?: string }) {
 
       <div className="flex items-center justify-between border-t border-line px-4 py-2.5">
         <span className="font-mono text-[11px] tracking-[0.06em] text-cream">
-          {label ?? "Delhi, India"}
+          {label ?? "New Delhi, India"}
         </span>
         <span className="font-mono text-[11px] tracking-[0.06em] text-green">
-          28.68°N 77.38°E
+          28.70°N 77.42°E
         </span>
       </div>
     </div>

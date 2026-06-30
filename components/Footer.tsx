@@ -43,10 +43,10 @@ export function Footer() {
         <span className="flex items-center gap-2.5">
           <Previewable
             kind="map"
-            label="Delhi, India"
+            label="New Delhi, India"
             className="cursor-help transition-colors hover:text-cream"
           >
-            28.68°N 77.38°E
+            28.70°N 77.42°E
           </Previewable>
           <span className="font-bold tracking-[0.06em] text-green">MADE IN INDIA</span>
         </span>

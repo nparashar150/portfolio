@@ -17,7 +17,7 @@ export function Hero() {
         </div>
         <Previewable
           kind="map"
-          label="Delhi, India"
+          label="New Delhi, India"
           className="hidden cursor-help font-mono text-[13px] tracking-[0.06em] text-muted transition-colors hover:text-cream sm:block"
         >
           {config.location}

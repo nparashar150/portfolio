@@ -3,7 +3,7 @@ export const config = {
   first: "naman",
   role: "Engineer",
   status: "Open to work",
-  location: "28.6789° N, 77.3760° E / Delhi, IND",
+  location: "28.7035° N, 77.4175° E / New Delhi, IND",
   headline:
     "Just an engineer who likes building products. I love playing with UI, and I've spent a while deep in the voice AI space.",
   email: "nparashar150@gmail.com",
