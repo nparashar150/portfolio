@@ -130,29 +130,53 @@ export function AgentConsole() {
           <p className="text-[15px] text-cream md:text-base">{COPY[status]}</p>
         </div>
 
-        {/* the grid: commit graph ⇄ live waveform, with the call button top-right */}
-        <div className="relative rounded-xl border border-line bg-surface-2 p-4 md:p-6">
-          <button
-            onClick={() => (active ? end() : start())}
-            disabled={status === "connecting"}
-            className="absolute right-4 top-4 z-10 flex items-center gap-2.5 rounded-full border border-line-3 bg-[#141414]/85 py-2 pr-5 pl-2 backdrop-blur-sm transition-colors hover:border-green/60 disabled:opacity-70"
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green text-green-deep">
-              <span className="text-[11px]">{active ? "■" : "▶"}</span>
+        {/* contribution-card layout: header (label + call button), grid, legend */}
+        <div className="rounded-xl border border-line bg-surface-2 p-4 md:p-6">
+          <div className="flex items-center justify-end gap-3 pb-4 sm:justify-between">
+            <span className="hidden font-mono text-[11px] tracking-[0.06em] text-faint sm:block">
+              {status === "live"
+                ? "● LIVE · REAL-TIME WAVEFORM"
+                : "CONTRIBUTIONS · LAST YEAR"}
             </span>
-            <span className="text-[14px] font-semibold text-cream">{ctaLabel}</span>
-          </button>
+            <button
+              onClick={() => (active ? end() : start())}
+              disabled={status === "connecting"}
+              className="flex shrink-0 items-center gap-2.5 rounded-full border border-line-3 bg-[#141414] py-2 pr-5 pl-2 transition-colors hover:border-green/60 disabled:opacity-70"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green text-green-deep">
+                <span className="text-[11px]">{active ? "■" : "▶"}</span>
+              </span>
+              <span className="text-[14px] font-semibold text-cream">
+                {ctaLabel}
+              </span>
+            </button>
+          </div>
 
           <Visualizer live={status === "live"} />
-          <div className="flex items-center justify-between pt-3.5">
-            <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
-              {status === "live"
-                ? "WAVEFORM · LIVE"
-                : "GITHUB CONTRIBUTIONS · LAST YEAR"}
-            </span>
+
+          <div className="flex items-center justify-between gap-3 pt-4">
             <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
               powered by RinggAI
             </span>
+            {status !== "live" && (
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-[10px] tracking-[0.04em] text-faint">
+                  Less
+                </span>
+                {["#16201a", "#0e4429", "#006d32", "#26a641", "#39d353"].map(
+                  (c) => (
+                    <span
+                      key={c}
+                      className="h-2.5 w-2.5 rounded-[2px]"
+                      style={{ backgroundColor: c }}
+                    />
+                  ),
+                )}
+                <span className="font-mono text-[10px] tracking-[0.04em] text-faint">
+                  More
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
