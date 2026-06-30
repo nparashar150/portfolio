@@ -1,7 +1,6 @@
 "use client";
 
 import { memo, useEffect, useState } from "react";
-import { loaderState } from "@/lib/loaderState";
 
 const COLS = 34;
 const ROWS = 7;
@@ -58,7 +57,6 @@ export function Loader() {
     const finish = () => {
       setProgress(100);
       setDone(true);
-      loaderState.markDone(); // hero animates in as the loader wipes away
       document.body.style.overflow = "";
       window.setTimeout(() => setHidden(true), 700);
     };
