@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { bandsRef } from "@/lib/agent/store";
 
 const COLS = 34;
@@ -12,10 +12,11 @@ const GH = ["#16201a", "#0e4429", "#006d32", "#26a641", "#39d353"];
 // dark → bright green ramp for the live waveform (graded by amplitude)
 const LIVE = ["#16321f", "#15803d", "#16a34a", "#22c55e", "#4ade80"];
 const SCALE = 1.9; // mic/agent volume gain into the 0..1 range
+const STAGGER = 16; // ms between columns during the morph sweep
+const TAIL = 240; // ms after the last column flips
 
 const frac = (x: number) => x - Math.floor(x);
 function commitLevel(c: number, r: number) {
-  // denser distribution + reshuffled seed so there are no empty dead corners
   const v = frac(Math.sin((c + 1) * 24.317 + (r + 1) * 9.137) * 41719.13);
   if (v < 0.26) return 0;
   if (v < 0.5) return 1;
@@ -28,46 +29,88 @@ export function Visualizer({ live }: { live: boolean }) {
   const cells = useRef<Array<HTMLSpanElement | null>>([]);
   const liveRef = useRef(live);
   liveRef.current = live;
+  const morph = useRef<{ active: boolean; start: number; dir: "in" | "out" }>({
+    active: false,
+    start: 0,
+    dir: "in",
+  });
+  const inited = useRef(false);
 
-  const paintIdle = useCallback(() => {
-    for (let i = 0; i < COLS * ROWS; i++) {
-      const el = cells.current[i];
-      if (!el) continue;
-      el.style.backgroundColor = GH[commitLevel(i % COLS, Math.floor(i / COLS))];
-      el.style.transform = "scale(1)";
-    }
-  }, []);
-
-  // single rAF loop; animates only while live (driven by the agent's audio)
+  // single rAF loop handling idle commit graph, the morph sweep, and live audio
   useEffect(() => {
     let raf = 0;
+
+    const paintIdle = () => {
+      for (let i = 0; i < COLS * ROWS; i++) {
+        const el = cells.current[i];
+        if (!el) continue;
+        el.style.backgroundColor = GH[commitLevel(i % COLS, Math.floor(i / COLS))];
+        el.style.transform = "scale(1)";
+      }
+    };
+
     const loop = () => {
-      if (liveRef.current) {
+      const now = performance.now();
+      const isLive = liveRef.current;
+      const m = morph.current;
+
+      if (isLive || m.active) {
         const bands = bandsRef.current;
+        const elapsed = m.active ? now - m.start : Infinity;
         for (let i = 0; i < COLS * ROWS; i++) {
           const el = cells.current[i];
           if (!el) continue;
           const col = i % COLS;
           const row = Math.floor(i / COLS);
-          // column amplitude × vertical falloff from the center row → graded energy
+
+          // waveform target for this cell
           const vol = Math.min(1, (bands[col] ?? 0) * SCALE);
           const fall = 1 - Math.abs(row - CENTER) / (CENTER + 1);
-          const energy = vol * fall; // 0..1
-          const level = Math.max(0, Math.min(4, Math.floor(energy * 5)));
-          el.style.backgroundColor = LIVE[level];
-          el.style.transform = `scale(${0.8 + energy * 0.2})`;
+          const energy = vol * fall;
+          const wLevel = Math.max(0, Math.min(4, Math.floor(energy * 5)));
+
+          // which face does this column show right now?
+          let showWave = true;
+          if (m.active) {
+            const revealed = elapsed > col * STAGGER;
+            showWave = m.dir === "in" ? revealed : !revealed;
+          }
+
+          if (showWave) {
+            el.style.backgroundColor = LIVE[wLevel];
+            el.style.transform = `scale(${0.8 + energy * 0.2})`;
+          } else {
+            el.style.backgroundColor = GH[commitLevel(col, row)];
+            el.style.transform = "scale(1)";
+          }
+        }
+
+        if (m.active && elapsed > (COLS - 1) * STAGGER + TAIL) {
+          morph.current = { ...m, active: false };
+          if (m.dir === "out") paintIdle();
         }
       }
+
       raf = requestAnimationFrame(loop);
     };
+
+    paintIdle();
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // paint / restore the commit graph whenever we drop out of live
+  // start a morph whenever live toggles (skip the initial mount)
   useEffect(() => {
-    if (!live) paintIdle();
-  }, [live, paintIdle]);
+    if (!inited.current) {
+      inited.current = true;
+      return;
+    }
+    morph.current = {
+      active: true,
+      start: performance.now(),
+      dir: live ? "in" : "out",
+    };
+  }, [live]);
 
   return (
     <div
@@ -84,7 +127,7 @@ export function Visualizer({ live }: { live: boolean }) {
           className="aspect-square rounded-[3px]"
           style={{
             backgroundColor: GH[commitLevel(i % COLS, Math.floor(i / COLS))],
-            transition: "background-color 130ms linear, transform 130ms linear",
+            transition: "background-color 150ms ease, transform 150ms ease",
           }}
         />
       ))}
