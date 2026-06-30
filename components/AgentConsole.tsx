@@ -1,18 +1,11 @@
 "use client";
 
 import { config } from "@/lib/config";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   agentStatus,
   type AgentStatus,
   EMPTY_TRANSCRIPT,
-  sendRef,
   transcriptStore,
 } from "@/lib/agent/store";
 import { Visualizer } from "./agent/Visualizer";
@@ -29,7 +22,7 @@ function fmt(sec: number) {
 const COPY: Record<AgentStatus, string> = {
   idle: "By day I ship commits. Hit play and they turn into a live voice agent you can actually talk to.",
   connecting: "Connecting you to the agent, allow your mic…",
-  live: "You're live. Say hi out loud, or type, ask me anything.",
+  live: "You're live. Say hi out loud, ask me anything.",
   error: "Couldn't connect right now. Give it another go in a moment.",
 };
 
@@ -45,7 +38,6 @@ export function AgentConsole() {
     () => EMPTY_TRANSCRIPT,
   );
   const [token, setToken] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
   const [seconds, setSeconds] = useState(0);
   const busy = useRef(false);
   const logRef = useRef<HTMLDivElement>(null);
@@ -61,19 +53,18 @@ export function AgentConsole() {
     return () => clearInterval(id);
   }, [status]);
 
-  // keep the transcript scrolled to the latest line
   useEffect(() => {
     const el = logRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [transcript]);
 
-  const start = useCallback(async () => {
+  const start = async () => {
     if (busy.current || active) return;
     busy.current = true;
     agentStatus.set("connecting");
     transcriptStore.clear();
 
-    // tie the mic permission to the user gesture (before any async work)
+    // tie mic permission to the user gesture (before any async work)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((t) => t.stop());
@@ -95,23 +86,12 @@ export function AgentConsole() {
     } finally {
       busy.current = false;
     }
-  }, [active]);
+  };
 
-  const end = useCallback(() => {
+  const end = () => {
     setToken(null);
     agentStatus.set("idle");
     transcriptStore.clear();
-  }, []);
-
-  const submit = () => {
-    const text = draft.trim();
-    if (!text) return;
-    setDraft("");
-    if (status === "live" && sendRef.current) {
-      sendRef.current(text); // chat mid-voice-call
-    } else {
-      void start();
-    }
   };
 
   const ctaLabel =
@@ -134,7 +114,7 @@ export function AgentConsole() {
               NAMAN.AI
             </span>
             <span className="hidden font-mono text-xs tracking-[0.06em] text-muted sm:block">
-              {status === "live" ? "/ LIVE · VOICE + CHAT" : "/ COMMITS → VOICE AGENT"}
+              {status === "live" ? "/ LIVE · VOICE AGENT" : "/ COMMITS → VOICE AGENT"}
             </span>
           </div>
           <span className="font-mono text-xs tracking-[0.06em] text-muted">
@@ -150,8 +130,19 @@ export function AgentConsole() {
           <p className="text-[15px] text-cream md:text-base">{COPY[status]}</p>
         </div>
 
-        {/* the grid: commit graph ⇄ live waveform */}
-        <div className="rounded-xl border border-line bg-surface-2 p-4 md:p-6">
+        {/* the grid: commit graph ⇄ live waveform, with the call button top-right */}
+        <div className="relative rounded-xl border border-line bg-surface-2 p-4 md:p-6">
+          <button
+            onClick={() => (active ? end() : start())}
+            disabled={status === "connecting"}
+            className="absolute right-4 top-4 z-10 flex items-center gap-2.5 rounded-full border border-line-3 bg-[#141414]/85 py-2 pr-5 pl-2 backdrop-blur-sm transition-colors hover:border-green/60 disabled:opacity-70"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green text-green-deep">
+              <span className="text-[11px]">{active ? "■" : "▶"}</span>
+            </span>
+            <span className="text-[14px] font-semibold text-cream">{ctaLabel}</span>
+          </button>
+
           <Visualizer live={status === "live"} />
           <div className="flex items-center justify-between pt-3.5">
             <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
@@ -188,63 +179,24 @@ export function AgentConsole() {
           </div>
         )}
 
-        {/* controls */}
-        <div className="flex flex-col gap-3.5 pt-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        {/* quick prompts (tap to start a voice call) */}
+        <div className="flex flex-wrap items-center gap-2 pt-6">
+          <span className="pr-1 font-mono text-[11px] tracking-[0.06em] text-faint">
+            ASK ME:
+          </span>
+          {config.agentPrompts.map((p, idx) => (
             <button
-              onClick={() => (active ? end() : start())}
-              disabled={status === "connecting"}
-              className="flex shrink-0 items-center gap-3 rounded-full border border-line-3 bg-[#141414] py-2.5 pr-6 pl-2.5 transition-colors hover:border-green/60 disabled:opacity-70"
+              key={p}
+              onClick={() => start()}
+              className={
+                idx === config.agentPrompts.length - 1
+                  ? "rounded-full bg-green px-3.5 py-1.5 font-mono text-xs font-bold text-green-deep transition-opacity hover:opacity-90"
+                  : "rounded-full border border-line-3 px-3.5 py-1.5 font-mono text-xs text-muted-2 transition-colors hover:border-green/50 hover:text-cream"
+              }
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green text-green-deep">
-                <span className="text-[11px]">{active ? "■" : "▶"}</span>
-              </span>
-              <span className="text-[15px] font-semibold text-cream">
-                {ctaLabel}
-              </span>
+              {p}
             </button>
-            <div className="flex flex-1 items-center justify-between rounded-full border border-line-2 bg-surface py-2 pr-2.5 pl-5">
-              <input
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && submit()}
-                placeholder={
-                  status === "live"
-                    ? "Type a message to the agent…"
-                    : "… or type to start a chat"
-                }
-                className="w-full bg-transparent text-[15px] text-cream outline-none placeholder:text-faint"
-              />
-              <button
-                onClick={submit}
-                className="flex shrink-0 items-center gap-2 rounded-full bg-line px-3.5 py-2 transition-colors hover:bg-line-3"
-              >
-                <span className="font-mono text-[11px] font-bold tracking-[0.06em] text-muted-2">
-                  SEND
-                </span>
-                <span className="text-sm text-green">→</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="pr-1 font-mono text-[11px] tracking-[0.06em] text-faint">
-              TRY:
-            </span>
-            {config.agentPrompts.map((p, idx) => (
-              <button
-                key={p}
-                onClick={() => (status === "live" ? sendRef.current?.(p) : start())}
-                className={
-                  idx === config.agentPrompts.length - 1
-                    ? "rounded-full bg-green px-3.5 py-1.5 font-mono text-xs font-bold text-green-deep transition-opacity hover:opacity-90"
-                    : "rounded-full border border-line-3 px-3.5 py-1.5 font-mono text-xs text-muted-2 transition-colors hover:border-green/50 hover:text-cream"
-                }
-              >
-                {p}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
 
