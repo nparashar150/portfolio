@@ -1,5 +1,7 @@
 import { config } from "@/lib/config";
 import { Previewable } from "./preview/Previewable";
+import { ScrambleName } from "./ScrambleName";
+import { LoadReveal } from "./LoadReveal";
 
 export function Hero() {
   return (
@@ -8,7 +10,7 @@ export function Hero() {
       className="mx-auto w-full max-w-[1240px] px-6 pt-12 pb-10 md:px-10 lg:px-16 lg:pt-20"
     >
       {/* eyebrow */}
-      <div className="flex items-center justify-between pb-10 md:pb-12">
+      <LoadReveal delay={80} className="flex items-center justify-between pb-10 md:pb-12">
         <div className="flex items-center gap-3">
           <span className="h-2 w-2 rounded-full bg-green animate-pulse" />
           <span className="font-mono text-[13px] tracking-[0.06em] text-cream">
@@ -22,18 +24,13 @@ export function Hero() {
         >
           {config.location}
         </Previewable>
-      </div>
+      </LoadReveal>
 
       {/* big name */}
-      <h1 className="font-display font-black uppercase leading-[0.88] tracking-[-0.045em] text-cream text-[clamp(44px,10.5vw,128px)]">
-        Naman
-        <br />
-        <span>Parashar</span>
-        <span className="text-green">.</span>
-      </h1>
+      <ScrambleName className="font-display font-black uppercase leading-[0.88] tracking-[-0.045em] text-cream text-[clamp(44px,10.5vw,128px)]" />
 
       {/* lower band */}
-      <div className="flex flex-col items-start justify-between gap-8 pt-10 md:flex-row md:items-end md:gap-16">
+      <LoadReveal delay={420} className="flex flex-col items-start justify-between gap-8 pt-10 md:flex-row md:items-end md:gap-16">
         <div className="max-w-lg">
           <div className="mb-5 h-px w-10 bg-green" />
           <p className="text-base leading-relaxed text-muted-2 md:text-lg">
@@ -50,7 +47,7 @@ export function Hero() {
             </div>
           ))}
         </dl>
-      </div>
+      </LoadReveal>
     </section>
   );
 }
