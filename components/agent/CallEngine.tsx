@@ -9,7 +9,13 @@ import {
   useRemoteParticipants,
   useTranscriptions,
 } from "@livekit/components-react";
-import { type RemoteAudioTrack, Room, RoomEvent, Track } from "livekit-client";
+import {
+  type LocalAudioTrack,
+  type RemoteAudioTrack,
+  Room,
+  RoomEvent,
+  Track,
+} from "livekit-client";
 import { useEffect, useMemo, useRef } from "react";
 import {
   agentStatus,
@@ -78,13 +84,22 @@ export function CallEngine({
   );
 }
 
-// reads the agent's live audio into per-band volumes for the visualizer
+// reads BOTH the user's mic and the agent's audio into per-band volumes
+// (max per band) so the visualizer reacts to whoever is speaking
 function BandReader() {
+  const { localParticipant } = useLocalParticipant();
   const remotes = useRemoteParticipants();
-  const track = remotes[0]?.getTrackPublication(Track.Source.Microphone)
+
+  const localTrack = localParticipant?.getTrackPublication(
+    Track.Source.Microphone,
+  )?.track as LocalAudioTrack | undefined;
+  const remoteTrack = remotes[0]?.getTrackPublication(Track.Source.Microphone)
     ?.track as RemoteAudioTrack | undefined;
-  const volumes = useMultibandTrackVolume(track, { bands: 34 });
-  bandsRef.current = volumes;
+
+  const localVols = useMultibandTrackVolume(localTrack, { bands: 34 });
+  const remoteVols = useMultibandTrackVolume(remoteTrack, { bands: 34 });
+
+  bandsRef.current = localVols.map((v, i) => Math.max(v, remoteVols[i] ?? 0));
   return null;
 }
 

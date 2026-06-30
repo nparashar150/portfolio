@@ -9,6 +9,9 @@ const CENTER = (ROWS - 1) / 2;
 
 // GitHub contribution palette (idle)
 const GH = ["#16201a", "#0e4429", "#006d32", "#26a641", "#39d353"];
+// dark → bright green ramp for the live waveform (graded by amplitude)
+const LIVE = ["#16321f", "#15803d", "#16a34a", "#22c55e", "#4ade80"];
+const SCALE = 1.9; // mic/agent volume gain into the 0..1 range
 
 const frac = (x: number) => x - Math.floor(x);
 function commitLevel(c: number, r: number) {
@@ -46,15 +49,13 @@ export function Visualizer({ live }: { live: boolean }) {
           if (!el) continue;
           const col = i % COLS;
           const row = Math.floor(i / COLS);
-          const vol = Math.min(1, (bands[col] ?? 0) * 3.6);
-          const litRadius = Math.pow(vol, 0.45) * 3.6;
-          const lit = Math.abs(row - CENTER) <= litRadius;
-          el.style.backgroundColor = lit
-            ? vol > 0.8
-              ? "#4ade80"
-              : "#22c55e"
-            : "#16321f";
-          el.style.transform = lit ? "scale(1)" : "scale(0.78)";
+          // column amplitude × vertical falloff from the center row → graded energy
+          const vol = Math.min(1, (bands[col] ?? 0) * SCALE);
+          const fall = 1 - Math.abs(row - CENTER) / (CENTER + 1);
+          const energy = vol * fall; // 0..1
+          const level = Math.max(0, Math.min(4, Math.floor(energy * 5)));
+          el.style.backgroundColor = LIVE[level];
+          el.style.transform = `scale(${0.8 + energy * 0.2})`;
         }
       }
       raf = requestAnimationFrame(loop);
