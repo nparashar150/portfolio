@@ -12,11 +12,12 @@ const GH = ["#16201a", "#0e4429", "#006d32", "#26a641", "#39d353"];
 
 const frac = (x: number) => x - Math.floor(x);
 function commitLevel(c: number, r: number) {
-  const v = frac(Math.sin((c + 1) * 12.9898 + (r + 1) * 78.233) * 43758.5453);
-  if (v < 0.46) return 0;
-  if (v < 0.7) return 1;
-  if (v < 0.86) return 2;
-  if (v < 0.96) return 3;
+  // denser distribution + reshuffled seed so there are no empty dead corners
+  const v = frac(Math.sin((c + 1) * 24.317 + (r + 1) * 9.137) * 41719.13);
+  if (v < 0.26) return 0;
+  if (v < 0.5) return 1;
+  if (v < 0.72) return 2;
+  if (v < 0.89) return 3;
   return 4;
 }
 
