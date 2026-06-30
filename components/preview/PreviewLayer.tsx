@@ -30,7 +30,7 @@ export function PreviewLayer() {
       {s.kind === "map" ? (
         <MiniMap label={s.label} />
       ) : s.kind === "image" ? (
-        <div className="relative h-[210px] w-full overflow-hidden rounded-xl border border-line-3 bg-surface-2 shadow-2xl shadow-black/60">
+        <div className="relative h-[210px] w-full overflow-hidden border border-line-3 bg-surface-2 shadow-2xl shadow-black/60">
           {/* placeholder shown until an image is dropped in /public/previews */}
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
             <span className="font-mono text-[11px] tracking-[0.08em] text-faint">
