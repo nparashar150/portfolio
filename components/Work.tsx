@@ -26,7 +26,8 @@ export function Work() {
         {config.work.map((job, i) => (
           <Reveal key={job.company} delay={i * 0.05}>
             <Previewable
-              href="#contact"
+              href={job.url}
+              target="_blank"
               preview={job.preview}
               label={job.company}
               className="group flex flex-col gap-3 border-b border-line py-7 md:flex-row md:items-center md:gap-10"
