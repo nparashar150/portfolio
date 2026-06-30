@@ -7,6 +7,7 @@ export const config = {
   headline:
     "Just an engineer who likes building products. I love playing with UI, and I've spent a while deep in the voice AI space.",
   email: "nparashar150@gmail.com",
+  photo: "/me.jpg", // drop a portrait at public/me.jpg
 
   meta: [
     { label: "Open to", value: "Work & Collabs" },
