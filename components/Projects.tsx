@@ -7,7 +7,7 @@ export function Projects() {
   return (
     <section
       id="projects"
-      className="mx-auto w-full max-w-[1240px] px-6 pt-28 md:px-10 lg:px-16"
+      className="mx-auto w-full max-w-[1240px] px-6 pt-36 md:px-10 lg:px-16"
     >
       <div className="flex items-end justify-between pb-8">
         <div className="flex flex-col gap-3.5">
@@ -30,7 +30,7 @@ export function Projects() {
           target="_blank"
           preview={f.preview}
           label={f.name}
-          className="group flex flex-col overflow-hidden rounded-lg border border-line-2 bg-surface md:flex-row"
+          className="group flex flex-col overflow-hidden rounded-2xl border border-line-2 bg-surface shadow-[0_18px_60px_-24px_rgba(0,0,0,0.85)] md:flex-row"
         >
           <div className="flex flex-1 flex-col justify-between gap-10 p-8 md:p-10">
             <div className="flex items-center justify-between">
@@ -83,7 +83,7 @@ export function Projects() {
               target="_blank"
               preview={p.preview}
               label={p.name}
-              className="group flex h-full flex-col justify-between gap-7 rounded-lg border border-line-2 bg-surface p-8 transition-colors hover:border-green/40"
+              className="group flex h-full flex-col justify-between gap-7 rounded-2xl border border-line-2 bg-surface p-8 shadow-[0_14px_50px_-26px_rgba(0,0,0,0.8)] transition-all hover:-translate-y-0.5 hover:border-green/40"
             >
               <div className="flex items-start justify-between">
                 <span className="font-mono text-[13px] tracking-[0.06em] text-muted">

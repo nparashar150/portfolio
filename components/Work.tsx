@@ -6,7 +6,7 @@ export function Work() {
   return (
     <section
       id="work"
-      className="mx-auto w-full max-w-[1240px] px-6 pt-28 md:px-10 lg:px-16"
+      className="mx-auto w-full max-w-[1240px] px-6 pt-36 md:px-10 lg:px-16"
     >
       <div className="flex items-end justify-between border-b border-line-3 pb-8">
         <div className="flex flex-col gap-3.5">

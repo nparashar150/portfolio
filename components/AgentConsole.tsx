@@ -131,7 +131,7 @@ export function AgentConsole() {
         </div>
 
         {/* graph on top: contribution grid ⇄ live waveform */}
-        <div className="rounded-xl border border-line bg-surface-2 p-4 md:p-6">
+        <div className="rounded-2xl border border-line bg-surface-2 p-4 shadow-[0_18px_60px_-24px_rgba(0,0,0,0.85)] md:p-6">
           <Visualizer live={status === "live"} />
           <div className="flex items-center justify-between pt-4">
             <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
@@ -149,7 +149,7 @@ export function AgentConsole() {
         {transcript.length > 0 && (
           <div
             ref={logRef}
-            className="mt-5 flex max-h-52 flex-col gap-3 overflow-y-auto rounded-xl border border-line bg-surface-2 p-5"
+            className="mt-5 flex max-h-52 flex-col gap-3 overflow-y-auto rounded-2xl border border-line bg-surface-2 p-5"
           >
             {transcript.map((line) => (
               <div key={line.id} className="flex gap-3">

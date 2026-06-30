@@ -5,7 +5,7 @@ export function About() {
   return (
     <section
       id="about"
-      className="mx-auto w-full max-w-[1240px] px-6 pt-28 md:px-10 lg:px-16"
+      className="mx-auto w-full max-w-[1240px] px-6 pt-36 md:px-10 lg:px-16"
     >
       <div className="flex items-end justify-between pb-10">
         <span className="font-mono text-xs tracking-[0.1em] text-green">
