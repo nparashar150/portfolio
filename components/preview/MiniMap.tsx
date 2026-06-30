@@ -1,42 +1,68 @@
-// stylized dark-mode mini map (no external tiles / keys) with a green pin
+// real dark-mode map: CARTO "dark_all" raster tiles (free, no API key),
+// composited and centered on the given coordinates with a green pin.
+const LAT = 28.6789;
+const LON = 77.376;
+const Z = 13;
+const W = 360;
+const H = 184;
+const TILE = 256;
+
+function buildTiles() {
+  const latRad = (LAT * Math.PI) / 180;
+  const n = Math.pow(2, Z);
+  const worldX = ((LON + 180) / 360) * n * TILE;
+  const worldY =
+    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) *
+    n *
+    TILE;
+  const originX = worldX - W / 2;
+  const originY = worldY - H / 2;
+
+  const tiles: { x: number; y: number; left: number; top: number }[] = [];
+  for (let tx = Math.floor(originX / TILE); tx <= Math.floor((originX + W) / TILE); tx++) {
+    for (let ty = Math.floor(originY / TILE); ty <= Math.floor((originY + H) / TILE); ty++) {
+      if (ty < 0 || ty >= n) continue;
+      tiles.push({
+        x: ((tx % n) + n) % n,
+        y: ty,
+        left: tx * TILE - originX,
+        top: ty * TILE - originY,
+      });
+    }
+  }
+  return tiles;
+}
+
 export function MiniMap({ label }: { label?: string }) {
+  const tiles = buildTiles();
   return (
-    <div className="overflow-hidden rounded-xl border border-line-3 bg-[#0b0f0d] shadow-2xl shadow-black/60">
-      <svg viewBox="0 0 360 180" className="block w-full">
-        <rect width="360" height="180" fill="#0b0f0d" />
+    <div className="overflow-hidden border border-line-3 bg-[#0b0f0d] shadow-2xl shadow-black/60">
+      <div
+        className="relative overflow-hidden"
+        style={{ width: W, height: H }}
+      >
+        {tiles.map((t) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={`${t.x}-${t.y}`}
+            src={`https://a.basemaps.cartocdn.com/dark_all/${Z}/${t.x}/${t.y}@2x.png`}
+            alt=""
+            width={TILE}
+            height={TILE}
+            className="absolute select-none"
+            style={{ left: t.left, top: t.top }}
+            draggable={false}
+          />
+        ))}
 
-        {/* faint street grid */}
-        <g stroke="#16241c" strokeWidth="1">
-          {[30, 60, 90, 120, 150, 210, 240, 270, 300, 330].map((x) => (
-            <line key={`v${x}`} x1={x} y1="0" x2={x} y2="180" />
-          ))}
-          {[30, 60, 90, 120, 150].map((y) => (
-            <line key={`h${y}`} x1="0" y1={y} x2="360" y2={y} />
-          ))}
-        </g>
+        {/* pin at the exact center */}
+        <span className="absolute left-1/2 top-1/2 h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-green/15" />
+        <span className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-bright ring-2 ring-[#0b0f0d]" />
 
-        {/* arterial roads */}
-        <g stroke="#1f3a2c" strokeWidth="2.5" fill="none" strokeLinecap="round">
-          <path d="M0 130 L150 70 L360 110" />
-          <path d="M40 0 L120 90 L90 180" />
-          <path d="M360 40 L200 100 L260 180" />
-        </g>
-
-        {/* a river */}
-        <path
-          d="M0 60 C 90 40, 130 110, 220 80 S 320 120, 360 90"
-          stroke="#163b3a"
-          strokeWidth="3"
-          fill="none"
-          opacity="0.8"
-        />
-
-        {/* pin */}
-        <circle cx="180" cy="92" r="22" fill="#22c55e" opacity="0.12" />
-        <circle cx="180" cy="92" r="12" fill="#22c55e" opacity="0.22" />
-        <circle cx="180" cy="92" r="5.5" fill="#4ade80" />
-        <circle cx="180" cy="92" r="2" fill="#07130d" />
-      </svg>
+        <span className="absolute bottom-1 right-1.5 font-mono text-[8px] tracking-[0.04em] text-cream/40">
+          © OSM · CARTO
+        </span>
+      </div>
 
       <div className="flex items-center justify-between border-t border-line px-4 py-2.5">
         <span className="font-mono text-[11px] tracking-[0.06em] text-cream">
