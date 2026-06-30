@@ -5,8 +5,14 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="mx-auto w-full max-w-[1240px] px-6 pt-12 pb-10 md:px-10 lg:px-16 lg:pt-20"
+      className="relative isolate mx-auto w-full max-w-[1240px] overflow-hidden px-6 pt-12 pb-10 md:px-10 lg:px-16 lg:pt-20"
     >
+      {/* ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[460px] w-[880px] max-w-[120%] -translate-x-1/2 rounded-full bg-[radial-gradient(50%_50%_at_50%_50%,rgba(34,197,94,0.10),transparent_72%)] blur-2xl"
+      />
+
       {/* eyebrow */}
       <div className="flex items-center justify-between pb-10 md:pb-12">
         <div className="flex items-center gap-3">

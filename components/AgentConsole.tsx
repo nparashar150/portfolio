@@ -173,7 +173,7 @@ export function AgentConsole() {
           <button
             onClick={() => (active ? end() : start())}
             disabled={status === "connecting"}
-            className="flex shrink-0 items-center gap-2.5 rounded-full border border-line-3 bg-[#141414] py-2 pr-5 pl-2 transition-colors hover:border-green/60 disabled:opacity-70"
+            className="flex shrink-0 items-center gap-2.5 rounded-full border border-line-3 bg-surface py-2 pr-5 pl-2 transition-colors hover:border-green/60 disabled:opacity-70"
           >
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green text-green-deep">
               <span className="text-[11px]">{active ? "■" : "▶"}</span>
