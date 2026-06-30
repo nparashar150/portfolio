@@ -26,23 +26,31 @@ export function Work() {
           <Reveal key={job.company} delay={i * 0.05}>
             <a
               href="#contact"
-              className="group flex flex-col gap-3 border-b border-line py-7 md:flex-row md:items-center md:gap-10"
+              className="group flex flex-col gap-3 border-b border-line py-8 md:flex-row md:items-start md:gap-10"
             >
-              <span className="w-28 shrink-0 font-mono text-[13px] tracking-[0.04em] text-muted">
+              <span className="w-28 shrink-0 font-mono text-[13px] tracking-[0.04em] text-muted md:pt-1">
                 {job.period}
               </span>
-              <h3 className="w-full shrink-0 font-display text-[24px] font-bold tracking-[-0.02em] text-cream transition-colors group-hover:text-green md:w-64 md:text-[28px]">
+              <h3 className="w-full shrink-0 font-display text-[24px] font-bold tracking-[-0.02em] text-cream transition-colors group-hover:text-green md:w-60 md:text-[28px]">
                 {job.company}
               </h3>
-              <div className="flex flex-1 flex-col gap-1.5">
+              <div className="flex flex-1 flex-col gap-2.5">
                 <span className="font-mono text-[11px] font-bold tracking-[0.06em] text-green">
                   {job.role.toUpperCase()}
                 </span>
-                <p className="max-w-xl text-[15px] leading-relaxed text-muted-2">
+                <p className="max-w-2xl text-[15px] leading-relaxed text-cream">
                   {job.desc}
                 </p>
+                <ul className="flex max-w-2xl flex-col gap-1.5 pt-1">
+                  {job.details.map((d) => (
+                    <li key={d} className="flex gap-2.5 text-[14px] leading-relaxed text-muted-2">
+                      <span className="shrink-0 text-green">–</span>
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <span className="hidden shrink-0 text-xl text-muted transition-all group-hover:translate-x-1 group-hover:text-cream md:block">
+              <span className="hidden shrink-0 text-xl text-muted transition-all group-hover:translate-x-1 group-hover:text-cream md:block md:pt-1">
                 ↗
               </span>
             </a>
