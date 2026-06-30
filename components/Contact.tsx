@@ -32,12 +32,12 @@ export function Contact() {
             </span>
             <a
               href={`mailto:${config.email}`}
-              className="group flex items-center gap-2 font-display text-xl font-semibold tracking-[-0.02em] text-cream break-all sm:gap-3 sm:text-2xl md:text-[30px]"
+              className="group inline-flex w-fit flex-col gap-2"
             >
-              {config.email}
-              <span className="shrink-0 text-green transition-transform group-hover:translate-x-1">
-                ↗
+              <span className="font-display text-xl font-semibold tracking-[-0.02em] text-cream break-all transition-colors group-hover:text-green sm:text-2xl md:text-[30px]">
+                {config.email}
               </span>
+              <span className="h-px w-full bg-line-3 transition-colors duration-300 group-hover:bg-green" />
             </a>
           </div>
           <div className="flex items-center gap-2.5">
