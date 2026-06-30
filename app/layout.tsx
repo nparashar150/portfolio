@@ -3,7 +3,6 @@ import { Archivo, Inter, Space_Mono } from "next/font/google";
 import { Cursor } from "@/components/Cursor";
 import { PreviewLayer } from "@/components/preview/PreviewLayer";
 import { Loader } from "@/components/Loader";
-import { SmoothScroll } from "@/components/SmoothScroll";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -49,7 +48,6 @@ export default function RootLayout({
       className={`${archivo.variable} ${inter.variable} ${spaceMono.variable}`}
     >
       <body>
-        <SmoothScroll />
         <Loader />
         <Cursor />
         <PreviewLayer />
