@@ -74,7 +74,7 @@ export function Loader() {
 
     let raf = 0;
     const start = performance.now();
-    const DUR = 2000;
+    const DUR = 3200;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / DUR);
       const eased = 1 - Math.pow(1 - t, 2);
