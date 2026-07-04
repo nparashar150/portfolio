@@ -5,7 +5,7 @@ export const config = {
   status: "Open to work",
   location: "28.7035° N, 77.4175° E / New Delhi, IND",
   headline:
-    "Just an engineer who likes building products. I love playing with UI, and I've spent a while deep in the voice AI space.",
+    "Just an engineer who likes building products. I love playing with UI, and I've been deep in voice AI. This site can hear you. And it talks back.",
   email: "nparashar150@gmail.com",
   photo: "/me.jpg", // drop a portrait at public/me.jpg
 

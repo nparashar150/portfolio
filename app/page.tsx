@@ -1,4 +1,3 @@
-import { Nav } from "@/components/Nav";
 import { Hero } from "@/components/Hero";
 import { AgentConsole } from "@/components/AgentConsole";
 import { Work } from "@/components/Work";
@@ -10,7 +9,6 @@ import { Footer } from "@/components/Footer";
 export default function Home() {
   return (
     <div className="min-h-screen bg-ink">
-      <Nav />
       <main>
         <Hero />
         <AgentConsole />
