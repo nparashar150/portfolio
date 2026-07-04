@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  /* tonal charcoal base so raised surfaces lift off the page */
-  --color-ink: #0c0d11;
-  --color-cream: #f4f2ec;
-  --color-muted: #8b8f99;
-  --color-muted-2: #b8bbc3;
-  --color-faint: #686c76;
-  --color-green: #22c55e;
-  --color-green-bright: #4ade80;
-  --color-green-dim: #16321f;
-  --color-green-deep: #07130d;
-  --color-surface: #15161c;
-  --color-surface-2: #101218;
-  --color-line: #21232b;
-  --color-line-2: #2b2e38;
-  --color-line-3: #393d48;
+  /* phosphor: void black ground, electric green signal */
+  --color-ink: #060709;
+  --color-cream: #f2f4ef;
+  --color-muted: #787f8c;
+  --color-muted-2: #b9bec8;
+  --color-faint: #6a707b;
+  --color-green: #31ff7a;
+  --color-green-bright: #6dffa3;
+  --color-green-dim: #0e2c1a;
+  --color-green-deep: #04120a;
+  --color-surface: #101319;
+  --color-surface-2: #0b0e13;
+  --color-line: #1e222b;
+  --color-line-2: #262a34;
+  --color-line-3: #343946;
 }
 
 @theme inline {
@@ -50,10 +50,10 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #060709;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1f1f1f;
+  background: #1e222b;
   border-radius: 100px;
 }
 
