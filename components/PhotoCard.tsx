@@ -12,7 +12,7 @@ export function PhotoCard({
   const [ok, setOk] = useState(true);
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-line shadow-[0_14px_50px_-26px_rgba(0,0,0,0.8)] ${className ?? ""}`}
+      className={`group relative overflow-hidden rounded-2xl border border-line shadow-[0_14px_50px_-26px_rgba(0,0,0,0.8)] ${className ?? ""}`}
     >
       {/* placeholder until a portrait is added at public/me.jpg */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[radial-gradient(120%_120%_at_50%_0%,#1c1e27,#101218)]">
@@ -22,13 +22,23 @@ export function PhotoCard({
         </span>
       </div>
       {ok ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt="Naman Parashar"
-          onError={() => setOk(false)}
-          className="relative h-full w-full object-cover"
-        />
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt="Naman Parashar"
+            onError={() => setOk(false)}
+            className="relative h-full w-full object-cover grayscale contrast-[1.06] brightness-[0.92] transition-all duration-500 group-hover:grayscale-0 group-hover:brightness-100"
+          />
+          {/* green wash, lifts on hover to reveal color */}
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(34,197,94,0.06),rgba(7,19,13,0.35))] transition-opacity duration-500 group-hover:opacity-0" />
+          <div className="absolute bottom-0 left-0 flex items-center gap-2 bg-ink/85 px-4 py-2.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-green" />
+            <span className="font-mono text-[11px] tracking-[0.08em] text-cream">
+              NAMAN, IRL
+            </span>
+          </div>
+        </>
       ) : null}
     </div>
   );

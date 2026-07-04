@@ -25,12 +25,12 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Naman Parashar — Engineer",
+  title: "Naman Parashar · Engineer",
   description:
     "An engineer who likes building products. Loves playing with UI, and has spent a while deep in the voice AI space.",
   metadataBase: new URL("https://nparashar150.dev"),
   openGraph: {
-    title: "Naman Parashar — Engineer",
+    title: "Naman Parashar · Engineer",
     description:
       "An engineer who likes building products. Loves UI, deep in voice AI.",
     type: "website",

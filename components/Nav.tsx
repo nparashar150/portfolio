@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { Wordmark } from "./Wordmark";
 
 const links = [
-  { label: "01 — Work", href: "#work", id: "work" },
-  { label: "02 — Projects", href: "#projects", id: "projects" },
-  { label: "03 — About", href: "#about", id: "about" },
+  { label: "01 / Work", href: "#work", id: "work" },
+  { label: "02 / Projects", href: "#projects", id: "projects" },
+  { label: "03 / About", href: "#about", id: "about" },
 ];
 
 export function Nav() {
