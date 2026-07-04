@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Archivo, Inter, Space_Mono } from "next/font/google";
 import { Cursor } from "@/components/Cursor";
 import { PreviewLayer } from "@/components/preview/PreviewLayer";
-import { Loader } from "@/components/Loader";
+import { BootGate } from "@/components/BootGate";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -48,7 +48,7 @@ export default function RootLayout({
       className={`${archivo.variable} ${inter.variable} ${spaceMono.variable}`}
     >
       <body>
-        <Loader />
+        <BootGate />
         <Cursor />
         <PreviewLayer />
         {children}

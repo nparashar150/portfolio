@@ -10,6 +10,7 @@ import {
 } from "@/lib/agent/store";
 import { Visualizer } from "./agent/Visualizer";
 import { CallEngine } from "./agent/CallEngine";
+import { AGENT_START_EVENT } from "@/lib/gateStore";
 
 function fmt(sec: number) {
   const m = Math.floor(sec / 60)
@@ -41,6 +42,7 @@ export function AgentConsole() {
   const [seconds, setSeconds] = useState(0);
   const busy = useRef(false);
   const logRef = useRef<HTMLDivElement>(null);
+  const startRef = useRef<(() => void) | null>(null);
 
   const active = status === "connecting" || status === "live";
 
@@ -57,6 +59,13 @@ export function AgentConsole() {
     const el = logRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [transcript]);
+
+  // boot gate's "enter with voice" starts the call as soon as the curtain lifts
+  useEffect(() => {
+    const onStart = () => startRef.current?.();
+    window.addEventListener(AGENT_START_EVENT, onStart);
+    return () => window.removeEventListener(AGENT_START_EVENT, onStart);
+  }, []);
 
   const start = async () => {
     if (busy.current || active) return;
@@ -87,6 +96,8 @@ export function AgentConsole() {
       busy.current = false;
     }
   };
+
+  startRef.current = start;
 
   const end = () => {
     setToken(null);
