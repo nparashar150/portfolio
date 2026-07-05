@@ -1,3 +1,4 @@
+import { AfterHero } from "@/components/AfterHero";
 import { Hero } from "@/components/Hero";
 import { TalkDock } from "@/components/TalkDock";
 import { Work } from "@/components/Work";
@@ -11,13 +12,17 @@ export default function Home() {
     <div className="min-h-screen bg-ink">
       <main>
         <Hero />
-        <Work />
-        <Projects />
-        <About />
-        <Contact />
+        <AfterHero>
+          <Work />
+          <Projects />
+          <About />
+          <Contact />
+        </AfterHero>
       </main>
-      <Footer />
-      <TalkDock />
+      <AfterHero>
+        <Footer />
+        <TalkDock />
+      </AfterHero>
     </div>
   );
 }
