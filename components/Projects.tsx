@@ -36,7 +36,7 @@ function CellMark() {
 export function Projects() {
   const f = config.featured;
   return (
-    <section id="projects" className="w-full px-6 pt-36 md:px-12">
+    <section id="projects" className="mx-auto w-full max-w-[1080px] px-6 pt-32">
       <div className="flex items-end justify-between pb-10">
         <span className="font-mono text-[13px] tracking-[0.1em] text-green">
           02 / THINGS I&apos;VE BUILT
@@ -103,7 +103,7 @@ export function Projects() {
 
       {/* drag strip */}
       <Reveal>
-        <div className="scrollbar-none -mx-6 mt-5 flex snap-x gap-5 overflow-x-auto px-6 pb-2 md:-mx-12 md:px-12">
+        <div className="scrollbar-none -mx-6 mt-5 flex snap-x gap-5 overflow-x-auto px-6 pb-2">
           {config.projects.map((p, i) => (
             <Previewable
               key={p.name}

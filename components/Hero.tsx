@@ -63,83 +63,80 @@ export function Hero() {
   const time = useDelhiTime();
 
   return (
-    <section
-      id="top"
-      className="relative flex flex-col overflow-hidden pt-32 pb-14"
-    >
-      {/* status, the only chrome on the page */}
-      <motion.div
-        className="absolute top-10 left-6 flex items-center gap-3 md:left-12"
-        initial={{ opacity: 0 }}
-        animate={done ? { opacity: 1 } : {}}
-        transition={{ duration: 0.6, delay: 0.5 }}
-      >
-        <span className="h-[7px] w-[7px] rounded-full bg-green animate-pulse" />
-        <span className="font-mono text-xs font-bold tracking-[0.06em] text-cream">
-          OPEN TO WORK
-        </span>
-        <span className="font-mono text-xs tracking-[0.06em] text-muted">
-          · DELHI {time || "--:--"} IST
-        </span>
-      </motion.div>
-
-      {/* commit-cell fragment, becomes the reactive field later */}
-      <motion.div
-        className="absolute top-12 right-6 hidden gap-[5px] md:right-12 lg:grid"
-        style={{ gridTemplateColumns: "repeat(13, 15px)" }}
-        initial={{ opacity: 0 }}
-        animate={done ? { opacity: 0.85 } : {}}
-        transition={{ duration: 0.8, delay: 0.7 }}
-        aria-hidden
-      >
-        {Array.from({ length: 13 * 5 }).map((_, i) => (
-          <span
-            key={i}
-            className="h-[15px] w-[15px] rounded-[3px]"
-            style={{ backgroundColor: cellTone(i % 13, Math.floor(i / 13)) }}
-          />
-        ))}
-      </motion.div>
-
-      {/* full-bleed name, PARASHAR runs off the edge on purpose */}
-      <h1 className="pl-6 font-display font-black uppercase leading-[0.87] tracking-[-0.045em] text-cream text-[clamp(72px,16.3vw,235px)] md:pl-9">
-        <NameLine done={done} delay={0.05}>
-          Naman
-        </NameLine>
-        <NameLine done={done} delay={0.14}>
-          Parashar<span className="text-green">.</span>
-        </NameLine>
-      </h1>
-
-      {/* lower band */}
-      <motion.div
-        className="flex flex-col items-start justify-between gap-8 px-6 pt-10 md:flex-row md:items-end md:px-12"
-        initial={{ opacity: 0, y: 24 }}
-        animate={done ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8, ease: EASE, delay: 0.4 }}
-      >
-        <div className="flex max-w-[520px] flex-col gap-4">
-          <div className="h-[2px] w-11 bg-green" />
-          <p className="text-base leading-relaxed text-muted-2 md:text-lg">
-            {config.headline}
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-col items-start gap-2 md:items-end">
-          <Previewable
-            kind="map"
-            label="New Delhi, India"
-            className="cursor-help font-mono text-xs tracking-[0.06em] text-muted transition-colors hover:text-cream"
+    <section id="top" className="w-full overflow-hidden pt-10 pb-14">
+      <div className="mx-auto w-full max-w-[1080px] px-6">
+        {/* status row */}
+        <motion.div
+          className="flex items-start justify-between"
+          initial={{ opacity: 0 }}
+          animate={done ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.5 }}
+        >
+          <div className="flex items-center gap-3 pt-1">
+            <span className="h-[7px] w-[7px] rounded-full bg-green animate-pulse" />
+            <span className="font-mono text-xs font-bold tracking-[0.06em] text-cream">
+              OPEN TO WORK
+            </span>
+            <span className="font-mono text-xs tracking-[0.06em] text-muted">
+              · DELHI {time || "--:--"} IST
+            </span>
+          </div>
+          {/* commit-cell fragment, becomes the reactive field later */}
+          <div
+            className="hidden gap-[4px] lg:grid"
+            style={{ gridTemplateColumns: "repeat(13, 12px)" }}
+            aria-hidden
           >
-            28.7035° N / 77.4175° E
-          </Previewable>
-          <span className="font-mono text-xs tracking-[0.06em] text-muted">
-            NEW DELHI, IND · REMOTE OK
-          </span>
-          <span className="font-mono text-xs tracking-[0.06em] text-green">
-            SCROLL, OR JUST SAY HI ↓
-          </span>
-        </div>
-      </motion.div>
+            {Array.from({ length: 13 * 4 }).map((_, i) => (
+              <span
+                key={i}
+                className="h-[12px] w-[12px] rounded-[2.5px]"
+                style={{ backgroundColor: cellTone(i % 13, Math.floor(i / 13)) }}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* name */}
+        <h1 className="pt-14 font-display font-black uppercase leading-[0.9] tracking-[-0.045em] text-cream text-[clamp(52px,14.5vw,158px)]">
+          <NameLine done={done} delay={0.05}>
+            Naman
+          </NameLine>
+          <NameLine done={done} delay={0.14}>
+            Parashar<span className="text-green">.</span>
+          </NameLine>
+        </h1>
+
+        {/* lower band */}
+        <motion.div
+          className="flex flex-col items-start justify-between gap-8 pt-10 md:flex-row md:items-end"
+          initial={{ opacity: 0, y: 24 }}
+          animate={done ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, ease: EASE, delay: 0.4 }}
+        >
+          <div className="flex max-w-[500px] flex-col gap-4">
+            <div className="h-[2px] w-11 bg-green" />
+            <p className="text-base leading-relaxed text-muted-2 md:text-lg">
+              {config.headline}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-col items-start gap-2 md:items-end">
+            <Previewable
+              kind="map"
+              label="New Delhi, India"
+              className="cursor-help font-mono text-xs tracking-[0.06em] text-muted transition-colors hover:text-cream"
+            >
+              28.7035° N / 77.4175° E
+            </Previewable>
+            <span className="font-mono text-xs tracking-[0.06em] text-muted">
+              NEW DELHI, IND · REMOTE OK
+            </span>
+            <span className="font-mono text-xs tracking-[0.06em] text-green">
+              SCROLL, OR JUST SAY HI ↓
+            </span>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }

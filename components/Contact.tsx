@@ -6,14 +6,14 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="w-full overflow-hidden border-t border-line px-6 pt-32 md:px-12"
+      className="mx-auto w-full max-w-[1080px] overflow-hidden px-6 pt-32"
     >
       <span className="font-mono text-[13px] tracking-[0.1em] text-green">
         04 / SAY IT OUT LOUD
       </span>
 
       <Reveal>
-        <h2 className="pt-8 font-display font-black uppercase leading-[0.9] tracking-[-0.045em] text-cream whitespace-nowrap text-[clamp(64px,13vw,190px)]">
+        <h2 className="pt-8 font-display font-black uppercase leading-[0.9] tracking-[-0.045em] text-cream whitespace-nowrap text-[clamp(52px,12vw,148px)]">
           Let&apos;s talk<span className="text-green">.</span>
         </h2>
       </Reveal>

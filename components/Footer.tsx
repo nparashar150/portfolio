@@ -4,7 +4,7 @@ import { getCommitCount } from "@/lib/commits";
 export async function Footer() {
   const commits = await getCommitCount();
   return (
-    <footer className="w-full border-t border-line px-6 md:px-12">
+    <footer className="mx-auto w-full max-w-[1080px] border-t border-line px-6">
       {/* console easter egg */}
       <div className="overflow-x-auto py-6">
         <code className="font-mono text-[13px] whitespace-nowrap">

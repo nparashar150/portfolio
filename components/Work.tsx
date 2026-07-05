@@ -21,7 +21,7 @@ function RollingName({ name }: { name: string }) {
 
 export function Work() {
   return (
-    <section id="work" className="w-full px-6 pt-36 md:px-12">
+    <section id="work" className="mx-auto w-full max-w-[1080px] px-6 pt-32">
       <div className="flex items-end justify-between pb-10">
         <span className="font-mono text-[13px] tracking-[0.1em] text-green">
           01 / WHERE I&apos;VE SHIPPED

@@ -4,7 +4,7 @@ import { PhotoCard } from "./PhotoCard";
 
 export function About() {
   return (
-    <section id="about" className="w-full px-6 pt-36 md:px-12">
+    <section id="about" className="mx-auto w-full max-w-[1080px] px-6 pt-32">
       <div className="flex items-end justify-between pb-10">
         <span className="font-mono text-[13px] tracking-[0.1em] text-green">
           03 / THE HUMAN BEHIND THE AGENT
