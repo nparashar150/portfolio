@@ -16,17 +16,18 @@ export function Cursor() {
       return;
     }
 
-    // history of distinct grid cells, newest first
+    // head follows the pointer exactly, the trail snaps to grid cells
     const history: Array<{ x: number; y: number }> = [];
     let cx = -1;
     let cy = -1;
     let lastMove = 0;
 
     const render = () => {
-      for (let i = 0; i < N; i++) {
+      // dots 1..N-1 are the snapped comet tail
+      for (let i = 1; i < N; i++) {
         const el = dots.current[i];
         if (!el) continue;
-        const h = history[i];
+        const h = history[i - 1];
         if (h) {
           el.style.transform = `translate(${h.x}px, ${h.y}px)`;
           el.style.opacity = String((1 - i / N) * 0.85);
@@ -37,15 +38,23 @@ export function Cursor() {
     };
 
     const onMove = (e: MouseEvent) => {
+      lastMove = performance.now();
+      document.documentElement.classList.add("cursor-on");
+
+      // head: pixel-exact on every move, no cell quantization, no lag
+      const head = dots.current[0];
+      if (head) {
+        head.style.transform = `translate(${e.clientX - (SIZE - 2) / 2}px, ${e.clientY - (SIZE - 2) / 2}px)`;
+        head.style.opacity = "0.95";
+      }
+
       const nx = Math.floor(e.clientX / SIZE);
       const ny = Math.floor(e.clientY / SIZE);
-      lastMove = performance.now();
-      if (nx === cx && ny === cy) return; // still in the same cell → don't move
+      if (nx === cx && ny === cy) return; // same cell → tail stays put
       cx = nx;
       cy = ny;
       history.unshift({ x: nx * SIZE, y: ny * SIZE });
-      if (history.length > N) history.pop();
-      document.documentElement.classList.add("cursor-on");
+      if (history.length > N - 1) history.pop();
       render();
     };
 
@@ -61,7 +70,7 @@ export function Cursor() {
       }
     }, 55);
 
-    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
 
     return () => {
