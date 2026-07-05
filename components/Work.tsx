@@ -39,6 +39,7 @@ export function Work() {
               target="_blank"
               preview={job.preview}
               label={job.company}
+              embed={job.embed}
               className="group flex flex-col gap-3 border-t border-line py-8 md:flex-row md:items-baseline md:gap-10 md:py-9"
             >
               <span className="w-14 shrink-0 font-mono text-sm text-muted">

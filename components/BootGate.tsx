@@ -103,26 +103,27 @@ export function BootGate() {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[200] bg-ink"
+      className="native-cursor fixed inset-0 z-[200] bg-ink"
       animate={phase === "leaving" ? { y: "-100%" } : { y: 0 }}
       transition={{ duration: 0.78, ease: EASE }}
     >
-      {/* boot log */}
-      <div className="absolute top-10 left-6 flex flex-col gap-1.5 md:left-12" aria-hidden>
-        {LOG_LINES.map((line) => (
-          <span
-            key={line.text}
-            className={`font-mono text-xs tracking-[0.04em] transition-opacity duration-300 ${
-              line.green ? "text-green" : "text-muted"
-            } ${progress >= line.at ? "opacity-100" : "opacity-0"}`}
-          >
-            {line.text}
-          </span>
-        ))}
-      </div>
+      {/* one column, everything together */}
+      <div className="flex h-full flex-col items-center justify-center gap-9 px-6">
+        {/* boot log */}
+        <div className="flex w-fit flex-col gap-1.5" aria-hidden>
+          {LOG_LINES.map((line) => (
+            <span
+              key={line.text}
+              className={`font-mono text-xs tracking-[0.04em] whitespace-nowrap transition-opacity duration-300 ${
+                line.green ? "text-green" : "text-muted"
+              } ${progress >= line.at ? "opacity-100" : "opacity-0"}`}
+            >
+              {ready && line.green ? "[ ok ] here you are" : line.text}
+            </span>
+          ))}
+        </div>
 
-      {/* center: cells assembling into a waveform */}
-      <div className="flex h-full flex-col items-center justify-center gap-10 px-6">
+        {/* cells assembling into a waveform */}
         <div
           className="grid gap-[5px]"
           style={{ gridTemplateColumns: `repeat(${COLS}, 16px)` }}
@@ -143,13 +144,22 @@ export function BootGate() {
             );
           })}
         </div>
-        <span className="font-mono text-[13px] tracking-[0.06em] text-muted">
-          a year of commits, ready to speak
-        </span>
+
+        {/* what this actually is */}
+        <div className="flex max-w-[420px] flex-col items-center gap-2 text-center">
+          <span className="font-mono text-[13px] tracking-[0.06em] text-cream">
+            this is my last year of github commits
+            <span className="font-bold text-green tabular-nums"> · {progress}%</span>
+          </span>
+          <span className="font-mono text-xs leading-relaxed tracking-[0.05em] text-muted">
+            they double as a live voice agent trained on me. say hi and ask it
+            anything, or just scroll.
+          </span>
+        </div>
 
         {/* enter CTAs */}
         <motion.div
-          className="flex flex-col items-center gap-4 pt-2"
+          className="flex flex-col items-center gap-4"
           initial={{ opacity: 0, y: 16 }}
           animate={ready ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, ease: EASE }}
@@ -175,17 +185,10 @@ export function BootGate() {
           >
             enter quiet, just browsing
           </button>
+          <span className="pt-1 font-mono text-[11px] tracking-[0.06em] text-faint">
+            mic optional · nothing autoplays
+          </span>
         </motion.div>
-      </div>
-
-      {/* bottom hud */}
-      <div className="absolute bottom-8 left-6 right-6 flex items-end justify-between md:left-12 md:right-12">
-        <span className="font-mono text-xs tracking-[0.06em] text-muted">
-          mic optional · nothing autoplays
-        </span>
-        <span className="font-display text-6xl font-black tracking-[-0.03em] text-cream tabular-nums">
-          {progress}%
-        </span>
       </div>
     </motion.div>
   );

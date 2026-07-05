@@ -63,6 +63,14 @@ body {
   html.cursor-on * {
     cursor: none !important;
   }
+  /* the boot gate keeps the real pointer, precision matters there */
+  html.cursor-on .native-cursor,
+  html.cursor-on .native-cursor * {
+    cursor: auto !important;
+  }
+  html.cursor-on .native-cursor button {
+    cursor: pointer !important;
+  }
 }
 
 /* hide scrollbars on drag strips, scrolling still works */

@@ -4,6 +4,9 @@ export type PreviewState = {
   kind: PreviewKind | null;
   src?: string;
   label?: string;
+  /* live-embed the real site in the mini browser when the host allows framing */
+  url?: string;
+  embed?: boolean;
   x: number;
   y: number;
 };
@@ -18,6 +21,8 @@ export const preview = {
     kind: PreviewKind;
     src?: string;
     label?: string;
+    url?: string;
+    embed?: boolean;
     x: number;
     y: number;
   }) => {

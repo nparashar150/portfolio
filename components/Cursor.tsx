@@ -75,7 +75,7 @@ export function Cursor() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-[100] hidden opacity-0 transition-opacity duration-200 md:block [.cursor-on_&]:opacity-100"
+      className="pointer-events-none fixed inset-0 z-[300] hidden opacity-0 transition-opacity duration-200 md:block [.cursor-on_&]:opacity-100"
     >
       {Array.from({ length: N }).map((_, i) => (
         <div
@@ -91,7 +91,7 @@ export function Cursor() {
             height: SIZE - 2,
             margin: 1,
             borderRadius: 3,
-            background: i === 0 ? "#4ade80" : "#22c55e",
+            background: i === 0 ? "#6dffa3" : "#31ff7a",
             opacity: 0,
             willChange: "transform, opacity",
           }}

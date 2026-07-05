@@ -10,6 +10,7 @@ export function Previewable({
   preview: src,
   label,
   kind = "image",
+  embed,
   className,
 }: {
   children: ReactNode;
@@ -18,11 +19,13 @@ export function Previewable({
   preview?: string;
   label?: string;
   kind?: PreviewKind;
+  /* when true, the mini browser loads the live href instead of the screenshot */
+  embed?: boolean;
   className?: string;
 }) {
   const onEnter = (e: MouseEvent) => {
     if (kind === "image" && !src) return;
-    preview.show({ kind, src, label, x: e.clientX, y: e.clientY });
+    preview.show({ kind, src, label, url: href, embed, x: e.clientX, y: e.clientY });
   };
   const onMove = (e: MouseEvent) => preview.move(e.clientX, e.clientY);
   const onLeave = () => preview.hide();

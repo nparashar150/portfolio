@@ -65,7 +65,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative flex min-h-[88vh] flex-col justify-end overflow-hidden pb-4"
+      className="relative flex flex-col overflow-hidden pt-32 pb-14"
     >
       {/* status, the only chrome on the page */}
       <motion.div
@@ -113,7 +113,7 @@ export function Hero() {
 
       {/* lower band */}
       <motion.div
-        className="flex flex-col items-start justify-between gap-8 px-6 pt-12 md:flex-row md:items-end md:px-12"
+        className="flex flex-col items-start justify-between gap-8 px-6 pt-10 md:flex-row md:items-end md:px-12"
         initial={{ opacity: 0, y: 24 }}
         animate={done ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8, ease: EASE, delay: 0.4 }}

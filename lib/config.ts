@@ -27,6 +27,7 @@ export const config = {
       desc: "Led the RinggAI and DesiVocal frontends. Shipped a TTS interface at 7M+ generations.",
       stat: "TTS AT 7M+ GENERATIONS",
       preview: "/previews/ringg.png",
+      embed: true,
       tech: ["React", "Next.js", "TypeScript", "Zustand", "AWS"],
     },
     {
@@ -37,6 +38,7 @@ export const config = {
       desc: "Ran the HubSpot to Attio migration of 500K+ records and scaled Miitra to 20+ communities.",
       stat: "500K+ RECORDS MIGRATED",
       preview: "/previews/sylva.png",
+      embed: true,
       tech: ["TypeScript", "React", "Node.js"],
     },
     {
@@ -47,6 +49,7 @@ export const config = {
       desc: "Built internal tools for 500+ portfolio companies and automated their content migrations.",
       stat: "TOOLS FOR 500+ STARTUPS",
       preview: "/previews/antler.png",
+      embed: true,
       tech: ["React", "TypeScript", "Node.js"],
     },
     {
@@ -57,6 +60,7 @@ export const config = {
       desc: "Built CareCred's onboarding and dashboards, helping secure early-stage funding.",
       stat: "CARECRED MVP → FUNDED",
       preview: "/previews/carefi.png",
+      embed: true,
       tech: ["React", "TypeScript", "Firebase"],
     },
   ],
