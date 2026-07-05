@@ -5,67 +5,40 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="mx-auto mt-28 w-full max-w-[1240px] border-t border-line px-6 pt-24 md:px-10 lg:px-16"
+      className="w-full overflow-hidden border-t border-line px-6 pt-32 md:px-12"
     >
-      <span className="font-mono text-xs tracking-[0.1em] text-green">
-        04 / LET&apos;S CONNECT
+      <span className="font-mono text-[13px] tracking-[0.1em] text-green">
+        04 / SAY IT OUT LOUD
       </span>
 
       <Reveal>
-        <h2 className="relative pt-7 font-display text-5xl font-black leading-[0.94] tracking-[-0.04em] text-cream md:text-[76px]">
-          Let&apos;s build
-          <br />
-          something good
-          <span className="text-green">.</span>
+        <h2 className="pt-8 font-display font-black uppercase leading-[0.9] tracking-[-0.045em] text-cream whitespace-nowrap text-[clamp(64px,13vw,190px)]">
+          Let&apos;s talk<span className="text-green">.</span>
         </h2>
       </Reveal>
 
-      <p className="max-w-xl pt-8 text-lg leading-relaxed text-muted-2 md:text-xl">
-        Open to work, collaborations, and good conversations.
+      <p className="max-w-[560px] pt-7 text-lg leading-relaxed text-muted-2">
+        Literally. The agent is listening. Or if you prefer the old ways, the
+        inbox works too.
       </p>
 
-      <div className="flex flex-col justify-between gap-12 pt-16 pb-8 md:flex-row md:gap-20">
-        <div className="flex flex-col gap-9">
-          <div className="flex flex-col gap-3">
-            <span className="font-mono text-[12px] tracking-[0.1em] text-muted">
-              EMAIL
-            </span>
-            <a
-              href={`mailto:${config.email}`}
-              className="group inline-flex w-fit flex-col gap-2"
-            >
-              <span className="font-display text-xl font-semibold tracking-[-0.02em] text-cream break-all transition-colors group-hover:text-green sm:text-2xl md:text-[30px]">
-                {config.email}
-              </span>
-              <span className="h-px w-full bg-line-3 transition-colors duration-300 group-hover:bg-green" />
-            </a>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <span className="h-2 w-2 rounded-full bg-green animate-pulse" />
-            <span className="font-mono text-[13px] tracking-[0.04em] text-muted">
-              USUALLY REPLIES WITHIN A DAY
-            </span>
-          </div>
-        </div>
-
-        <div className="flex w-full shrink-0 flex-col gap-2.5 md:w-[420px]">
-          <span className="pb-1 font-mono text-[12px] tracking-[0.1em] text-muted">
-            ELSEWHERE
-          </span>
+      <div className="flex flex-col items-start justify-between gap-8 pt-14 pb-12 md:flex-row md:items-center">
+        <a
+          href={`mailto:${config.email}`}
+          className="font-mono text-lg font-bold tracking-[-0.01em] text-cream underline underline-offset-8 transition-colors hover:text-green md:text-[22px]"
+        >
+          {config.email}
+        </a>
+        <div className="flex flex-wrap items-center gap-7">
           {config.socials.map((s) => (
             <a
               key={s.name}
               href={s.url}
               target="_blank"
               rel="noreferrer"
-              className="group flex items-center justify-between rounded-xl border border-line bg-surface px-5 py-4 shadow-[0_14px_50px_-26px_rgba(0,0,0,0.8)] transition-all hover:-translate-y-0.5 hover:border-green/40"
+              className="font-mono text-[13px] tracking-[0.06em] text-muted transition-colors hover:text-green"
             >
-              <span className="text-lg font-medium text-cream transition-colors group-hover:text-green">
-                {s.name}
-              </span>
-              <span className="font-mono text-sm text-muted transition-colors group-hover:text-muted-2">
-                {s.handle} ↗
-              </span>
+              {s.name.toUpperCase()} ↗
             </a>
           ))}
         </div>
