@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { motion } from "motion/react";
 import { themeStore } from "@/lib/themeStore";
+import { themeSweep } from "@/lib/themeSweep";
 import { gateStore } from "@/lib/gateStore";
 
 export function ThemeToggle() {
@@ -22,7 +23,7 @@ export function ThemeToggle() {
 
   return (
     <motion.button
-      onClick={() => themeStore.set(dark ? "light" : "dark")}
+      onClick={() => themeSweep(() => themeStore.set(dark ? "light" : "dark"))}
       whileTap={{ scale: 0.94 }}
       initial={{ opacity: 0 }}
       animate={gateDone ? { opacity: 1 } : {}}
