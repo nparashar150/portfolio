@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { config } from "@/lib/config";
 import { gateStore } from "@/lib/gateStore";
 import { Previewable } from "./preview/Previewable";
+import { ThemeToggle } from "./ThemeToggle";
 
 const EASE = [0.76, 0, 0.24, 1] as const;
 
@@ -67,12 +68,12 @@ export function Hero() {
       <div className="mx-auto w-full max-w-[1080px] px-6">
         {/* status row */}
         <motion.div
-          className="flex items-start justify-between"
+          className="flex items-center justify-between"
           initial={{ opacity: 0 }}
           animate={done ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.35 }}
         >
-          <div className="flex items-center gap-3 pt-1">
+          <div className="flex items-center gap-3">
             <span className="h-[7px] w-[7px] rounded-full bg-green animate-pulse" />
             <span className="font-mono text-xs font-bold tracking-[0.06em] text-cream">
               OPEN TO WORK
@@ -81,19 +82,22 @@ export function Hero() {
               · DELHI {time || "--:--"} IST
             </span>
           </div>
-          {/* commit-cell fragment, becomes the reactive field later */}
-          <div
-            className="hidden gap-[4px] lg:grid"
-            style={{ gridTemplateColumns: "repeat(13, 12px)" }}
-            aria-hidden
-          >
-            {Array.from({ length: 13 * 4 }).map((_, i) => (
-              <span
-                key={i}
-                className="h-[12px] w-[12px] rounded-[2.5px]"
-                style={{ backgroundColor: cellTone(i % 13, Math.floor(i / 13)) }}
-              />
-            ))}
+          <div className="flex items-center gap-5">
+            {/* commit-cell fragment, becomes the reactive field later */}
+            <div
+              className="hidden gap-[4px] lg:grid"
+              style={{ gridTemplateColumns: "repeat(13, 12px)" }}
+              aria-hidden
+            >
+              {Array.from({ length: 13 * 4 }).map((_, i) => (
+                <span
+                  key={i}
+                  className="h-[12px] w-[12px] rounded-[2.5px]"
+                  style={{ backgroundColor: cellTone(i % 13, Math.floor(i / 13)) }}
+                />
+              ))}
+            </div>
+            <ThemeToggle />
           </div>
         </motion.div>
 

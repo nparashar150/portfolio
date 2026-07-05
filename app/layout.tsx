@@ -4,7 +4,6 @@ import { Cursor } from "@/components/Cursor";
 import { PreviewLayer } from "@/components/preview/PreviewLayer";
 import { BootGate } from "@/components/BootGate";
 import { ConsoleEgg } from "@/components/ConsoleEgg";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -60,7 +59,6 @@ export default function RootLayout({
         />
         <BootGate />
         <ConsoleEgg />
-        <ThemeToggle />
         <Cursor />
         <PreviewLayer />
         {children}
