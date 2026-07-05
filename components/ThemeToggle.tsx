@@ -23,7 +23,13 @@ export function ThemeToggle() {
 
   return (
     <motion.button
-      onClick={() => themeSweep(() => themeStore.set(dark ? "light" : "dark"))}
+      onClick={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        themeSweep(() => themeStore.set(dark ? "light" : "dark"), {
+          x: r.left + r.width / 2,
+          y: r.top + r.height / 2,
+        });
+      }}
       whileTap={{ scale: 0.94 }}
       initial={{ opacity: 0 }}
       animate={gateDone ? { opacity: 1 } : {}}

@@ -1,38 +1,21 @@
-// matrix-style theme switch: a wave of commit cells sweeps across the page,
-// the new theme is what it leaves behind
-const PITCH = 26;
-const CELL = 21;
-const COVER_MS = 520;
-const REVEAL_MS = 620;
+// theme switch: the new theme radiates out from the toggle button as an
+// expanding circle (view transition), with a sparse glitch of commit cells
+// riding the wavefront
+const DURATION = 750;
+const EASE = "cubic-bezier(0.76, 0, 0.24, 1)";
 
 let running = false;
 
-const frac = (x: number) => x - Math.floor(x);
-const jitter = (c: number, r: number) =>
-  frac(Math.sin((c + 1) * 12.9898 + (r + 1) * 78.233) * 43758.5453);
+type VT = { ready: Promise<void>; finished: Promise<void> };
+type DocWithVT = Document & { startViewTransition?: (cb: () => void) => VT };
 
-function readVars() {
+function readRamp() {
   const s = getComputedStyle(document.documentElement);
-  const v = (name: string) => s.getPropertyValue(name).trim();
-  return {
-    ink: v("--color-ink"),
-    ramp: [0, 1, 2, 3, 4].map((i) => v(`--cell-${i}`)),
-  };
+  return [1, 2, 3, 4].map((i) => s.getPropertyValue(`--cell-${i}`).trim());
 }
 
-export function themeSweep(apply: () => void) {
-  if (running) return;
-  if (
-    typeof window === "undefined" ||
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  ) {
-    apply();
-    return;
-  }
-  running = true;
-
-  const old = readVars();
-
+// short-lived cells sprinkled just inside the expanding edge
+function glitchCells(x: number, y: number, maxR: number) {
   const canvas = document.createElement("canvas");
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const w = window.innerWidth;
@@ -45,65 +28,99 @@ export function themeSweep(apply: () => void) {
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     canvas.remove();
-    apply();
-    running = false;
     return;
   }
   ctx.scale(dpr, dpr);
 
-  const cols = Math.ceil(w / PITCH);
-  const rows = Math.ceil(h / PITCH);
-  let applied = false;
+  const ramp = readRamp();
+  const cells: { x: number; y: number; born: number; ttl: number; c: string; s: number }[] = [];
   const start = performance.now();
 
   const tick = (now: number) => {
-    const t = now - start;
+    const t = (now - start) / DURATION;
     ctx.clearRect(0, 0, w, h);
 
-    if (t >= COVER_MS && !applied) {
-      applied = true;
-      apply(); // page under the wave flips theme here
-    }
-
-    const cover = Math.min(1, t / COVER_MS);
-    const reveal = applied
-      ? Math.min(1, (t - COVER_MS) / REVEAL_MS)
-      : 0;
-
-    for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rows; r++) {
-        const j = jitter(c, r);
-        const tIn = (c / cols) * 0.72 + j * 0.28;
-        const tOut = (c / cols) * 0.72 + j * 0.28;
-        const covered = cover > tIn && !(applied && reveal > tOut);
-        if (!covered) continue;
-
-        const x = c * PITCH;
-        const y = r * PITCH;
-        // opaque backing so the mid-flip never peeks through the gaps
-        ctx.fillStyle = old.ink;
-        ctx.fillRect(x, y, PITCH, PITCH);
-
-        // bright leading edge, dimmer body, matrix texture behind the front
-        const nearIn = cover - tIn < 0.1;
-        const nearOut = applied && tOut - reveal < 0.1;
-        const level =
-          nearIn || nearOut ? 4 : j > 0.86 ? 3 : j > 0.55 ? 2 : j > 0.2 ? 1 : 0;
-        ctx.fillStyle = old.ramp[level];
-        const pad = (PITCH - CELL) / 2;
-        ctx.beginPath();
-        ctx.roundRect(x + pad, y + pad, CELL, CELL, 4);
-        ctx.fill();
+    if (t < 1) {
+      // eased radius matching the clip-path circle
+      const p = 1 - Math.pow(1 - Math.min(1, t), 3);
+      const R = maxR * p;
+      // spawn a handful of cells just inside the edge each frame
+      for (let i = 0; i < 14; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = R - Math.random() * 90;
+        if (r < 0) continue;
+        const cx = x + Math.cos(a) * r;
+        const cy = y + Math.sin(a) * r;
+        if (cx < -20 || cx > w + 20 || cy < -20 || cy > h + 20) continue;
+        cells.push({
+          x: Math.round(cx / 22) * 22,
+          y: Math.round(cy / 22) * 22,
+          born: now,
+          ttl: 140 + Math.random() * 260,
+          c: ramp[Math.random() > 0.6 ? 3 : Math.floor(Math.random() * 3)],
+          s: Math.random() > 0.85 ? 16 : 10,
+        });
       }
     }
 
-    if (t < COVER_MS + REVEAL_MS) {
-      requestAnimationFrame(tick);
-    } else {
-      canvas.remove();
-      running = false;
+    let alive = false;
+    for (const cell of cells) {
+      const age = (now - cell.born) / cell.ttl;
+      if (age >= 1) continue;
+      alive = true;
+      ctx.globalAlpha = (1 - age) * 0.85;
+      ctx.fillStyle = cell.c;
+      ctx.beginPath();
+      ctx.roundRect(cell.x, cell.y, cell.s, cell.s, 3);
+      ctx.fill();
     }
+    ctx.globalAlpha = 1;
+
+    if (t < 1 || alive) requestAnimationFrame(tick);
+    else canvas.remove();
   };
 
   requestAnimationFrame(tick);
+}
+
+export function themeSweep(apply: () => void, origin?: { x: number; y: number }) {
+  if (running) return;
+  const doc = document as DocWithVT;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reduced || !doc.startViewTransition) {
+    apply();
+    return;
+  }
+  running = true;
+
+  const x = origin?.x ?? window.innerWidth - 40;
+  const y = origin?.y ?? 40;
+  const maxR = Math.hypot(
+    Math.max(x, window.innerWidth - x),
+    Math.max(y, window.innerHeight - y),
+  );
+
+  const vt = doc.startViewTransition(apply);
+  vt.ready
+    .then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${maxR}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: DURATION,
+          easing: EASE,
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+      glitchCells(x, y, maxR);
+    })
+    .catch(() => {});
+  vt.finished.finally(() => {
+    running = false;
+  });
 }
