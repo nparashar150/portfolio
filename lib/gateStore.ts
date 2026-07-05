@@ -20,3 +20,4 @@ export const gateStore = {
 };
 
 export const AGENT_START_EVENT = "naman:agent-start";
+export const AGENT_END_EVENT = "naman:agent-end";

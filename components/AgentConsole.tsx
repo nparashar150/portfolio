@@ -10,7 +10,7 @@ import {
 } from "@/lib/agent/store";
 import { Visualizer } from "./agent/Visualizer";
 import { CallEngine } from "./agent/CallEngine";
-import { AGENT_START_EVENT } from "@/lib/gateStore";
+import { AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
 
 function fmt(sec: number) {
   const m = Math.floor(sec / 60)
@@ -43,6 +43,7 @@ export function AgentConsole() {
   const busy = useRef(false);
   const logRef = useRef<HTMLDivElement>(null);
   const startRef = useRef<(() => void) | null>(null);
+  const endRef = useRef<(() => void) | null>(null);
 
   const active = status === "connecting" || status === "live";
 
@@ -60,11 +61,16 @@ export function AgentConsole() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [transcript]);
 
-  // boot gate's "enter with voice" starts the call as soon as the curtain lifts
+  // boot gate's "enter with voice" and the talk dock drive the call remotely
   useEffect(() => {
     const onStart = () => startRef.current?.();
+    const onEnd = () => endRef.current?.();
     window.addEventListener(AGENT_START_EVENT, onStart);
-    return () => window.removeEventListener(AGENT_START_EVENT, onStart);
+    window.addEventListener(AGENT_END_EVENT, onEnd);
+    return () => {
+      window.removeEventListener(AGENT_START_EVENT, onStart);
+      window.removeEventListener(AGENT_END_EVENT, onEnd);
+    };
   }, []);
 
   const start = async () => {
@@ -104,6 +110,7 @@ export function AgentConsole() {
     agentStatus.set("idle");
     transcriptStore.clear();
   };
+  endRef.current = end;
 
   const ctaLabel =
     status === "connecting"
@@ -113,7 +120,7 @@ export function AgentConsole() {
         : "Try an agent";
 
   return (
-    <section className="mx-auto w-full max-w-[1240px] px-6 md:px-10 lg:px-16">
+    <section id="console" className="mx-auto w-full max-w-[1240px] px-6 md:px-10 lg:px-16">
       <div className="border-y border-line py-10 md:py-14">
         {/* header */}
         <div className="flex items-center justify-between">
