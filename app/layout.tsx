@@ -3,6 +3,7 @@ import { Archivo, Inter, Space_Mono } from "next/font/google";
 import { Cursor } from "@/components/Cursor";
 import { PreviewLayer } from "@/components/preview/PreviewLayer";
 import { BootGate } from "@/components/BootGate";
+import { ConsoleEgg } from "@/components/ConsoleEgg";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -49,6 +50,7 @@ export default function RootLayout({
     >
       <body>
         <BootGate />
+        <ConsoleEgg />
         <Cursor />
         <PreviewLayer />
         {children}
