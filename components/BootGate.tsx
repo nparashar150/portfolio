@@ -42,6 +42,10 @@ export function BootGate() {
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
+    // the loader always lifts into the hero, never a restored mid-page scroll
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+
     const leave = () => {
       if (leftRef.current) return;
       leftRef.current = true;
