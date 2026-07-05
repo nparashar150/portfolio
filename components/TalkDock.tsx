@@ -104,7 +104,7 @@ export function TalkDock() {
           exit={{ opacity: 0, y: 24, scale: 0.95 }}
           transition={{ duration: 0.25, scale: { type: "spring", visualDuration: 0.25, bounce: 0.15 } }}
         >
-          <div className="flex items-center gap-5 rounded-full border border-line bg-surface/95 py-3 pr-7 pl-3 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.9)] backdrop-blur">
+          <div className="flex items-center gap-3 rounded-full border border-line bg-surface/95 py-2 pr-5 pl-2 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.9)] backdrop-blur sm:gap-5 sm:py-3 sm:pr-7 sm:pl-3">
             <Magnetic strength={0.25}>
               <motion.button
                 onClick={toggle}
@@ -112,27 +112,33 @@ export function TalkDock() {
                 whileTap={{ scale: 0.94 }}
                 disabled={status === "connecting"}
                 aria-label={live ? "End call" : "Talk to the agent"}
-                className="flex h-[52px] w-[52px] items-center justify-center rounded-full bg-green disabled:opacity-60"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-green disabled:opacity-60 sm:h-[52px] sm:w-[52px]"
               >
-                <span className="text-[13px] text-green-deep">
+                <span className="text-[12px] text-green-deep sm:text-[13px]">
                   {live ? "■" : "▶"}
                 </span>
               </motion.button>
             </Magnetic>
             <div className="flex flex-col gap-0.5">
-              <span className="font-mono text-[13px] font-bold tracking-[0.08em] text-cream">
+              <span className="font-mono text-xs font-bold tracking-[0.08em] text-cream sm:text-[13px]">
                 {status === "connecting"
                   ? "CONNECTING…"
                   : live
                     ? "LIVE, SAY ANYTHING"
                     : "TAP TO TALK"}
               </span>
-              <span className="font-mono text-[11px] tracking-[0.05em] text-muted">
+              <span className="hidden font-mono text-[11px] tracking-[0.05em] text-muted sm:block">
                 live voice agent · trained on me
               </span>
             </div>
-            <DockBars live={live} />
-            <span className="font-mono text-[11px] tracking-[0.05em] text-muted tabular-nums">
+            <div className="hidden sm:block">
+              <DockBars live={live} />
+            </div>
+            <span
+              className={`font-mono text-[11px] tracking-[0.05em] text-muted tabular-nums ${
+                live ? "" : "hidden sm:inline"
+              }`}
+            >
               {fmt(seconds)}
             </span>
           </div>

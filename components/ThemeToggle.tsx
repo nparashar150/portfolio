@@ -35,12 +35,12 @@ export function ThemeToggle() {
       animate={gateDone ? { opacity: 1 } : {}}
       transition={{ duration: 0.5, delay: 0.6 }}
       aria-label={dark ? "Switch to daylight theme" : "Switch to phosphor theme"}
-      className="fixed top-5 right-5 z-[150] flex items-center gap-2 rounded-full border border-line bg-surface/90 px-4 py-2 backdrop-blur transition-colors hover:border-green/50"
+      className="fixed top-4 right-4 z-[150] flex items-center gap-2 rounded-full border border-line bg-surface/90 p-2.5 backdrop-blur transition-colors hover:border-green/50 sm:top-5 sm:right-5 sm:px-4 sm:py-2"
     >
       <span
-        className={`h-2 w-2 rounded-full transition-colors ${dark ? "bg-green" : "bg-[#ff5a1f]"}`}
+        className={`h-2.5 w-2.5 rounded-full transition-colors sm:h-2 sm:w-2 ${dark ? "bg-green" : "bg-[#ff5a1f]"}`}
       />
-      <span className="font-mono text-[11px] font-bold tracking-[0.08em] text-cream">
+      <span className="hidden font-mono text-[11px] font-bold tracking-[0.08em] text-cream sm:inline">
         {dark ? "DAYLIGHT" : "PHOSPHOR"}
       </span>
     </motion.button>
