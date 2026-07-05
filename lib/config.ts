@@ -34,11 +34,11 @@ export const config = {
       period: "2022 → NOW",
       role: "Software Engineer II",
       company: "Sylva, NY",
-      url: "https://sylva.com",
+      url: "https://withsylva.com",
       desc: "Ran the HubSpot to Attio migration of 500K+ records and scaled Miitra to 20+ communities.",
       stat: "500K+ RECORDS MIGRATED",
       preview: "/previews/sylva.png",
-      embed: true,
+      embed: false, // withsylva.com sets frame-ancestors 'none'
       tech: ["TypeScript", "React", "Node.js"],
     },
     {
