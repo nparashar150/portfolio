@@ -10,12 +10,7 @@ const ROWS = 5;
 // waveform silhouette, column heights 1..5
 const LEVELS = [1, 2, 4, 5, 3, 2, 5, 4, 2, 3, 4, 2, 1];
 
-const LOG_LINES = [
-  { text: "$ naman --wake", at: 0 },
-  { text: "[ ok ] commits.......... 1,204 loaded", at: 18 },
-  { text: "[ ok ] voice agent...... ringg.ai live", at: 42 },
-  { text: "[ .. ] here you are", at: 78, green: true },
-];
+const COMMIT_FALLBACK = 3770;
 
 function cellColor(col: number, row: number, lit: boolean) {
   if (!lit) return "#0e2c1a";
@@ -31,7 +26,18 @@ function cellColor(col: number, row: number, lit: boolean) {
 export function BootGate() {
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<"boot" | "leaving" | "gone">("boot");
+  const [commits, setCommits] = useState(COMMIT_FALLBACK);
   const leftRef = useRef(false);
+
+  // real contribution count, resolved from cache well before the line shows
+  useEffect(() => {
+    fetch("/api/commits")
+      .then((r) => r.json())
+      .then((d) => {
+        if (typeof d?.total === "number") setCommits(d.total);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -78,6 +84,16 @@ export function BootGate() {
 
   const litCols = Math.round((progress / 100) * COLS);
 
+  const logLines = [
+    { text: "$ naman --wake", at: 0 },
+    {
+      text: `[ ok ] commits.......... ${commits.toLocaleString("en-US")} loaded`,
+      at: 18,
+    },
+    { text: "[ ok ] voice agent...... ringg.ai live", at: 42 },
+    { text: "[ .. ] here you are", at: 78, green: true },
+  ];
+
   return (
     <motion.div
       className="fixed inset-0 z-[200] bg-ink"
@@ -88,7 +104,7 @@ export function BootGate() {
       <div className="flex h-full flex-col items-center justify-center gap-9 px-6">
         {/* boot log */}
         <div className="flex w-fit flex-col gap-1.5">
-          {LOG_LINES.map((line) => (
+          {logLines.map((line) => (
             <span
               key={line.text}
               className={`font-mono text-xs tracking-[0.04em] whitespace-nowrap transition-opacity duration-300 ${

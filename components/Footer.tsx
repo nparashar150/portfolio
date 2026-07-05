@@ -1,6 +1,8 @@
 import { Previewable } from "./preview/Previewable";
+import { getCommitCount } from "@/lib/commits";
 
-export function Footer() {
+export async function Footer() {
+  const commits = await getCommitCount();
   return (
     <footer className="w-full border-t border-line px-6 md:px-12">
       {/* console easter egg */}
@@ -27,7 +29,10 @@ export function Footer() {
           >
             28.70°N 77.42°E
           </Previewable>
-          <span>· 1,204 COMMITS THIS YEAR · THE SITE TALKS BACK</span>
+          <span>
+            · {commits.toLocaleString("en-US")} COMMITS THIS YEAR · THE SITE
+            TALKS BACK
+          </span>
         </span>
       </div>
     </footer>
