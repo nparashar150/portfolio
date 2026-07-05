@@ -19,12 +19,12 @@ function CellMark() {
         const d = row - 2;
         const lit = d >= -up && d <= down;
         const color = !lit
-          ? "#0e2c1a"
+          ? "var(--cell-1)"
           : Math.abs(d) === 0
-            ? "#31ff7a"
+            ? "var(--cell-4)"
             : Math.abs(d) === 1
-              ? "#16a34a"
-              : "#15803d";
+              ? "var(--cell-3)"
+              : "var(--cell-2)";
         return (
           <span key={i} className="h-[13px] w-[13px] rounded-[3px]" style={{ backgroundColor: color }} />
         );
@@ -61,7 +61,7 @@ export function Projects() {
               <span className="font-mono text-xs tracking-[0.08em] text-muted">
                 FEATURED / 01
               </span>
-              <span className="flex items-center gap-2 rounded-full border border-[#2b4a36] px-3.5 py-1.5">
+              <span className="flex items-center gap-2 rounded-full border border-line-3 px-3.5 py-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse" />
                 <span className="font-mono text-[11px] font-bold tracking-[0.08em] text-cream">
                   {f.tag.toUpperCase()}

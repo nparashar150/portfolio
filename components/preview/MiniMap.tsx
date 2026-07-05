@@ -1,5 +1,10 @@
-// real dark-mode map: CARTO "dark_all" raster tiles (free, no API key),
-// composited and centered on the given coordinates with a green pin.
+"use client";
+
+import { useSyncExternalStore } from "react";
+import { themeStore } from "@/lib/themeStore";
+
+// real map: CARTO raster tiles (free, no API key), dark_all or light_all to
+// match the theme, centered on the given coordinates with an accent pin.
 const LAT = 28.7035087;
 const LON = 77.4174775;
 const Z = 14;
@@ -35,8 +40,14 @@ function buildTiles() {
 
 export function MiniMap({ label }: { label?: string }) {
   const tiles = buildTiles();
+  const theme = useSyncExternalStore(
+    themeStore.subscribe,
+    themeStore.get,
+    () => "dark" as const,
+  );
+  const style = theme === "light" ? "light_all" : "dark_all";
   return (
-    <div className="overflow-hidden border border-line-3 bg-[#0b0f0d] shadow-2xl shadow-black/60">
+    <div className="overflow-hidden border border-line-3 bg-surface-2 shadow-2xl shadow-black/60">
       <div
         className="relative overflow-hidden"
         style={{ width: W, height: H }}
@@ -45,7 +56,7 @@ export function MiniMap({ label }: { label?: string }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={`${t.x}-${t.y}`}
-            src={`https://a.basemaps.cartocdn.com/dark_all/${Z}/${t.x}/${t.y}@2x.png`}
+            src={`https://a.basemaps.cartocdn.com/${style}/${Z}/${t.x}/${t.y}@2x.png`}
             alt=""
             width={TILE}
             height={TILE}
@@ -57,7 +68,7 @@ export function MiniMap({ label }: { label?: string }) {
 
         {/* pin at the exact center */}
         <span className="absolute left-1/2 top-1/2 h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-green/15" />
-        <span className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-bright ring-2 ring-[#0b0f0d]" />
+        <span className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-bright ring-2 ring-surface-2" />
 
         <span className="absolute bottom-1 right-1.5 font-mono text-[8px] tracking-[0.04em] text-cream/40">
           © OSM · CARTO

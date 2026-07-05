@@ -152,7 +152,7 @@ export function PreviewLayer() {
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
             <span className="flex gap-1.5">
               <span className="h-2 w-2 animate-pulse rounded-[2px] bg-green-dim [animation-delay:0ms]" />
-              <span className="h-2 w-2 animate-pulse rounded-[2px] bg-[#16a34a] [animation-delay:150ms]" />
+              <span className="h-2 w-2 animate-pulse rounded-[2px] bg-[var(--cell-3)] [animation-delay:150ms]" />
               <span className="h-2 w-2 animate-pulse rounded-[2px] bg-green [animation-delay:300ms]" />
             </span>
             <span className="font-mono text-[11px] tracking-[0.08em] text-muted">

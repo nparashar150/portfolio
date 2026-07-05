@@ -4,6 +4,7 @@ import { Cursor } from "@/components/Cursor";
 import { PreviewLayer } from "@/components/preview/PreviewLayer";
 import { BootGate } from "@/components/BootGate";
 import { ConsoleEgg } from "@/components/ConsoleEgg";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -46,11 +47,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${archivo.variable} ${inter.variable} ${spaceMono.variable}`}
     >
       <body>
+        {/* apply the saved theme before first paint, no flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}",
+          }}
+        />
         <BootGate />
         <ConsoleEgg />
+        <ThemeToggle />
         <Cursor />
         <PreviewLayer />
         {children}

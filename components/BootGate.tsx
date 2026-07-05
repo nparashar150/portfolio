@@ -13,14 +13,18 @@ const LEVELS = [1, 2, 4, 5, 3, 2, 5, 4, 2, 3, 4, 2, 1];
 const COMMIT_FALLBACK = 3770;
 
 function cellColor(col: number, row: number, lit: boolean) {
-  if (!lit) return "#0e2c1a";
+  if (!lit) return "var(--cell-1)";
   const level = LEVELS[col];
   const up = Math.floor((level - 1) / 2);
   const down = Math.ceil((level - 1) / 2);
   const d = row - 2; // distance from center row
-  if (d < -up || d > down) return "#0e2c1a";
+  if (d < -up || d > down) return "var(--cell-1)";
   const abs = Math.abs(d);
-  return abs === 0 ? "#31ff7a" : abs === 1 ? "#16a34a" : "#15803d";
+  return abs === 0
+    ? "var(--cell-4)"
+    : abs === 1
+      ? "var(--cell-3)"
+      : "var(--cell-2)";
 }
 
 export function BootGate() {

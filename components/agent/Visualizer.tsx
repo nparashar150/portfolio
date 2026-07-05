@@ -7,10 +7,16 @@ const COLS = 34;
 const ROWS = 7;
 const CENTER = (ROWS - 1) / 2;
 
-// GitHub contribution palette (idle)
-const GH = ["#16201a", "#0e4429", "#006d32", "#26a641", "#39d353"];
-// dark → bright green ramp for the live waveform (graded by amplitude)
-const LIVE = ["#16321f", "#15803d", "#16a34a", "#22c55e", "#4ade80"];
+// commit-cell ramp, themed via CSS variables (idle contribution graph)
+const GH = [0, 1, 2, 3, 4].map((i) => `var(--cell-${i})`);
+// quiet → loud ramp for the live waveform (graded by amplitude)
+const LIVE = [
+  "var(--cell-1)",
+  "var(--cell-2)",
+  "var(--cell-3)",
+  "var(--cell-4)",
+  "var(--color-green-bright)",
+];
 const SCALE = 1.9; // mic/agent volume gain into the 0..1 range
 const STAGGER = 16; // ms between columns during the morph sweep
 const TAIL = 240; // ms after the last column flips

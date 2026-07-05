@@ -91,7 +91,8 @@ export function Cursor() {
             height: SIZE - 2,
             margin: 1,
             borderRadius: 3,
-            background: i === 0 ? "#6dffa3" : "#31ff7a",
+            background:
+              i === 0 ? "var(--color-green-bright)" : "var(--color-green)",
             opacity: 0,
             willChange: "transform, opacity",
           }}

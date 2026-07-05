@@ -11,10 +11,10 @@ const EASE = [0.76, 0, 0.24, 1] as const;
 const frac = (x: number) => x - Math.floor(x);
 function cellTone(c: number, r: number) {
   const v = frac(Math.sin((c + 1) * 24.317 + (r + 1) * 9.137) * 41719.13);
-  if (v < 0.55) return "#0e2c1a";
-  if (v < 0.78) return "#15803d";
-  if (v < 0.93) return "#16a34a";
-  return "#31ff7a";
+  if (v < 0.55) return "var(--cell-1)";
+  if (v < 0.78) return "var(--cell-2)";
+  if (v < 0.93) return "var(--cell-3)";
+  return "var(--cell-4)";
 }
 
 function useDelhiTime() {

@@ -30,8 +30,13 @@ export function PhotoCard({
             onError={() => setOk(false)}
             className="relative h-full w-full origin-bottom-left object-cover grayscale contrast-[1.06] brightness-[0.92] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.07] group-hover:grayscale-0 group-hover:brightness-100"
           />
-          {/* green wash, lifts on hover to reveal color */}
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(34,197,94,0.06),rgba(7,19,13,0.35))] transition-opacity duration-500 group-hover:opacity-0" />
+          {/* accent wash, lifts on hover to reveal color */}
+          <div
+            className="pointer-events-none absolute inset-0 transition-opacity duration-500 group-hover:opacity-0"
+            style={{
+              background: "linear-gradient(180deg, var(--wash-a), var(--wash-b))",
+            }}
+          />
           <div className="absolute bottom-0 left-0 flex items-center gap-2 bg-ink/85 px-4 py-2.5">
             <span className="h-1.5 w-1.5 rounded-full bg-green" />
             <span className="font-mono text-[11px] tracking-[0.08em] text-cream">
