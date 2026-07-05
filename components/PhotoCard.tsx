@@ -12,7 +12,7 @@ export function PhotoCard({
   const [ok, setOk] = useState(true);
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl border border-line shadow-[0_14px_50px_-26px_rgba(0,0,0,0.8)] ${className ?? ""}`}
+      className={`group relative overflow-hidden border border-line ${className ?? ""}`}
     >
       {/* placeholder until a portrait is added at public/me.jpg */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[radial-gradient(120%_120%_at_50%_0%,#1c1e27,#101218)]">
