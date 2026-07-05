@@ -1,5 +1,6 @@
 import { config } from "@/lib/config";
 import { Reveal } from "./Reveal";
+import { AgentConsole } from "./AgentConsole";
 
 export function Contact() {
   return (
@@ -18,11 +19,18 @@ export function Contact() {
       </Reveal>
 
       <p className="max-w-[560px] pt-7 text-lg leading-relaxed text-muted-2">
-        Literally. The agent is listening. Or if you prefer the old ways, the
-        inbox works too.
+        Literally. My commits double as a live voice agent. Hit play and say
+        hi, or if you prefer the old ways, the inbox works too.
       </p>
 
-      <div className="flex flex-col items-start justify-between gap-8 pt-14 pb-12 md:flex-row md:items-center">
+      {/* the agent lives here now */}
+      <div className="pt-12">
+        <Reveal>
+          <AgentConsole />
+        </Reveal>
+      </div>
+
+      <div className="flex flex-col items-start justify-between gap-8 pt-16 pb-12 md:flex-row md:items-center">
         <a
           href={`mailto:${config.email}`}
           className="font-mono text-lg font-bold tracking-[-0.01em] text-cream underline underline-offset-8 transition-colors hover:text-green md:text-[22px]"

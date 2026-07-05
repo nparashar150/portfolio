@@ -20,13 +20,6 @@ function fmt(sec: number) {
   return `${m}:${s}`;
 }
 
-const COPY: Record<AgentStatus, string> = {
-  idle: "By day I ship commits. Hit play and they turn into a live voice agent you can actually talk to.",
-  connecting: "Connecting you to the agent, allow your mic…",
-  live: "You're live. Say hi out loud, ask me anything.",
-  error: "Couldn't connect right now. Give it another go in a moment.",
-};
-
 export function AgentConsole() {
   const status = useSyncExternalStore(
     agentStatus.subscribe,
@@ -120,100 +113,76 @@ export function AgentConsole() {
         : "Try an agent";
 
   return (
-    <section id="console" className="mx-auto w-full max-w-[1240px] px-6 md:px-10 lg:px-16">
-      <div className="border-y border-line py-10 md:py-14">
-        {/* header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span
-              className={`h-2 w-2 rounded-full bg-green ${active ? "animate-pulse" : ""}`}
-            />
-            <span className="font-mono text-xs font-bold tracking-[0.06em] text-cream">
-              NAMAN.AI
-            </span>
-            <span className="hidden font-mono text-xs tracking-[0.06em] text-muted sm:block">
-              {status === "live" ? "/ LIVE · VOICE AGENT" : "/ COMMITS → VOICE AGENT"}
-            </span>
-          </div>
-          <span className="font-mono text-xs tracking-[0.06em] text-muted">
-            {status === "live" ? `● LIVE · ${fmt(seconds)}` : "IDLE · TAP TO TALK"}
+    <div className="w-full">
+      {/* contribution grid ⇄ live waveform */}
+      <div className="border border-line bg-surface-2 p-4 md:p-6">
+        <Visualizer live={status === "live"} />
+        <div className="flex items-center justify-between pt-4">
+          <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
+            {status === "live"
+              ? "REAL-TIME WAVEFORM"
+              : "GITHUB CONTRIBUTIONS · LAST YEAR"}
+          </span>
+          <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
+            {status === "live" ? (
+              <span className="text-green">● LIVE · {fmt(seconds)}</span>
+            ) : (
+              "powered by RinggAI"
+            )}
           </span>
         </div>
+      </div>
 
-        {/* status line */}
-        <div className="flex items-center gap-3 pt-5 pb-6">
-          <span className="shrink-0 font-mono text-[13px] font-bold text-green">
-            AI ›
-          </span>
-          <p className="text-[15px] text-cream md:text-base">{COPY[status]}</p>
-        </div>
-
-        {/* graph on top: contribution grid ⇄ live waveform */}
-        <div className="rounded-2xl border border-line bg-surface-2 p-4 shadow-[0_18px_60px_-24px_rgba(0,0,0,0.85)] md:p-6">
-          <Visualizer live={status === "live"} />
-          <div className="flex items-center justify-between pt-4">
-            <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
-              {status === "live"
-                ? "REAL-TIME WAVEFORM"
-                : "GITHUB CONTRIBUTIONS · LAST YEAR"}
-            </span>
-            <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
-              powered by RinggAI
-            </span>
-          </div>
-        </div>
-
-        {/* live transcript */}
-        {transcript.length > 0 && (
-          <div
-            ref={logRef}
-            className="mt-5 flex max-h-52 flex-col gap-3 overflow-y-auto rounded-2xl border border-line bg-surface-2 p-5"
-          >
-            {transcript.map((line) => (
-              <div key={line.id} className="flex gap-3">
-                <span
-                  className={`mt-0.5 w-16 shrink-0 font-mono text-[10px] font-bold tracking-[0.06em] ${
-                    line.role === "agent" ? "text-green" : "text-muted"
-                  }`}
-                >
-                  {line.role === "agent" ? "NAMAN.AI" : "YOU"}
-                </span>
-                <p className="text-[14px] leading-relaxed text-cream">
-                  {line.text}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* bottom: try an agent, then aligned quick-prompt chips */}
-        <div className="flex flex-wrap items-center gap-2.5 pt-6">
-          <button
-            onClick={() => (active ? end() : start())}
-            disabled={status === "connecting"}
-            className="flex shrink-0 items-center gap-2.5 rounded-full border border-line-3 bg-surface py-2 pr-5 pl-2 transition-colors hover:border-green/60 disabled:opacity-70"
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green text-green-deep">
-              <span className="text-[11px]">{active ? "■" : "▶"}</span>
-            </span>
-            <span className="text-[14px] font-semibold text-cream">
-              {ctaLabel}
-            </span>
-          </button>
-          {config.agentPrompts.map((p, idx) => (
-            <button
-              key={p}
-              onClick={() => start()}
-              className={
-                idx === config.agentPrompts.length - 1
-                  ? "rounded-full bg-green px-4 py-2.5 font-mono text-xs font-bold text-green-deep transition-opacity hover:opacity-90"
-                  : "rounded-full border border-line-3 px-4 py-2.5 font-mono text-xs text-muted-2 transition-colors hover:border-green/50 hover:text-cream"
-              }
-            >
-              {p}
-            </button>
+      {/* live transcript */}
+      {transcript.length > 0 && (
+        <div
+          ref={logRef}
+          className="mt-4 flex max-h-52 flex-col gap-3 overflow-y-auto border border-line bg-surface-2 p-5"
+        >
+          {transcript.map((line) => (
+            <div key={line.id} className="flex gap-3">
+              <span
+                className={`mt-0.5 w-16 shrink-0 font-mono text-[10px] font-bold tracking-[0.06em] ${
+                  line.role === "agent" ? "text-green" : "text-muted"
+                }`}
+              >
+                {line.role === "agent" ? "NAMAN.AI" : "YOU"}
+              </span>
+              <p className="text-[14px] leading-relaxed text-cream">
+                {line.text}
+              </p>
+            </div>
           ))}
         </div>
+      )}
+
+      {/* try an agent + quick prompts */}
+      <div className="flex flex-wrap items-center gap-2.5 pt-5">
+        <button
+          onClick={() => (active ? end() : start())}
+          disabled={status === "connecting"}
+          className="flex shrink-0 items-center gap-2.5 rounded-full border border-line-3 bg-surface py-2 pr-5 pl-2 transition-colors hover:border-green/60 disabled:opacity-70"
+        >
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green text-green-deep">
+            <span className="text-[11px]">{active ? "■" : "▶"}</span>
+          </span>
+          <span className="text-[14px] font-semibold text-cream">
+            {ctaLabel}
+          </span>
+        </button>
+        {config.agentPrompts.map((p, idx) => (
+          <button
+            key={p}
+            onClick={() => start()}
+            className={
+              idx === config.agentPrompts.length - 1
+                ? "rounded-full bg-green px-4 py-2.5 font-mono text-xs font-bold text-green-deep transition-opacity hover:opacity-90"
+                : "rounded-full border border-line-3 px-4 py-2.5 font-mono text-xs text-muted-2 transition-colors hover:border-green/50 hover:text-cream"
+            }
+          >
+            {p}
+          </button>
+        ))}
       </div>
 
       {token && (
@@ -221,6 +190,6 @@ export function AgentConsole() {
           <CallEngine token={token} onEnd={end} />
         </div>
       )}
-    </section>
+    </div>
   );
 }

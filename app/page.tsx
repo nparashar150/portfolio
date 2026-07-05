@@ -1,5 +1,4 @@
 import { Hero } from "@/components/Hero";
-import { AgentConsole } from "@/components/AgentConsole";
 import { Work } from "@/components/Work";
 import { Projects } from "@/components/Projects";
 import { About } from "@/components/About";
@@ -11,7 +10,6 @@ export default function Home() {
     <div className="min-h-screen bg-ink">
       <main>
         <Hero />
-        <AgentConsole />
         <Work />
         <Projects />
         <About />
