@@ -113,7 +113,7 @@ export function AgentConsole() {
         : "Try an agent";
 
   return (
-    <div className="w-full">
+    <div id="console" className="w-full">
       {/* contribution grid ⇄ live waveform */}
       <div className="border border-line bg-surface-2 p-4 md:p-6">
         <Visualizer live={status === "live"} />

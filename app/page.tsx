@@ -1,4 +1,5 @@
 import { Hero } from "@/components/Hero";
+import { TalkDock } from "@/components/TalkDock";
 import { Work } from "@/components/Work";
 import { Projects } from "@/components/Projects";
 import { About } from "@/components/About";
@@ -16,6 +17,7 @@ export default function Home() {
         <Contact />
       </main>
       <Footer />
+      <TalkDock />
     </div>
   );
 }
