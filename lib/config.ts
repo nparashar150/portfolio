@@ -74,6 +74,7 @@ export const config = {
     host: "pixio.tech",
     url: "https://www.pixio.tech/",
     preview: "/previews/pixio.png",
+    embed: true,
   },
 
   projects: [
@@ -84,6 +85,7 @@ export const config = {
       stack: "TypeScript · No-Code",
       url: "https://www.quik.run/",
       preview: "/previews/quikrun.png",
+      embed: true,
     },
     {
       name: "ACE Monorepo",
@@ -92,6 +94,7 @@ export const config = {
       stack: "Gatsby · GraphQL",
       url: "https://vipsace.org",
       preview: "/previews/ace.png",
+      embed: true,
     },
     {
       name: "Miitra",
@@ -100,6 +103,7 @@ export const config = {
       stack: "React · Node · Data",
       url: "https://www.joinmiitra.com/",
       preview: "/previews/miitra.png",
+      embed: false, // joinmiitra.com sets frame-ancestors none
     },
   ],
 

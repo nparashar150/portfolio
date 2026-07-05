@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { config } from "@/lib/config";
 import { Reveal } from "./Reveal";
+import { Previewable } from "./preview/Previewable";
 
 const STATS = ["100+ USERS", "45% FASTER", "2X ENGAGEMENT"];
 
@@ -47,10 +48,12 @@ export function Projects() {
 
       {/* featured */}
       <Reveal>
-        <a
+        <Previewable
           href={f.url}
           target="_blank"
-          rel="noreferrer"
+          preview={f.preview}
+          label={f.name}
+          embed={f.embed}
           className="group flex flex-col overflow-hidden border border-line bg-surface md:flex-row"
         >
           <div className="flex flex-1 flex-col justify-between gap-14 p-8 md:p-11">
@@ -95,18 +98,20 @@ export function Projects() {
               className="w-full max-w-[460px] object-contain"
             />
           </div>
-        </a>
+        </Previewable>
       </Reveal>
 
       {/* drag strip */}
       <Reveal>
         <div className="scrollbar-none -mx-6 mt-5 flex snap-x gap-5 overflow-x-auto px-6 pb-2 md:-mx-12 md:px-12">
           {config.projects.map((p, i) => (
-            <a
+            <Previewable
               key={p.name}
               href={p.url}
               target="_blank"
-              rel="noreferrer"
+              preview={p.preview}
+              label={p.name}
+              embed={p.embed}
               className="group flex w-[330px] shrink-0 snap-start flex-col border border-line bg-surface transition-colors hover:border-green/40 md:w-[390px]"
             >
               <div className="border-b border-line bg-surface-2 p-3.5">
@@ -127,7 +132,7 @@ export function Projects() {
                 </div>
                 <p className="text-sm leading-relaxed text-muted">{p.desc}</p>
               </div>
-            </a>
+            </Previewable>
           ))}
           {/* more card, peeks from the edge */}
           <a

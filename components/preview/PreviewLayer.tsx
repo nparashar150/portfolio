@@ -88,7 +88,11 @@ export function PreviewLayer() {
   // warm every embeddable site shortly after load, so first hover is instant
   useEffect(() => {
     const t = window.setTimeout(() => {
-      const urls = config.work.filter((w) => w.embed).map((w) => w.url);
+      const urls = [
+        ...config.work.filter((w) => w.embed).map((w) => w.url),
+        ...(config.featured.embed ? [config.featured.url] : []),
+        ...config.projects.filter((p) => p.embed).map((p) => p.url),
+      ];
       setCache((c) => [...c, ...urls.filter((u) => !c.includes(u))]);
     }, 4000);
     return () => window.clearTimeout(t);
