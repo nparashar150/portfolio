@@ -51,10 +51,9 @@ export function BootGate() {
       leftRef.current = true;
       document.body.style.overflow = "";
       setPhase("leaving");
-      window.setTimeout(() => {
-        gateStore.finish();
-        setPhase("gone");
-      }, 760);
+      // hero starts revealing under the lifting curtain, no blank beat
+      gateStore.finish();
+      window.setTimeout(() => setPhase("gone"), 760);
     };
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

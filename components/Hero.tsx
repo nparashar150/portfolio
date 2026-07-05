@@ -70,7 +70,7 @@ export function Hero() {
           className="flex items-start justify-between"
           initial={{ opacity: 0 }}
           animate={done ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
+          transition={{ duration: 0.6, delay: 0.35 }}
         >
           <div className="flex items-center gap-3 pt-1">
             <span className="h-[7px] w-[7px] rounded-full bg-green animate-pulse" />
@@ -112,7 +112,7 @@ export function Hero() {
           className="flex flex-col items-start justify-between gap-8 pt-10 md:flex-row md:items-end"
           initial={{ opacity: 0, y: 24 }}
           animate={done ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, ease: EASE, delay: 0.4 }}
+          transition={{ duration: 0.8, ease: EASE, delay: 0.28 }}
         >
           <div className="flex max-w-[500px] flex-col gap-4">
             <div className="h-[2px] w-11 bg-green" />
