@@ -28,7 +28,7 @@ export function PhotoCard({
             src={src}
             alt="Naman Parashar"
             onError={() => setOk(false)}
-            className="relative h-full w-full object-cover grayscale contrast-[1.06] brightness-[0.92] transition-all duration-500 group-hover:grayscale-0 group-hover:brightness-100"
+            className="relative h-full w-full origin-top-right object-cover grayscale contrast-[1.06] brightness-[0.92] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.07] group-hover:grayscale-0 group-hover:brightness-100"
           />
           {/* green wash, lifts on hover to reveal color */}
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(34,197,94,0.06),rgba(7,19,13,0.35))] transition-opacity duration-500 group-hover:opacity-0" />
