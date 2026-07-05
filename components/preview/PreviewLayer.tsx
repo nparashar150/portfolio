@@ -54,8 +54,9 @@ function CachedFrame({
         width: PAGE_W,
         height: BROWSER_BODY_H / SCALE,
         transform: `scale(${SCALE})`,
-        opacity: active ? 1 : 0,
-        transition: "opacity 300ms ease",
+        // display none, not opacity: the browser stops painting inactive
+        // sites (webgl/video embeds otherwise burn frame budget forever)
+        display: active ? "block" : "none",
         pointerEvents: "none",
       }}
     />
