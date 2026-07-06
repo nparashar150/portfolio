@@ -43,7 +43,7 @@ export function MiniMap({ label }: { label?: string }) {
   const theme = useSyncExternalStore(
     themeStore.subscribe,
     themeStore.get,
-    () => "dark" as const,
+    () => "light" as const,
   );
   const style = theme === "light" ? "light_all" : "dark_all";
   return (
