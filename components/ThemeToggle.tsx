@@ -10,7 +10,7 @@ export function ThemeToggle() {
   const theme = useSyncExternalStore(
     themeStore.subscribe,
     themeStore.get,
-    () => "dark" as const,
+    () => "light" as const,
   );
 
   // pick up whatever the no-flash script applied before hydration

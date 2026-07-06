@@ -64,11 +64,21 @@ export function Hero() {
   const time = useDelhiTime();
 
   return (
-    <section id="top" className="w-full overflow-hidden pt-10 pb-14">
+    <section id="top" className="relative w-full overflow-hidden pt-10 pb-14">
+      {/* theme toggle: same line as the status, pinned to the screen corner */}
+      <motion.div
+        className="absolute top-10 right-4 z-10 sm:right-6"
+        initial={{ opacity: 0 }}
+        animate={done ? { opacity: 1 } : {}}
+        transition={{ duration: 0.6, delay: 0.35 }}
+      >
+        <ThemeToggle />
+      </motion.div>
+
       <div className="mx-auto w-full max-w-[1080px] px-6">
         {/* status row */}
         <motion.div
-          className="flex items-center justify-between"
+          className="flex h-9 items-center justify-between"
           initial={{ opacity: 0 }}
           animate={done ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.35 }}
@@ -82,22 +92,19 @@ export function Hero() {
               · DELHI {time || "--:--"} IST
             </span>
           </div>
-          <div className="flex items-center gap-5">
-            {/* commit-cell fragment, becomes the reactive field later */}
-            <div
-              className="hidden gap-[4px] lg:grid"
-              style={{ gridTemplateColumns: "repeat(13, 12px)" }}
-              aria-hidden
-            >
-              {Array.from({ length: 13 * 4 }).map((_, i) => (
-                <span
-                  key={i}
-                  className="h-[12px] w-[12px] rounded-[2.5px]"
-                  style={{ backgroundColor: cellTone(i % 13, Math.floor(i / 13)) }}
-                />
-              ))}
-            </div>
-            <ThemeToggle />
+          {/* commit-cell fragment, becomes the reactive field later */}
+          <div
+            className="hidden gap-[4px] self-start min-[1380px]:grid"
+            style={{ gridTemplateColumns: "repeat(13, 12px)" }}
+            aria-hidden
+          >
+            {Array.from({ length: 13 * 4 }).map((_, i) => (
+              <span
+                key={i}
+                className="h-[12px] w-[12px] rounded-[2.5px]"
+                style={{ backgroundColor: cellTone(i % 13, Math.floor(i / 13)) }}
+              />
+            ))}
           </div>
         </motion.div>
 
