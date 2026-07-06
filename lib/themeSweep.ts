@@ -83,10 +83,86 @@ function glitchCells(x: number, y: number, maxR: number) {
   requestAnimationFrame(tick);
 }
 
+// mini firework of commit cells thrown off the button, every click gets one
+let bursts = 0;
+export function sparkleBurst(x: number, y: number) {
+  if (bursts >= 5) return; // spam-friendly, but not infinite canvases
+  bursts++;
+
+  const canvas = document.createElement("canvas");
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.cssText =
+    "position:fixed;inset:0;width:100%;height:100%;z-index:185;pointer-events:none;";
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    canvas.remove();
+    bursts--;
+    return;
+  }
+  ctx.scale(dpr, dpr);
+
+  const ramp = readRamp();
+  // fountain aimed at the viewport center so corner buttons spray into view
+  const aim = Math.atan2(h / 2 - y, w / 2 - x);
+  const parts = Array.from({ length: 42 }, () => {
+    const a = aim + (Math.random() - 0.5) * 2.6;
+    const v = 220 + Math.random() * 520;
+    return {
+      vx: Math.cos(a) * v,
+      vy: Math.sin(a) * v - 60,
+      s: Math.random() > 0.7 ? 16 : Math.random() > 0.4 ? 12 : 8,
+      c: ramp[Math.random() > 0.4 ? 3 : 1 + Math.floor(Math.random() * 2)],
+      ttl: 600 + Math.random() * 400,
+      spin: (Math.random() - 0.5) * 7,
+    };
+  });
+  const start = performance.now();
+
+  const tick = (now: number) => {
+    const t = now - start;
+    ctx.clearRect(0, 0, w, h);
+    let alive = false;
+    for (const p of parts) {
+      const life = t / p.ttl;
+      if (life >= 1) continue;
+      alive = true;
+      const sec = t / 1000;
+      const px = x + p.vx * sec;
+      const py = y + p.vy * sec + 380 * sec * sec; // gravity
+      ctx.save();
+      ctx.globalAlpha = 1 - life;
+      ctx.translate(px, py);
+      ctx.rotate(p.spin * sec);
+      ctx.fillStyle = p.c;
+      ctx.beginPath();
+      ctx.roundRect(-p.s / 2, -p.s / 2, p.s, p.s, 2.5);
+      ctx.fill();
+      ctx.restore();
+    }
+    if (alive) {
+      requestAnimationFrame(tick);
+    } else {
+      canvas.remove();
+      bursts--;
+    }
+  };
+
+  requestAnimationFrame(tick);
+}
+
 export function themeSweep(apply: () => void, origin?: { x: number; y: number }) {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // every click throws cells off the button, even mid-transition spam
+  if (!reduced && origin) sparkleBurst(origin.x, origin.y);
+
   if (running) return;
   const doc = document as DocWithVT;
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (reduced || !doc.startViewTransition) {
     apply();
