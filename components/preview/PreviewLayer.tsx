@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { preview, type PreviewState } from "@/lib/preview";
-import { config } from "@/lib/config";
 import { MiniMap } from "./MiniMap";
 
 const SERVER: PreviewState = { kind: null, x: 0, y: 0 };
@@ -86,18 +85,8 @@ export function PreviewLayer() {
     }
   }, [s.kind, s.embed, s.url]);
 
-  // warm every embeddable site shortly after load, so first hover is instant
-  useEffect(() => {
-    const t = window.setTimeout(() => {
-      const urls = [
-        ...config.work.filter((w) => w.embed).map((w) => w.url),
-        ...(config.featured.embed ? [config.featured.url] : []),
-        ...config.projects.filter((p) => p.embed).map((p) => p.url),
-      ];
-      setCache((c) => [...c, ...urls.filter((u) => !c.includes(u))]);
-    }, 4000);
-    return () => window.clearTimeout(t);
-  }, []);
+  // live sites mount on first hover only, never eagerly: preloading all of
+  // them dragged in tens of MB of third-party weight on page load.
 
   const isEmbed = Boolean(s.embed && s.url);
   const activeLoaded = isEmbed && s.url ? loaded[s.url] : false;
