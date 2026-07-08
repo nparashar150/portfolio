@@ -95,6 +95,9 @@ export function Projects() {
             <img
               src={f.preview}
               alt={f.name}
+              width={800}
+              height={486}
+              loading="lazy"
               className="w-full max-w-[460px] object-contain"
             />
           </div>
@@ -118,6 +121,9 @@ export function Projects() {
                 <img
                   src={p.preview}
                   alt={p.name}
+                  width={800}
+                  height={486}
+                  loading="lazy"
                   className="h-[190px] w-full object-cover object-top md:h-[219px]"
                 />
               </div>
