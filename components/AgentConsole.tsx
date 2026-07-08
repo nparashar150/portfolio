@@ -2,6 +2,7 @@
 
 import { config } from "@/lib/config";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import dynamic from "next/dynamic";
 import {
   agentStatus,
   type AgentStatus,
@@ -9,8 +10,14 @@ import {
   transcriptStore,
 } from "@/lib/agent/store";
 import { Visualizer } from "./agent/Visualizer";
-import { CallEngine } from "./agent/CallEngine";
 import { AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
+
+// LiveKit is heavy (~hundreds of KB) and only needed once a call starts, so it
+// stays out of the initial bundle and loads on demand.
+const CallEngine = dynamic(
+  () => import("./agent/CallEngine").then((m) => m.CallEngine),
+  { ssr: false },
+);
 
 function fmt(sec: number) {
   const m = Math.floor(sec / 60)
