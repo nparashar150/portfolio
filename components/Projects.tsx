@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import { config } from "@/lib/config";
 import { Reveal } from "./Reveal";
 import { Previewable } from "./preview/Previewable";
@@ -92,13 +92,13 @@ export function Projects() {
             </div>
           </div>
           <div className="flex w-full items-center justify-center border-t border-line bg-surface-2 p-7 md:w-[44%] md:border-t-0 md:border-l">
-            <img
+            <Image
               src={f.preview}
               alt={f.name}
               width={800}
               height={486}
-              loading="lazy"
-              className="w-full max-w-[460px] object-contain"
+              sizes="(max-width: 768px) 90vw, 460px"
+              className="h-auto w-full max-w-[460px] object-contain"
             />
           </div>
         </Previewable>
@@ -118,12 +118,12 @@ export function Projects() {
               className="group flex w-[330px] shrink-0 snap-start flex-col border border-line bg-surface transition-colors hover:border-green/40 md:w-[390px]"
             >
               <div className="border-b border-line bg-surface-2 p-3.5">
-                <img
+                <Image
                   src={p.preview}
                   alt={p.name}
                   width={800}
                   height={486}
-                  loading="lazy"
+                  sizes="(max-width: 768px) 330px, 390px"
                   className="h-[190px] w-full object-cover object-top md:h-[219px]"
                 />
               </div>
