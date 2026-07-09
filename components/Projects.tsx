@@ -38,9 +38,9 @@ export function Projects() {
   return (
     <section id="projects" className="mx-auto w-full max-w-[1080px] px-6 pt-32">
       <div className="flex items-end justify-between pb-10">
-        <span className="font-mono text-[13px] tracking-[0.1em] text-green">
+        <h2 className="font-mono text-[13px] tracking-[0.1em] text-green">
           02 / THINGS I&apos;VE BUILT
-        </span>
+        </h2>
         <span className="hidden font-mono text-xs tracking-[0.05em] text-muted sm:block">
           [ DRAG SIDEWAYS → ]
         </span>

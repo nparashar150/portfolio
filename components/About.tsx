@@ -6,9 +6,9 @@ export function About() {
   return (
     <section id="about" className="mx-auto w-full max-w-[1080px] px-6 pt-32">
       <div className="flex items-end justify-between pb-10">
-        <span className="font-mono text-[13px] tracking-[0.1em] text-green">
+        <h2 className="font-mono text-[13px] tracking-[0.1em] text-green">
           03 / THE HUMAN BEHIND THE AGENT
-        </span>
+        </h2>
         <span className="hidden font-mono text-xs tracking-[0.05em] text-muted sm:block">
           ASK THE AGENT ABOUT ME. IT KNOWS
         </span>
