@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Archivo, Inter, Space_Mono } from "next/font/google";
 import { Cursor } from "@/components/Cursor";
 import { PreviewLayer } from "@/components/preview/PreviewLayer";
@@ -62,6 +63,11 @@ export default function RootLayout({
         <Cursor />
         <PreviewLayer />
         {children}
+        <Script
+          src="https://analytics.ahrefs.com/analytics.js"
+          data-key="DeirVMR5+FCfCin7Jdrutw"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
