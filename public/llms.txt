@@ -1,0 +1,31 @@
+# Naman Parashar
+
+> Software engineer based in New Delhi, India. Builds products end to end, loves crafting UI, and has spent years deep in voice AI — currently Product & Frontend Consultant at Ringg AI. His portfolio is an interactive "AI agent console": a GitHub commit graph that morphs into a live voice agent you can actually talk to.
+
+Naman Parashar (GitHub, X, LinkedIn, Medium: @nparashar150) is a full-stack/product engineer specializing in TypeScript, React, Next.js, Node.js, micro-frontends, and real-time voice AI. Reach him at nparashar150@gmail.com. He is open to work and collaborations.
+
+## Experience
+
+- [Ringg AI](https://www.ringg.ai): Product & Frontend Consultant, 2023–present. Led the RinggAI and DesiVocal frontends; shipped a text-to-speech interface serving 7M+ generations.
+- [Sylva, NY](https://withsylva.com): Software Engineer II, 2022–present. Ran a HubSpot→Attio migration of 500K+ records and scaled Miitra to 20+ communities.
+- [Antler](https://www.antler.co): Product Engineer, 2022–2023. Built internal tools for 500+ portfolio companies and automated their content migrations.
+- [CareFi](https://carefi.in): Software Developer, 2022. Built CareCred's onboarding and dashboards, helping secure early-stage funding.
+
+## Projects
+
+- [Pixio](https://www.pixio.tech/): Turns long-form video into captioned shorts for Reels, TikTok and Shorts. Built end to end (Next.js, FFmpeg, Gemini, AWS S3).
+- [QuikRun](https://www.quik.run/): Run TypeScript with packages inside no-code tools. 100+ early users.
+- [ACE Monorepo](https://vipsace.org): Rebuilt vipsace.org with micro-frontends. 45% faster, led 15+ developers.
+- [Miitra](https://www.joinmiitra.com/): Customer-data tooling across 20+ communities. 2x engagement.
+
+## Skills
+
+TypeScript, React, Next.js, Node.js, GraphQL, TanStack Query, AWS, Remotion, Micro-Frontends, Monorepo, Playwright, Voice AI.
+
+## Contact
+
+- Email: nparashar150@gmail.com
+- [GitHub](https://github.com/nparashar150)
+- [LinkedIn](https://www.linkedin.com/in/nparashar150)
+- [X (Twitter)](https://x.com/nparashar150)
+- [Medium](https://medium.com/@nparashar150)
