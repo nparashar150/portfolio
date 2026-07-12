@@ -1,6 +1,6 @@
 // single source of truth for the canonical production URL.
 // if you serve from a different domain, change this one line.
-export const SITE_URL = "https://nparashar150.dev";
+export const SITE_URL = "https://nparashar150.com";
 
 // Person / Portfolio structured data (JSON-LD) — read by Google, Bing, and
 // increasingly by LLM answer engines for grounding.
