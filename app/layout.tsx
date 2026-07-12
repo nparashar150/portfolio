@@ -5,6 +5,7 @@ import { Cursor } from "@/components/Cursor";
 import { PreviewLayer } from "@/components/preview/PreviewLayer";
 import { BootGate } from "@/components/BootGate";
 import { ConsoleEgg } from "@/components/ConsoleEgg";
+import { SITE_URL, personJsonLd } from "@/lib/site";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -27,15 +28,46 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Naman Parashar · Engineer",
   description:
     "An engineer who likes building products. Loves playing with UI, and has spent a while deep in the voice AI space.",
-  metadataBase: new URL("https://nparashar150.dev"),
+  keywords: [
+    "Naman Parashar",
+    "software engineer",
+    "product engineer",
+    "frontend engineer",
+    "voice AI",
+    "TypeScript",
+    "React",
+    "Next.js",
+    "Ringg AI",
+    "New Delhi",
+    "portfolio",
+  ],
+  authors: [{ name: "Naman Parashar", url: SITE_URL }],
+  creator: "Naman Parashar",
+  alternates: { canonical: SITE_URL },
   openGraph: {
     title: "Naman Parashar · Engineer",
     description:
       "An engineer who likes building products. Loves UI, deep in voice AI.",
+    url: SITE_URL,
+    siteName: "Naman Parashar",
     type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Naman Parashar · Engineer",
+    description:
+      "An engineer who likes building products. Loves UI, deep in voice AI.",
+    creator: "@nparashar150",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
 };
 
@@ -51,6 +83,11 @@ export default function RootLayout({
       className={`${archivo.variable} ${inter.variable} ${spaceMono.variable}`}
     >
       <body>
+        {/* Person structured data for search + AI answer engines */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd()) }}
+        />
         {/* apply the saved theme before first paint, no flash */}
         <script
           dangerouslySetInnerHTML={{
