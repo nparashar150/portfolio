@@ -3,8 +3,6 @@ import { config } from "@/lib/config";
 import { Reveal } from "./Reveal";
 import { Previewable } from "./preview/Previewable";
 
-const STATS = ["100+ USERS", "45% FASTER", "2X ENGAGEMENT"];
-
 function CellMark() {
   // waveform silhouette in commit cells, the site's atom
   const LEVELS = [1, 2, 4, 5, 3, 2, 5, 4, 2, 3, 4, 2, 1];
@@ -73,8 +71,7 @@ export function Projects() {
                 {f.display}
               </span>
               <p className="max-w-md text-[16px] leading-relaxed text-muted-2">
-                {f.name} turns long-form video into captioned shorts for Reels,
-                TikTok and Shorts. Built it end to end.
+                {f.desc}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2.5">
@@ -107,7 +104,7 @@ export function Projects() {
       {/* drag strip */}
       <Reveal>
         <div className="scrollbar-none -mx-6 mt-5 flex snap-x gap-5 overflow-x-auto px-6 pb-2">
-          {config.projects.map((p, i) => (
+          {config.projects.map((p) => (
             <Previewable
               key={p.name}
               href={p.url}
@@ -133,7 +130,7 @@ export function Projects() {
                     {p.name}
                   </span>
                   <span className="font-mono text-[11px] tracking-[0.06em] text-green">
-                    {STATS[i]}
+                    {p.stat}
                   </span>
                 </div>
                 <p className="text-sm leading-relaxed text-muted">{p.desc}</p>

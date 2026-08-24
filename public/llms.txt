@@ -13,8 +13,8 @@ Naman Parashar (GitHub, X, LinkedIn, Medium: @nparashar150) is a full-stack/prod
 
 ## Projects
 
+- [QuikRun](https://www.quik.run/): The AI code runtime — describe a tool in plain English and get a live URL that runs it. No servers, no deploys. 100+ early users.
 - [Pixio](https://www.pixio.tech/): Turns long-form video into captioned shorts for Reels, TikTok and Shorts. Built end to end (Next.js, FFmpeg, Gemini, AWS S3).
-- [QuikRun](https://www.quik.run/): Run TypeScript with packages inside no-code tools. 100+ early users.
 - [ACE Monorepo](https://vipsace.org): Rebuilt vipsace.org with micro-frontends. 45% faster, led 15+ developers.
 - [Miitra](https://www.joinmiitra.com/): Customer-data tooling across 20+ communities. 2x engagement.
 
