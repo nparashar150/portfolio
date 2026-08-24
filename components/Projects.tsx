@@ -67,7 +67,8 @@ export function Projects() {
               </span>
             </div>
             <div className="flex flex-col gap-4">
-              <span className="font-display text-[56px] font-black lowercase leading-[0.92] tracking-[-0.04em] text-green md:text-[100px]">
+              <h3 className="sr-only">{f.name}</h3>
+              <span className="whitespace-pre-line font-display text-[56px] font-black lowercase leading-none tracking-[-0.04em] text-green md:text-[100px]">
                 {f.display}
               </span>
               <p className="max-w-md text-[16px] leading-relaxed text-muted-2">
@@ -126,9 +127,9 @@ export function Projects() {
               </div>
               <div className="flex flex-col gap-2.5 p-6">
                 <div className="flex items-baseline justify-between">
-                  <span className="font-display text-[26px] font-black tracking-[-0.02em] text-cream md:text-[30px]">
+                  <h3 className="font-display text-[26px] font-black tracking-[-0.02em] text-cream md:text-[30px]">
                     {p.name}
-                  </span>
+                  </h3>
                   <span className="font-mono text-[11px] tracking-[0.06em] text-green">
                     {p.stat}
                   </span>

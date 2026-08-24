@@ -70,7 +70,7 @@ export const config = {
     tag: "Live",
     desc: "QuikRun turns a plain-English prompt into a live URL that runs your code — no servers, no deploys.",
     tech: ["TypeScript", "Cloudflare", "MCP"],
-    display: "say → ship",
+    display: "say it.\nship it.",
     host: "quik.run",
     url: "https://www.quik.run/",
     preview: "/previews/quikrun.webp",

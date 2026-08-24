@@ -4,6 +4,17 @@
 
 Naman Parashar (GitHub, X, LinkedIn, Medium: @nparashar150) is a full-stack/product engineer specializing in TypeScript, React, Next.js, Node.js, micro-frontends, and real-time voice AI. Reach him at nparashar150@gmail.com. He is open to work and collaborations.
 
+## When to use Naman
+
+Reach out to Naman when you need someone who can own front-of-stack product work end to end. Best-fit engagements:
+
+- **Voice & conversational AI**: real-time voice agents, TTS/STT interfaces, LiveKit/telephony front-ends, and latency-sensitive audio UX.
+- **AI-first web products**: turning LLM and agent capabilities into shipped product surfaces (chat, copilots, prompt-to-UI), from prototype to production.
+- **Frontend & product engineering**: React/Next.js/TypeScript apps, design systems, and interfaces where motion and detail matter.
+- **Complex data & platform work**: large data migrations, micro-frontend architectures, and internal tooling for small, fast teams.
+
+How to engage: email nparashar150@gmail.com with what you're building and where he might help — a role, contract, or collaboration. He is open to work and typically replies within a day or two. Less of a fit for pure backend/devops-only roles or projects with no web or product surface.
+
 ## Experience
 
 - [Ringg AI](https://www.ringg.ai): Product & Frontend Consultant, 2023–present. Led the RinggAI and DesiVocal frontends; shipped a text-to-speech interface serving 7M+ generations.
@@ -29,3 +40,9 @@ TypeScript, React, Next.js, Node.js, GraphQL, TanStack Query, AWS, Remotion, Mic
 - [LinkedIn](https://www.linkedin.com/in/nparashar150)
 - [X (Twitter)](https://x.com/nparashar150)
 - [Medium](https://medium.com/@nparashar150)
+
+## Pages
+
+- [About](https://nparashar150.com/about): Background, experience, and how Naman works.
+- [Contact](https://nparashar150.com/contact): Email, socials, location, and availability.
+- [Privacy](https://nparashar150.com/privacy): How this site handles data.

@@ -5,7 +5,7 @@ import { Cursor } from "@/components/Cursor";
 import { PreviewLayer } from "@/components/preview/PreviewLayer";
 import { BootGate } from "@/components/BootGate";
 import { ConsoleEgg } from "@/components/ConsoleEgg";
-import { SITE_URL, personJsonLd } from "@/lib/site";
+import { SITE_URL, siteJsonLd } from "@/lib/site";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -83,16 +83,18 @@ export default function RootLayout({
       className={`${archivo.variable} ${inter.variable} ${spaceMono.variable}`}
     >
       <body>
-        {/* Person structured data for search + AI answer engines */}
+        {/* Person + Organization + WebSite structured data for search + AI answer engines */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd()) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd()) }}
         />
-        {/* apply the saved theme before first paint, no flash */}
+        {/* Mark JS as present (enables the boot reveal gate) and apply the saved
+            theme before first paint. Runs synchronously ahead of body content, so
+            no-JS agents keep the content visible while JS users get the entrance. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}",
+              "try{document.documentElement.classList.add('js');if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}",
           }}
         />
         <BootGate />

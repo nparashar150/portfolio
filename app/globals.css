@@ -155,3 +155,24 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* Progressive-enhancement reveal gate.
+   Default (no JS): content is fully visible so crawlers and no-JS agents get
+   the full page in raw HTML. Only once JS is present (html.js, set
+   synchronously before paint) do we hide it for the boot entrance animation —
+   and the boot curtain covers the page during that window, so there's no flash. */
+.reveal-gate {
+  opacity: 1;
+  transition: opacity 650ms ease;
+}
+html.js .reveal-gate {
+  opacity: 0;
+}
+html.js .reveal-gate[data-show="true"] {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.js .reveal-gate {
+    opacity: 1;
+  }
+}

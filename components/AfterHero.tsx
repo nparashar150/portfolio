@@ -19,8 +19,11 @@ export function AfterHero({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(t);
   }, [gateDone]);
 
+  // Visibility is driven by CSS (`.reveal-gate`, gated on `html.js`) so that
+  // without JavaScript the content stays visible for crawlers/agents. When JS is
+  // present it starts hidden and we flip `data-show` once the boot has played.
   return (
-    <div style={{ opacity: show ? 1 : 0, transition: "opacity 650ms ease" }}>
+    <div className="reveal-gate" data-show={show ? "true" : undefined}>
       {children}
     </div>
   );
