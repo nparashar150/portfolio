@@ -134,7 +134,7 @@ export function AgentConsole() {
             {status === "live" ? (
               <span className="text-green">● LIVE · {fmt(seconds)}</span>
             ) : (
-              "powered by RinggAI"
+              "REAL-TIME VOICE"
             )}
           </span>
         </div>

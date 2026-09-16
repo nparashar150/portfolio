@@ -40,7 +40,7 @@ export function About() {
                 ))}
               </div>
               <span className="font-mono text-xs tracking-[0.05em] text-muted">
-                CURRENTLY: RINGG AI · PREVIOUSLY: SYLVA, ANTLER, CAREFI ·
+                CURRENTLY: SYLVA + RINGG AI · PREVIOUSLY: ANTLER, CAREFI ·
                 ALWAYS: SHIPPING
               </span>
             </div>

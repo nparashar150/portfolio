@@ -97,7 +97,7 @@ export function BootGate() {
       text: `[ ok ] commits.......... ${commits.toLocaleString("en-US")} loaded`,
       at: 18,
     },
-    { text: "[ ok ] voice agent...... ringg.ai live", at: 42 },
+    { text: "[ ok ] voice agent...... live", at: 42 },
     { text: "[ .. ] here you are", at: 78, green: true },
   ];
 

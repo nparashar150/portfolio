@@ -31,13 +31,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Naman Parashar · Engineer",
   description:
-    "An engineer who likes building products. Loves playing with UI, and has spent a while deep in the voice AI space.",
+    "An engineer who likes building products. Loves playing with UI, and has spent a while deep in the voice and video AI space.",
   keywords: [
     "Naman Parashar",
     "software engineer",
     "product engineer",
     "frontend engineer",
     "voice AI",
+    "video AI",
     "TypeScript",
     "React",
     "Next.js",
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Naman Parashar · Engineer",
     description:
-      "An engineer who likes building products. Loves UI, deep in voice AI.",
+      "An engineer who likes building products. Loves UI, deep in voice and video AI.",
     url: SITE_URL,
     siteName: "Naman Parashar",
     type: "website",
@@ -61,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Naman Parashar · Engineer",
     description:
-      "An engineer who likes building products. Loves UI, deep in voice AI.",
+      "An engineer who likes building products. Loves UI, deep in voice and video AI.",
     creator: "@nparashar150",
   },
   robots: {

@@ -30,11 +30,10 @@ function personNode() {
     description: config.headline,
     image: `${SITE_URL}/me.jpg`,
     address: ADDRESS,
-    worksFor: {
-      "@type": "Organization",
-      name: "Ringg AI",
-      url: "https://www.ringg.ai",
-    },
+    // derived from the work list so the "currently" entity can never drift
+    worksFor: config.work
+      .filter((w) => w.period.endsWith("NOW"))
+      .map((w) => ({ "@type": "Organization", name: w.company, url: w.url })),
     knowsAbout: [
       "Voice AI",
       "TypeScript",

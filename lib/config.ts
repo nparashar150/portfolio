@@ -5,7 +5,7 @@ export const config = {
   status: "Open to work",
   location: "28.7035° N, 77.4175° E / New Delhi, IND",
   headline:
-    "Just an engineer who likes building products. I love playing with UI, and I've been deep in voice AI. This site can hear you. And it talks back.",
+    "Just an engineer who likes building products. I love playing with UI, and I've been deep in voice and video AI. This site can hear you. And it talks back.",
   email: "nparashar150@gmail.com",
   photo: "/me.jpg", // drop a portrait at public/me.jpg
 
@@ -16,20 +16,9 @@ export const config = {
   ],
 
   about:
-    "I live where design meets systems. Lately that means voice AI: agents that sound human and interfaces that feel alive.",
+    "I live where design meets systems. Lately that means voice and video AI: agents that sound human and interfaces that feel alive.",
 
   work: [
-    {
-      period: "2023 → NOW",
-      role: "Product & Frontend Consultant",
-      company: "Ringg AI",
-      url: "https://www.ringg.ai",
-      desc: "Led the RinggAI and DesiVocal frontends. Shipped a TTS interface at 7M+ generations.",
-      stat: "TTS AT 7M+ GENERATIONS",
-      preview: "/previews/ringg.webp",
-      embed: true,
-      tech: ["React", "Next.js", "TypeScript", "Zustand", "AWS"],
-    },
     {
       period: "2022 → NOW",
       role: "Software Engineer II",
@@ -40,6 +29,17 @@ export const config = {
       preview: "/previews/sylva.webp",
       embed: false, // withsylva.com sets frame-ancestors 'none'
       tech: ["TypeScript", "React", "Node.js"],
+    },
+    {
+      period: "2023 → NOW",
+      role: "Product & Frontend Consultant",
+      company: "Ringg AI",
+      url: "https://www.ringg.ai",
+      desc: "Led the RinggAI and DesiVocal frontends. Shipped a TTS interface at 7M+ generations.",
+      stat: "TTS AT 7M+ GENERATIONS",
+      preview: "/previews/ringg.webp",
+      embed: false, // ringg.ai sets frame-ancestors 'self' https://*.prismic.io
+      tech: ["React", "Next.js", "TypeScript", "Zustand", "AWS"],
     },
     {
       period: "2022 → 2023",
@@ -97,16 +97,6 @@ export const config = {
       url: "https://vipsace.org",
       preview: "/previews/ace.webp",
       embed: true,
-    },
-    {
-      name: "Miitra",
-      tag: "Notes",
-      desc: "Customer-data tooling across 20+ communities. 2x engagement.",
-      stack: "React · Node · Data",
-      stat: "2X ENGAGEMENT",
-      url: "https://www.joinmiitra.com/",
-      preview: "/previews/miitra.webp",
-      embed: false, // joinmiitra.com sets frame-ancestors none
     },
   ],
 

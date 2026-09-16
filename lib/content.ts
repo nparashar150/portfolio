@@ -30,13 +30,13 @@ export const aboutContent: PageContent = {
       heading: "What I do",
       body: [
         "I design and build front-of-stack products end to end: React and Next.js interfaces, TypeScript everywhere, and Node services when the work calls for it. I care about the details most people scroll past — motion, typography, empty states, and the feel of a single click.",
-        "For the last while I've been deep in voice AI: agents that listen, reason, and talk back in real time. This very site is one of them — its commit graph doubles as a live voice agent you can actually speak to.",
+        "For the last while I've been deep in voice and video AI: agents that listen, reason, and talk back in real time, and pipelines that cut long-form video down to the parts worth watching. This very site is one of them — its commit graph doubles as a live voice agent you can actually speak to.",
       ],
     },
     {
       heading: "Where I've shipped",
       body: [
-        "I'm currently a Product & Frontend Consultant at Ringg AI, where I led the RinggAI and DesiVocal frontends and shipped a text-to-speech interface serving over 7 million generations. Before that I was a Software Engineer II at Sylva (a 500K+ record HubSpot to Attio migration), a Product Engineer at Antler (internal tools for 500+ portfolio companies), and a Software Developer at CareFi (CareCred's onboarding and dashboards, which helped secure early-stage funding).",
+        "I'm currently a Software Engineer II at Sylva, where I ran a 500K+ record HubSpot to Attio migration and scaled Miitra to 20+ communities, and a Product & Frontend Consultant at Ringg AI, where I led the RinggAI and DesiVocal frontends and shipped a text-to-speech interface serving over 7 million generations. Before those I was a Product Engineer at Antler (internal tools for 500+ portfolio companies) and a Software Developer at CareFi (CareCred's onboarding and dashboards, which helped secure early-stage funding).",
       ],
     },
     {
