@@ -7,6 +7,8 @@ dependencies = [
     "google-auth~=2.35",
     "google-api-python-client~=2.149",
     "livekit-agents[sarvam]~=1.7",
+    "livekit-plugins-silero>=1.8.2",
+    "python-dotenv>=1.2.3",
 ]
 
 [tool.uv]
