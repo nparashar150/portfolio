@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 dependencies = [
     "google-auth~=2.35",
     "google-api-python-client~=2.149",
+    "livekit-agents[sarvam]~=1.7",
 ]
 
 [tool.uv]
