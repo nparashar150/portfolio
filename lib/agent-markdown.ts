@@ -47,9 +47,14 @@ function homeMarkdown(): string {
     "",
     "## Experience",
     "",
-    ...config.work.map(
-      (w) => `- **${w.company}** — ${w.role} (${w.period}). ${w.desc}`,
-    ),
+    // Bullets where we have them: the voice agent answers from this, and a
+    // one-line summary per role isn't enough to hold a conversation.
+    ...config.work.flatMap((w) => [
+      `- **${w.company}** — ${w.role} (${w.period}). ${w.desc}`,
+      ...("detail" in w && Array.isArray(w.detail)
+        ? w.detail.map((d: string) => `  - ${d}`)
+        : []),
+    ]),
     "",
     "## Projects",
     "",
