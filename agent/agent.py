@@ -47,7 +47,11 @@ if os.environ.get("AGENT_LOG_FILE"):
     logging.getLogger().setLevel(logging.INFO)
 
 VOICE = os.environ.get("AGENT_VOICE", "shubh")          # bulbul:v3 preset
-USE_REALTIME_STT = os.environ.get("SARVAM_REALTIME_STT", "1") == "1"
+# Legacy STT + silero VAD by default. Sarvam's realtime API raises a *fatal*
+# inactivity_timeout after 60s of silence and does not reconnect (it bills per
+# connection), which kills the session for a visitor who starts a call and then
+# just reads the page. Silero gates the audio so the socket only opens on speech.
+USE_REALTIME_STT = os.environ.get("SARVAM_REALTIME_STT", "0") == "1"
 BOOKING_TOPIC = "booking.confirmed"                      # read by AgentConsole.tsx
 
 
