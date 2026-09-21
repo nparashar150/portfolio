@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import re
 import sys
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
@@ -56,15 +57,56 @@ def main() -> int:
         return 1
 
     client = json.loads(CLIENT_FILE.read_text())["installed"]
-    print("\n--- store these three as agent secrets ---\n")
-    print(f"GOOGLE_OAUTH_CLIENT_ID={client['client_id']}")
-    print(f"GOOGLE_OAUTH_CLIENT_SECRET={client['client_secret']}")
-    print(f"GOOGLE_OAUTH_REFRESH_TOKEN={creds.refresh_token}")
-    print("\nlk agent update-secrets --secrets GOOGLE_OAUTH_CLIENT_ID=... \\")
-    print("    --secrets GOOGLE_OAUTH_CLIENT_SECRET=... \\")
-    print("    --secrets GOOGLE_OAUTH_REFRESH_TOKEN=...")
+    values = {
+        "GOOGLE_OAUTH_CLIENT_ID": client["client_id"],
+        "GOOGLE_OAUTH_CLIENT_SECRET": client["client_secret"],
+        "GOOGLE_OAUTH_REFRESH_TOKEN": creds.refresh_token,
+    }
+
+    # Written to disk rather than printed: a refresh token pasted into a chat or
+    # a terminal log is a refresh token you have to rotate.
+    env = pathlib.Path(__file__).parent / ".env.local"
+    text = env.read_text() if env.exists() else ""
+    for key, value in values.items():
+        line = f"{key}={value}"
+        if re.search(rf"^{key}=.*$", text, flags=re.M):
+            text = re.sub(rf"^{key}=.*$", line, text, flags=re.M)
+        else:
+            text = text.rstrip("\n") + f"\n{line}\n"
+    env.write_text(text)
+    env.chmod(0o600)
+
+    print(f"\nwrote 3 values to {env.name} (gitignored)")
+    print(f"  refresh token: {creds.refresh_token[:6]}...{creds.refresh_token[-4:]}")
+    print("\nNow push them to the deployed agent:")
+    print("  uv run python authorize.py --push")
     return 0
 
 
+def push() -> int:
+    """Copy the OAuth values from .env.local into the agent's secrets."""
+    import subprocess
+
+    env = pathlib.Path(__file__).parent / ".env.local"
+    if not env.exists():
+        print("no .env.local - run without --push first", file=sys.stderr)
+        return 1
+    text = env.read_text()
+
+    args = []
+    for key in ("GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET",
+                "GOOGLE_OAUTH_REFRESH_TOKEN"):
+        m = re.search(rf"^{key}=(.*)$", text, flags=re.M)
+        if not m or not m.group(1).strip():
+            print(f"{key} missing from .env.local", file=sys.stderr)
+            return 1
+        args += ["--secrets", f"{key}={m.group(1).strip()}"]
+
+    print("pushing 3 secrets to the deployed agent...")
+    return subprocess.call(["lk", "agent", "update-secrets", *args])
+
+
 if __name__ == "__main__":
+    if "--push" in sys.argv:
+        raise SystemExit(push())
     raise SystemExit(main())
