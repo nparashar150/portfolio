@@ -1,46 +1,33 @@
-"""Facts about Naman, taken from the live site so they can't drift.
+"""Facts about Naman, rendered from the site's own content.
 
-The site already renders itself as Markdown for agents (see
-`lib/agent-markdown.ts` in the portfolio repo), so that rendering is the single
-source of truth. We fetch it rather than duplicating the CV here.
+`site_snapshot.md` is the markdown the site serves to agents (see
+`lib/agent-markdown.ts`), captured at build time by `refresh_snapshot.sh`. It
+ships inside the image, so it always matches the code being deployed.
 
-A snapshot is committed alongside as a fallback: an agent that can't say who
-Naman is has nothing to offer, so a site outage must not take it down.
+It deliberately does NOT fetch the live site at runtime. That looked tidier —
+"facts can't drift" — but it meant the agent served whatever was last deployed
+to production, which lagged the repo and went stale the moment content changed
+on a branch. It also put a network round trip in the session hot path, which is
+exactly where cold-start latency hurts. Regenerate the snapshot instead:
+
+    ./refresh_snapshot.sh     # then redeploy the agent
+
 """
 
 from __future__ import annotations
 
 import pathlib
-import urllib.request
 
-# The apex 308-redirects to www; ask for www directly.
-SITE_URL = "https://www.nparashar150.com/"
 SNAPSHOT = pathlib.Path(__file__).parent / "site_snapshot.md"
 
 _cache: str | None = None
 
 
-def site_facts(timeout: float = 8.0) -> str:
+def site_facts() -> str:
     """Markdown describing Naman. Cached for the life of the process."""
     global _cache
-    if _cache is not None:
-        return _cache
-
-    try:
-        req = urllib.request.Request(
-            SITE_URL,
-            headers={"Accept": "text/markdown", "User-Agent": "naman-voice-agent"},
-        )
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            body = resp.read().decode("utf-8")
-        # Guard against a proxy handing back an HTML error page with a 200.
-        if body.lstrip().startswith("#"):
-            _cache = body
-            return _cache
-    except Exception:
-        pass
-
-    _cache = SNAPSHOT.read_text(encoding="utf-8")
+    if _cache is None:
+        _cache = SNAPSHOT.read_text(encoding="utf-8")
     return _cache
 
 
