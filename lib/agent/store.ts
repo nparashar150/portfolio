@@ -23,24 +23,67 @@ export const agentStatus = {
   },
 };
 
-export type TranscriptLine = { id: string; role: "you" | "agent"; text: string };
+export type TranscriptLine = {
+  id: string;
+  role: "you" | "agent";
+  text: string;
+  /** ms epoch, used only to interleave typed turns with spoken ones */
+  at?: number;
+};
 
 export const EMPTY_TRANSCRIPT: TranscriptLine[] = [];
 
-let transcript: TranscriptLine[] = EMPTY_TRANSCRIPT;
+// Speech arrives as a full list from LiveKit on every update, while typed turns
+// (a tapped slot, a submitted email) are local and would be wiped by the next
+// speech update. So they're kept apart and merged by timestamp on read.
+let spoken: TranscriptLine[] = [];
+let typed: TranscriptLine[] = [];
+let merged: TranscriptLine[] = EMPTY_TRANSCRIPT;
+const firstSeen = new Map<string, number>();
 const tSubs = new Set<() => void>();
 
+function recompute() {
+  const all = [...spoken, ...typed];
+  merged =
+    all.length === 0
+      ? EMPTY_TRANSCRIPT
+      : all.sort((a, b) => (a.at ?? 0) - (b.at ?? 0));
+  tSubs.forEach((cb) => cb());
+}
+
 export const transcriptStore = {
-  get: (): TranscriptLine[] => transcript,
+  get: (): TranscriptLine[] => merged,
+
+  /** Full replacement from LiveKit's transcription stream. */
   set: (lines: TranscriptLine[]) => {
-    transcript = lines;
-    tSubs.forEach((cb) => cb());
+    const now = Date.now();
+    spoken = lines.map((l) => {
+      // Pin each line to when it first appeared, so later edits to an
+      // in-progress line don't jump it ahead of a typed turn.
+      if (!firstSeen.has(l.id)) firstSeen.set(l.id, now);
+      return { ...l, at: firstSeen.get(l.id) };
+    });
+    recompute();
   },
+
+  /** A turn the visitor sent by tapping or typing rather than speaking. */
+  addTyped: (text: string) => {
+    typed = [
+      ...typed,
+      { id: `typed-${Date.now()}`, role: "you", text, at: Date.now() },
+    ];
+    recompute();
+  },
+
   clear: () => {
-    if (transcript.length === 0) return;
-    transcript = EMPTY_TRANSCRIPT;
+    if (merged.length === 0) return;
+    spoken = [];
+    typed = [];
+    firstSeen.clear();
+    merged = EMPTY_TRANSCRIPT;
     tSubs.forEach((cb) => cb());
   },
+
   subscribe: (cb: () => void) => {
     tSubs.add(cb);
     return () => {
@@ -118,13 +161,18 @@ export const slotsStore = {
 // if nothing answers, so telephony and headless clients still work.
 export type UiRequest = {
   id: string;
-  kind: "email";
+  kind: "details";
   prompt: string;
 };
 
+/** What the form hands back. */
+export type Details = { name: string; email: string };
+
 let uiRequest: UiRequest | null = null;
-let pending: { resolve: (v: string) => void; reject: (e: Error) => void } | null =
-  null;
+let pending: {
+  resolve: (v: Details) => void;
+  reject: (e: Error) => void;
+} | null = null;
 const uSubs = new Set<() => void>();
 
 function notify() {
@@ -141,17 +189,17 @@ export const uiRequestStore = {
   },
 
   /** Show the input and resolve when the visitor submits. */
-  open: (req: UiRequest): Promise<string> => {
+  open: (req: UiRequest): Promise<Details> => {
     // A second request supersedes the first; never leave a promise dangling.
     pending?.reject(new Error("superseded"));
     uiRequest = req;
     notify();
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<Details>((resolve, reject) => {
       pending = { resolve, reject };
     });
   },
 
-  submit: (value: string) => {
+  submit: (value: Details) => {
     const p = pending;
     uiRequest = null;
     pending = null;
