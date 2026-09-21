@@ -320,14 +320,27 @@ export function AgentConsole() {
                 <p className="pt-1 font-mono text-[11px] text-muted">
                   {booking.minutes} min
                   {booking.email ? ` · ${booking.email}` : ""}
+                  {booking.invited ? " · invite sent" : ""}
                 </p>
                 <div className="flex flex-wrap gap-2 pt-3">
+                  {booking.joinUrl && (
+                    <a
+                      href={booking.joinUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full bg-green px-4 py-2 font-mono text-[11px] font-bold text-green-deep transition-opacity hover:opacity-90"
+                    >
+                      Join link ↗
+                    </a>
+                  )}
+                  {!booking.invited && (
                   <button
                     onClick={() => downloadIcs(booking, config.email)}
-                    className="rounded-full bg-green px-4 py-2 font-mono text-[11px] font-bold text-green-deep transition-opacity hover:opacity-90"
+                    className="rounded-full border border-line-3 px-4 py-2 font-mono text-[11px] text-cream transition-colors hover:border-green hover:text-green"
                   >
                     Add to calendar
                   </button>
+                  )}
                   <button
                     onClick={() => bookingStore.clear()}
                     className="rounded-full border border-line-3 px-4 py-2 font-mono text-[11px] text-muted-2 transition-colors hover:border-green/50 hover:text-cream"

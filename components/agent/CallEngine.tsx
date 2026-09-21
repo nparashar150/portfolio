@@ -161,6 +161,8 @@ function BookingReader() {
           minutes: typeof parsed.minutes === "number" ? parsed.minutes : 30,
           email: typeof parsed.email === "string" ? parsed.email : null,
           tz: typeof parsed.tz === "string" ? parsed.tz : "Asia/Kolkata",
+          joinUrl: typeof parsed.joinUrl === "string" ? parsed.joinUrl : null,
+          invited: parsed.invited === true,
         });
       } catch {
         // ignore: the booking is already on the calendar, the card is cosmetic

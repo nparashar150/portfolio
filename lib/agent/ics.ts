@@ -39,8 +39,12 @@ export function bookingToIcs(b: Booking, organiser: string): string {
     `DTEND:${stamp(end)}`,
     "SUMMARY:Call with Naman Parashar",
     `DESCRIPTION:${esc(
-      `A ${b.minutes}-minute call booked through nparashar150.com.\nOrganiser: ${organiser}`,
+      `A ${b.minutes}-minute call booked through nparashar150.com.` +
+        (b.joinUrl ? `\nJoin: ${b.joinUrl}` : "") +
+        `\nOrganiser: ${organiser}`,
     )}`,
+    // LOCATION is what calendar apps turn into a join button.
+    ...(b.joinUrl ? [`LOCATION:${esc(b.joinUrl)}`] : []),
     `ORGANIZER;CN=Naman Parashar:mailto:${organiser}`,
     "STATUS:CONFIRMED",
     "END:VEVENT",

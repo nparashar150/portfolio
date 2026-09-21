@@ -102,6 +102,10 @@ export type Booking = {
   minutes: number;
   email: string | null;
   tz: string;
+  /** Where to actually join. Without this a booking is just a promise. */
+  joinUrl: string | null;
+  /** Google emailed a real invite, so the .ics fallback isn't needed. */
+  invited: boolean;
 };
 
 let booking: Booking | null = null;
