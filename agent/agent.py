@@ -13,6 +13,7 @@ Two hard-won constraints shape the tool design (see tools_probe.py):
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -30,6 +31,11 @@ from livekit.agents import (
     room_io,
 )
 from livekit.agents.beta.tools import EndCallTool
+from livekit.agents.voice.background_audio import (
+    AudioConfig,
+    BackgroundAudioPlayer,
+    BuiltinAudioClip,
+)
 from livekit.agents.beta.workflows import GetEmailTask, GetPhoneNumberTask
 from livekit import rtc
 from livekit.plugins import sarvam, silero
@@ -55,7 +61,16 @@ VOICE = os.environ.get("AGENT_VOICE", "shubh")          # bulbul:v3 preset
 USE_REALTIME_STT = os.environ.get("SARVAM_REALTIME_STT", "0") == "1"
 BOOKING_TOPIC = "booking.confirmed"                      # read by AgentConsole.tsx
 SLOTS_TOPIC = "slots.offered"                            # ditto — renders as chips
-EMAIL_RPC = "ui.collectEmail"                            # typed input in the browser
+DETAILS_RPC = "ui.collectDetails"                        # typed name + email in the browser
+
+# Hang up on a silent visitor. Someone who clicked play and wandered off would
+# otherwise hold an open session (and keep billing) indefinitely.
+IDLE_SECONDS = float(os.environ.get("AGENT_IDLE_SECONDS", "30"))
+
+# check_availability queries three calendars and book_call re-validates before
+# writing. Both are silent seconds mid-conversation, which reads as a dropped
+# call rather than as thinking. A faint keyboard fills them.
+THINKING_VOLUME = float(os.environ.get("AGENT_THINKING_VOLUME", "0.5"))
 
 
 @dataclass
@@ -139,18 +154,20 @@ class Assistant(Agent):
 
     @function_tool()
     async def book_call(
-        self, context: RunContext, slot_id: str, name: str, brief: str
+        self, context: RunContext, slot_id: str, brief: str, name: str = ""
     ) -> str:
         """Book a 30-minute call in a slot that check_availability offered.
 
-        Only call this after check_availability, using one of the ids it returned.
-        If you don't have the visitor's email yet, this will ask for it.
+        Call this as soon as they pick a time. Do NOT ask for their name or
+        email first — collect_details gathers both on screen, and asking for
+        them by voice only makes the visitor say it twice.
 
         Args:
             slot_id: The id of the chosen slot, e.g. "s1". Never a date.
-            name: The visitor's name.
             brief: One or two sentences on what they want to discuss, so Naman
-                can prepare. Summarise it from the conversation.
+                can prepare. Summarise it from the conversation; if they haven't
+                said, put what you can infer.
+            name: Only if they already volunteered it. Leave empty otherwise.
         """
         v: Visitor = context.session.userdata
 
@@ -169,8 +186,8 @@ class Assistant(Agent):
             v.pending_slot = slot_id
             return ("FAILED: nothing was booked. The slot is still free and is "
                     "NOT held. Do NOT say booked, confirmed, all set, or "
-                    "'you're in'. Tell them you need their email to confirm, "
-                    "then call collect_email, then call book_call again with "
+                    "'you're in'. Tell them you just need a couple of details, "
+                    "then call collect_details, then call book_call again with "
                     f"slot_id {slot_id}.")
 
         # Writing to the calendar can't be half-done, so hold the turn.
@@ -194,23 +211,26 @@ class Assistant(Agent):
     # --- contact capture ---------------------------------------------------
 
     @function_tool()
-    async def collect_email(self, context: RunContext) -> str:
-        """Ask for and confirm the visitor's email address.
+    async def collect_details(self, context: RunContext) -> str:
+        """Ask for the visitor's name and email so a call can be booked.
 
-        Call this when book_call tells you an email is needed, or before booking
-        if you don't have one. Do not ask for the address in your own words —
-        this puts a box on screen and falls back to asking aloud.
+        Call this when book_call says details are needed. Don't ask for a name
+        or an address in your own words — this puts a short form on screen and
+        falls back to asking aloud if there's no browser.
         """
         v: Visitor = context.session.userdata
 
-        typed = await _ask_browser_for_email(v)
+        typed = await _ask_browser_for_details(v)
         if typed:
-            v.email = typed
-            logger.info("email captured via UI input")
-            if v.pending_slot:
-                return (f"Email is {v.email}. Now call book_call again with slot_id "
-                        f"{v.pending_slot}. It is NOT booked until that succeeds.")
-            return f"Email is {v.email}."
+            v.name = typed.get("name") or v.name
+            v.email = typed.get("email") or v.email
+            logger.info("details captured via UI form")
+            if v.email:
+                if v.pending_slot:
+                    return (f"Got {v.name} at {v.email}. Now call book_call again "
+                            f"with slot_id {v.pending_slot}. It is NOT booked "
+                            "until that succeeds.")
+                return f"Got {v.name} at {v.email}."
 
         result = await GetEmailTask(chat_ctx=self.chat_ctx)
         v.email = getattr(result, "email_address", None)
@@ -283,7 +303,6 @@ class Assistant(Agent):
 
 async def asyncio_to_thread(fn, *args, **kwargs):
     """Google's client is blocking; keep it off the event loop."""
-    import asyncio
     import functools
 
     return await asyncio.to_thread(functools.partial(fn, *args, **kwargs))
@@ -305,13 +324,13 @@ async def _log(context: RunContext, v: Visitor, method: str, handle: str,
     return f"Saved. Tell them Naman will reach out via {method}."
 
 
-async def _ask_browser_for_email(v: Visitor) -> str | None:
-    """Ask the page for a typed address. Returns None if it can't or won't.
+async def _ask_browser_for_details(v: Visitor) -> dict | None:
+    """Ask the page for a typed name and email. None if it can't or won't.
 
-    Typing beats dictation: STT mangles addresses, and reading one back to
-    confirm costs an entire turn. But a caller may have no UI at all (SIP, the
-    Agent Console), and may dismiss the box, so every failure falls back to
-    asking aloud rather than dead-ending.
+    Typing beats dictation: STT mangles both names ("Naman" -> "Laman") and
+    addresses, and reading either back to confirm costs a whole turn. But a
+    caller may have no UI at all (SIP, the Agent Console) and may dismiss the
+    form, so every failure falls back to asking aloud rather than dead-ending.
     """
     room = v.room
     if room is None:
@@ -324,14 +343,17 @@ async def _ask_browser_for_email(v: Visitor) -> str | None:
     try:
         raw = await room.local_participant.perform_rpc(
             destination_identity=identity,
-            method=EMAIL_RPC,
-            payload=json.dumps({"prompt": "Your email"}),
-            response_timeout=90.0,   # a human has to type it
+            method=DETAILS_RPC,
+            payload=json.dumps({"prompt": "Your details"}),
+            response_timeout=120.0,   # a human has to type two fields
         )
-        email = (json.loads(raw) or {}).get("email", "").strip()
-        return email or None
+        got = json.loads(raw) or {}
+        email = (got.get("email") or "").strip()
+        if not email:
+            return None
+        return {"name": (got.get("name") or "").strip(), "email": email}
     except Exception as e:
-        logger.info("no typed email (%s: %s); asking by voice",
+        logger.info("no typed details (%s: %s); asking by voice",
                     type(e).__name__, str(e)[:200])
         return None
 
@@ -394,6 +416,7 @@ async def entrypoint(ctx: agents.JobContext):
     stt, vad = _build_stt()
     session = AgentSession[Visitor](
         userdata=visitor,
+        user_away_timeout=IDLE_SECONDS,
         stt=stt,
         vad=vad,
         # Sarvam's realtime API detects turns itself; the default TurnDetector
@@ -409,15 +432,48 @@ async def entrypoint(ctx: agents.JobContext):
         ),
     )
 
+    @session.on("user_state_changed")
+    def _on_user_state(ev) -> None:
+        # Fires once the visitor has been silent for IDLE_SECONDS.
+        if getattr(ev, "new_state", None) != "away":
+            return
+        logger.info("visitor idle for %.0fs; closing", IDLE_SECONDS)
+
+        async def _wrap_up() -> None:
+            try:
+                await session.generate_reply(instructions=(
+                    "Say one short line that you'll let them go, and that they "
+                    "can start again any time. Do not ask a question."
+                ))
+            except Exception:
+                logger.debug("idle goodbye failed", exc_info=True)
+            finally:
+                await session.aclose()
+
+        asyncio.create_task(_wrap_up())
+
     await session.start(
         room=ctx.room,
         agent=Assistant(visitor.tz),
         room_options=room_io.RoomOptions(close_on_disconnect=True),
     )
 
+    # Published as a separate track, so it never mixes into the agent's speech.
+    background = BackgroundAudioPlayer(
+        thinking_sound=[
+            AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=THINKING_VOLUME),
+            AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=THINKING_VOLUME),
+        ],
+    )
+    try:
+        await background.start(room=ctx.room, agent_session=session)
+    except Exception:
+        # Cosmetic: a silent pause is worse than no pause, but not fatal.
+        logger.warning("background audio unavailable", exc_info=True)
+
     await session.generate_reply(instructions=(
         "Greet them in one short sentence. Say you're Naman's site agent and "
-        "they can ask about his work, or book a call. Don't list anything."
+        "they can ask about his work, or book a call right now. Don't list anything."
     ))
 
 
