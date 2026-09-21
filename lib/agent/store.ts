@@ -1,4 +1,4 @@
-export const LIVEKIT_URL = "wss://ringg-ai-prod-r0vhjzhs.livekit.cloud";
+export const LIVEKIT_URL = "wss://naman-s-project-jmq6m83m.livekit.cloud";
 
 // the live agent's per-band audio volumes, written by the call engine, read by the visualizer's rAF loop
 export const bandsRef: { current: number[] } = { current: [] };
