@@ -40,6 +40,12 @@ Just an engineer who likes building products. I love playing with UI, and I've b
 - **Pixio** — Long-form video into captioned shorts for Reels, TikTok and Shorts.
 - **ACE Monorepo** — Rebuilt vipsace.org with micro-frontends. 45% faster, 15+ devs led.
 
+## Rates
+
+- Project-based — a fixed price for a defined scope.
+- $60/hr when time-based suits the work better.
+- Happy to scope a project on a call.
+
 ## Contact
 
 - Email: nparashar150@gmail.com

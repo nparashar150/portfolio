@@ -15,6 +15,14 @@ export const config = {
     { label: "Based", value: "India · Remote" },
   ],
 
+  // What the agent answers "what do you charge?" with. Kept here so the site
+  // and the agent can't disagree about it.
+  rates: {
+    preferred: "Project-based — a fixed price for a defined scope.",
+    hourly: "$60/hr when time-based suits the work better.",
+    note: "Happy to scope a project on a call.",
+  },
+
   about:
     "I live where design meets systems. Lately that means voice and video AI: agents that sound human and interfaces that feel alive.",
 
