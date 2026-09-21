@@ -6,9 +6,11 @@ import dynamic from "next/dynamic";
 import {
   agentStatus,
   type AgentStatus,
+  bookingStore,
   EMPTY_TRANSCRIPT,
   transcriptStore,
 } from "@/lib/agent/store";
+import { downloadIcs } from "@/lib/agent/ics";
 import { Visualizer } from "./agent/Visualizer";
 import { AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
 
@@ -37,6 +39,11 @@ export function AgentConsole() {
     transcriptStore.subscribe,
     transcriptStore.get,
     () => EMPTY_TRANSCRIPT,
+  );
+  const booking = useSyncExternalStore(
+    bookingStore.subscribe,
+    bookingStore.get,
+    () => null,
   );
   const [token, setToken] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
@@ -78,6 +85,7 @@ export function AgentConsole() {
     busy.current = true;
     agentStatus.set("connecting");
     transcriptStore.clear();
+    bookingStore.clear();
 
     // tie mic permission to the user gesture (before any async work)
     try {
@@ -160,6 +168,43 @@ export function AgentConsole() {
               </p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* a call the agent booked. Outlives the call itself: the visitor gets no
+          confirmation email, so this is their only record until Naman replies. */}
+      {booking && (
+        <div className="mt-4 border border-green/40 bg-surface-2 p-5">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[11px] font-bold tracking-[0.06em] text-green">
+              ● CALL BOOKED
+            </span>
+            <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
+              {booking.minutes} MIN
+            </span>
+          </div>
+          <p className="pt-3 text-[17px] font-semibold leading-snug text-cream">
+            {booking.label}
+          </p>
+          {booking.email && (
+            <p className="pt-1 font-mono text-[12px] text-muted">
+              confirmation to {booking.email}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-2.5 pt-4">
+            <button
+              onClick={() => downloadIcs(booking, config.email)}
+              className="rounded-full bg-green px-4 py-2.5 font-mono text-xs font-bold text-green-deep transition-opacity hover:opacity-90"
+            >
+              Add to calendar
+            </button>
+            <button
+              onClick={() => bookingStore.clear()}
+              className="rounded-full border border-line-3 px-4 py-2.5 font-mono text-xs text-muted-2 transition-colors hover:border-green/50 hover:text-cream"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 
