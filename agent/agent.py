@@ -29,6 +29,7 @@ from livekit.agents import (
     function_tool,
     room_io,
 )
+from livekit.agents.beta.tools import EndCallTool
 from livekit.agents.beta.workflows import GetEmailTask, GetPhoneNumberTask
 from livekit import rtc
 from livekit.plugins import sarvam, silero
@@ -71,9 +72,27 @@ class Visitor:
     room: "rtc.Room | None" = None
 
 
+# Names and product words the STT otherwise mangles ("Naman" -> "Laman").
+STT_PROMPT = (
+    "Naman Parashar, nparashar150, Sylva, Ringg AI, DesiVocal, QuikRun, Pixio, "
+    "Antler, CareFi, LiveKit, Sarvam, voice AI, Next.js, TypeScript"
+)
+
+
 class Assistant(Agent):
     def __init__(self, visitor_tz: str) -> None:
-        super().__init__(instructions=content.instructions(visitor_tz))
+        super().__init__(
+            instructions=content.instructions(visitor_tz),
+            # Lets the agent hang up itself rather than leaving the line open
+            # (and billing) after the visitor is done.
+            tools=[EndCallTool(
+                extra_description=(
+                    "Use this once the visitor is finished — they've said goodbye, "
+                    "or the booking is done and they have nothing else to ask."
+                ),
+                end_instructions="Say a short goodbye, then end the call.",
+            )],
+        )
 
     # --- availability ------------------------------------------------------
 
@@ -292,6 +311,7 @@ def _build_stt():
         # Sarvam's realtime API brings its own VAD, so no silero needed.
         return sarvam.STTRealtime(language="en-IN", stream_type="balanced"), None
     return sarvam.STT(language="en-IN", model="saaras:v4",
+                      prompt=STT_PROMPT,
                       high_vad_sensitivity=True), silero.VAD.load()
 
 
