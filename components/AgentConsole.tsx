@@ -7,7 +7,10 @@ import {
   agentStatus,
   type AgentStatus,
   bookingStore,
+  EMPTY_SLOTS,
   EMPTY_TRANSCRIPT,
+  sendRef,
+  slotsStore,
   transcriptStore,
 } from "@/lib/agent/store";
 import { downloadIcs } from "@/lib/agent/ics";
@@ -44,6 +47,11 @@ export function AgentConsole() {
     bookingStore.subscribe,
     bookingStore.get,
     () => null,
+  );
+  const slots = useSyncExternalStore(
+    slotsStore.subscribe,
+    slotsStore.get,
+    () => EMPTY_SLOTS,
   );
   const [token, setToken] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
@@ -86,6 +94,7 @@ export function AgentConsole() {
     agentStatus.set("connecting");
     transcriptStore.clear();
     bookingStore.clear();
+    slotsStore.clear();
 
     // tie mic permission to the user gesture (before any async work)
     try {
@@ -126,6 +135,7 @@ export function AgentConsole() {
     setToken(null);
     agentStatus.set("idle");
     transcriptStore.clear();
+    slotsStore.clear();
   };
   endRef.current = end;
 
@@ -177,6 +187,31 @@ export function AgentConsole() {
               </p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* times the agent just offered. Tapping one sends it back as a chat turn
+          so the agent drives the booking exactly as it would by voice. */}
+      {slots.length > 0 && !booking && (
+        <div className="mt-4 border border-line bg-surface-2 p-5">
+          <span className="font-mono text-[11px] tracking-[0.06em] text-faint">
+            PICK A TIME
+          </span>
+          <div className="flex flex-wrap gap-2.5 pt-3.5">
+            {slots.map((slot) => (
+              <button
+                key={slot.id}
+                onClick={() => {
+                  // optimistic: the agent confirms in the transcript
+                  slotsStore.clear();
+                  sendRef.current?.(`I'll take ${slot.label}.`);
+                }}
+                className="rounded-full border border-line-3 px-4 py-2.5 font-mono text-xs text-cream transition-colors hover:border-green hover:text-green"
+              >
+                {slot.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
