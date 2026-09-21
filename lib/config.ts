@@ -167,11 +167,13 @@ export const config = {
     { name: "Medium", handle: "@nparashar150", url: "https://medium.com/@nparashar150" },
   ],
 
+  // Questions someone deciding whether to hire or work with me actually has.
+  // "Who is Naman?" is a fan's question; these move toward a booking.
   agentPrompts: [
-    "Who is Naman?",
-    "Show me your work",
-    "Your tech stack",
-    "Are you hireable?",
+    "Are you available?",
+    "Have you shipped voice AI?",
+    "What do you charge?",
+    "Book a call",
   ],
 };
 

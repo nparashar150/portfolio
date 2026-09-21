@@ -9,7 +9,7 @@ export function Contact() {
       className="mx-auto w-full max-w-[1080px] overflow-hidden px-6 pt-32"
     >
       <span className="font-mono text-[13px] tracking-[0.1em] text-green">
-        04 / SAY IT OUT LOUD
+        04 / SKIP THE EMAIL THREAD
       </span>
 
       <Reveal>
@@ -19,8 +19,9 @@ export function Contact() {
       </Reveal>
 
       <p className="max-w-[560px] pt-7 text-lg leading-relaxed text-muted-2">
-        Literally. My commits double as a live voice agent. Hit play and say
-        hi, or if you prefer the old ways, the inbox works too.
+        Literally. Ask my agent anything about the work, then have it put 30
+        minutes on my calendar while you&apos;re still talking. No form, no
+        reply-all. The inbox still works if you prefer the old ways.
       </p>
 
       {/* the agent lives here now */}

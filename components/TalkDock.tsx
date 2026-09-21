@@ -128,7 +128,7 @@ export function TalkDock() {
                     : "TAP TO TALK"}
               </span>
               <span className="hidden font-mono text-[11px] tracking-[0.05em] text-muted sm:block">
-                live voice agent · trained on me
+                answers now · books a real slot
               </span>
             </div>
             <div className="hidden sm:block">
