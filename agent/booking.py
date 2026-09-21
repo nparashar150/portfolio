@@ -16,6 +16,7 @@ description instead, and the site UI hands them an .ics.
 from __future__ import annotations
 
 import datetime as dt
+import json
 import os
 from dataclasses import dataclass
 from zoneinfo import ZoneInfo
@@ -122,14 +123,28 @@ def is_civil_for_visitor(slot: "Slot", tz: ZoneInfo) -> bool:
 
 # --- Google Calendar ---------------------------------------------------------
 
+SCOPES = ["https://www.googleapis.com/auth/calendar"]
+
+
 def _service():
+    """Calendar client.
+
+    `GOOGLE_SERVICE_ACCOUNT_JSON` holds either a path (local development) or the
+    key material itself (deployed, where it arrives as a runtime secret — the key
+    must never be baked into the image).
+    """
     from google.oauth2 import service_account
     from googleapiclient.discovery import build
 
-    path = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "service-account.json")
-    creds = service_account.Credentials.from_service_account_file(
-        path, scopes=["https://www.googleapis.com/auth/calendar"]
-    )
+    raw = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "service-account.json")
+    if raw.lstrip().startswith("{"):
+        creds = service_account.Credentials.from_service_account_info(
+            json.loads(raw), scopes=SCOPES
+        )
+    else:
+        creds = service_account.Credentials.from_service_account_file(
+            raw, scopes=SCOPES
+        )
     return build("calendar", "v3", credentials=creds, cache_discovery=False)
 
 
