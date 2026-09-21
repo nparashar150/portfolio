@@ -221,6 +221,27 @@ export const uiRequestStore = {
   },
 };
 
+// Whether the in-page console is on screen. The conversation panel lives in the
+// floating dock while it isn't, and hands off to the console when it is — one
+// panel, two homes, so scrolling never produces two copies of the same thread.
+let consoleInView = false;
+const vSubs = new Set<() => void>();
+
+export const consoleInViewStore = {
+  get: (): boolean => consoleInView,
+  set: (next: boolean) => {
+    if (next === consoleInView) return;
+    consoleInView = next;
+    vSubs.forEach((cb) => cb());
+  },
+  subscribe: (cb: () => void) => {
+    vSubs.add(cb);
+    return () => {
+      vSubs.delete(cb);
+    };
+  },
+};
+
 // chat send fn, set by a component mounted inside the LiveKit room context
 export const sendRef: { current: ((text: string) => void) | null } = {
   current: null,
