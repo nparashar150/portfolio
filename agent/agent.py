@@ -67,6 +67,11 @@ DETAILS_RPC = "ui.collectDetails"                        # typed name + email in
 # otherwise hold an open session (and keep billing) indefinitely.
 IDLE_SECONDS = float(os.environ.get("AGENT_IDLE_SECONDS", "30"))
 
+# The idle timeout only fires on silence, so it does nothing against someone
+# holding a session open with continuous audio — a podcast into the mic keeps
+# STT, the LLM and TTS billing indefinitely. This is the ceiling regardless.
+MAX_SESSION_SECONDS = float(os.environ.get("AGENT_MAX_SESSION_SECONDS", "600"))
+
 # check_availability queries three calendars and book_call re-validates before
 # writing. Both are silent seconds mid-conversation, which reads as a dropped
 # call rather than as thinking. A faint keyboard fills them.
@@ -436,6 +441,27 @@ async def entrypoint(ctx: agents.JobContext):
             pace=1.0,
         ),
     )
+
+    async def _hard_stop() -> None:
+        await asyncio.sleep(MAX_SESSION_SECONDS)
+        logger.info("session hit the %.0fs ceiling; closing", MAX_SESSION_SECONDS)
+        try:
+            await session.generate_reply(instructions=(
+                "Say one short line that you have to wrap up there, and they can "
+                "start again any time. Do not ask a question."
+            ))
+        except Exception:
+            logger.debug("wrap-up line failed", exc_info=True)
+        finally:
+            await session.aclose()
+
+    ceiling = asyncio.create_task(_hard_stop())
+
+    async def _cancel_ceiling() -> None:
+        # Must be a coroutine: add_shutdown_callback awaits what it's given.
+        ceiling.cancel()
+
+    ctx.add_shutdown_callback(_cancel_ceiling)
 
     @session.on("user_state_changed")
     def _on_user_state(ev) -> None:
