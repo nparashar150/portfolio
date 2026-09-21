@@ -46,8 +46,11 @@ export function BootGate() {
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
-    // the loader always lifts into the hero, never a restored mid-page scroll
+    // The loader always lifts into the hero, never a restored mid-page scroll.
+    // But a deep link is intent, not restoration: /#console from a CV or a DM
+    // must still land on the console once the curtain is up.
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    const target = window.location.hash.slice(1);
     window.scrollTo(0, 0);
 
     const leave = () => {
@@ -58,6 +61,13 @@ export function BootGate() {
       // hero starts revealing under the lifting curtain, no blank beat
       gateStore.finish();
       window.setTimeout(() => setPhase("gone"), 760);
+
+      if (target) {
+        // After the curtain, so the scroll isn't eaten by the overflow lock.
+        window.setTimeout(() => {
+          document.getElementById(target)?.scrollIntoView({ block: "start" });
+        }, 780);
+      }
     };
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
