@@ -54,6 +54,7 @@ VOICE = os.environ.get("AGENT_VOICE", "shubh")          # bulbul:v3 preset
 # just reads the page. Silero gates the audio so the socket only opens on speech.
 USE_REALTIME_STT = os.environ.get("SARVAM_REALTIME_STT", "0") == "1"
 BOOKING_TOPIC = "booking.confirmed"                      # read by AgentConsole.tsx
+SLOTS_TOPIC = "slots.offered"                            # ditto — renders as chips
 
 
 @dataclass
@@ -120,10 +121,15 @@ class Assistant(Agent):
                     "contact details instead.")
 
         v.offered = {f"s{i+1}": s["start"] for i, s in enumerate(slots)}
+        listed = [{"id": f"s{i+1}", "label": s["label"]} for i, s in enumerate(slots)]
+
+        # Reading six times aloud is unusable; the browser renders them as chips
+        # the visitor can just tap. Speech and UI stay in sync because both come
+        # from this one list.
+        await _publish(v, SLOTS_TOPIC, {"slots": listed, "tz": v.tz})
+
         logger.info("offered %d slots (hint=%r)", len(slots), date_hint)
-        return json.dumps([
-            {"id": f"s{i+1}", "label": s["label"]} for i, s in enumerate(slots)
-        ])
+        return json.dumps(listed)
 
     # --- booking -----------------------------------------------------------
 
@@ -283,27 +289,29 @@ async def _log(context: RunContext, v: Visitor, method: str, handle: str,
     return f"Saved. Tell them Naman will reach out via {method}."
 
 
-async def _publish_booking(context: RunContext, res: dict, v: Visitor) -> None:  # noqa: ARG001
-    """Tell the browser, so the site can render a card with an .ics link."""
-    room = getattr(v, "room", None)
-    if room is None:
-        logger.warning("no room handle; skipping %s", BOOKING_TOPIC)
+async def _publish(v: Visitor, topic: str, payload: dict) -> None:
+    """Push structured state to the browser. Never fatal — the UI is a bonus."""
+    if v.room is None:
+        logger.warning("no room handle; skipping %s", topic)
         return
     try:
-        await room.local_participant.send_text(
-            json.dumps({
-                "start": res["start"],
-                "label": res["label"],
-                "minutes": booking.SLOT_MINUTES,
-                "email": v.email,
-                "tz": v.tz,
-            }),
-            topic=BOOKING_TOPIC,
-        )
-        logger.info("published %s", BOOKING_TOPIC)
+        await v.room.local_participant.send_text(json.dumps(payload), topic=topic)
+        logger.info("published %s", topic)
     except Exception:
-        # The booking is already real; a missing card is cosmetic.
-        logger.warning("could not publish %s", BOOKING_TOPIC, exc_info=True)
+        logger.warning("could not publish %s", topic, exc_info=True)
+
+
+async def _publish_booking(context: RunContext, res: dict, v: Visitor) -> None:  # noqa: ARG001
+    """Tell the browser, so the site can render a card with an .ics link."""
+    await _publish(v, BOOKING_TOPIC, {
+        "start": res["start"],
+        "label": res["label"],
+        "minutes": booking.SLOT_MINUTES,
+        "email": v.email,
+        "tz": v.tz,
+    })
+    # The offer is spent; clear the chips so a stale list can't be tapped.
+    await _publish(v, SLOTS_TOPIC, {"slots": [], "tz": v.tz})
 
 
 def _build_stt():
