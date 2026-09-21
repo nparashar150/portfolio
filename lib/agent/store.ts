@@ -112,6 +112,63 @@ export const slotsStore = {
   },
 };
 
+// a structured input the agent asked the browser for over RPC. Typing an email
+// beats spelling it aloud — the STT mangles addresses, and "at gmail dot com"
+// costs a whole conversational turn to confirm. The agent falls back to voice
+// if nothing answers, so telephony and headless clients still work.
+export type UiRequest = {
+  id: string;
+  kind: "email";
+  prompt: string;
+};
+
+let uiRequest: UiRequest | null = null;
+let pending: { resolve: (v: string) => void; reject: (e: Error) => void } | null =
+  null;
+const uSubs = new Set<() => void>();
+
+function notify() {
+  uSubs.forEach((cb) => cb());
+}
+
+export const uiRequestStore = {
+  get: (): UiRequest | null => uiRequest,
+  subscribe: (cb: () => void) => {
+    uSubs.add(cb);
+    return () => {
+      uSubs.delete(cb);
+    };
+  },
+
+  /** Show the input and resolve when the visitor submits. */
+  open: (req: UiRequest): Promise<string> => {
+    // A second request supersedes the first; never leave a promise dangling.
+    pending?.reject(new Error("superseded"));
+    uiRequest = req;
+    notify();
+    return new Promise<string>((resolve, reject) => {
+      pending = { resolve, reject };
+    });
+  },
+
+  submit: (value: string) => {
+    const p = pending;
+    uiRequest = null;
+    pending = null;
+    notify();
+    p?.resolve(value);
+  },
+
+  /** Visitor dismissed it, or the call ended — the agent falls back to voice. */
+  cancel: () => {
+    const p = pending;
+    uiRequest = null;
+    pending = null;
+    notify();
+    p?.reject(new Error("cancelled"));
+  },
+};
+
 // chat send fn, set by a component mounted inside the LiveKit room context
 export const sendRef: { current: ((text: string) => void) | null } = {
   current: null,
