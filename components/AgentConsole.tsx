@@ -99,7 +99,16 @@ export function AgentConsole() {
     }
 
     try {
-      const res = await fetch("/api/webcall", { method: "POST" });
+      // The browser is the only thing that knows the visitor's timezone, and
+      // the agent needs it to offer slots in their local time.
+      const res = await fetch("/api/webcall", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          referrer: document.referrer,
+        }),
+      });
       const data = await res.json();
       if (!res.ok || !data?.user_token) throw new Error("token");
       setToken(data.user_token);
