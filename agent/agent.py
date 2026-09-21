@@ -421,7 +421,14 @@ async def entrypoint(ctx: agents.JobContext):
         referrer=meta.get("referrer", ""),
         room=ctx.room,
     )
-    logger.info("session start tz=%s referrer=%s", visitor.tz, visitor.referrer)
+    # Whether writes go out as Naman (real Meet + invite) or fall back to the
+    # service account (no conferencing). Logged every session because the
+    # difference is invisible until someone books.
+    logger.info(
+        "session start tz=%s referrer=%s oauth=%s",
+        visitor.tz, visitor.referrer,
+        "on" if booking._oauth_service() is not None else "OFF-fallback",
+    )
 
     stt, vad = _build_stt()
     session = AgentSession[Visitor](
