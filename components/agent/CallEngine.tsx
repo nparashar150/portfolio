@@ -11,6 +11,7 @@ import {
 } from "@livekit/components-react";
 import {
   type LocalAudioTrack,
+  RpcError,
   type RemoteAudioTrack,
   Room,
   RoomEvent,
@@ -27,6 +28,7 @@ import {
   type Slot,
   slotsStore,
   transcriptStore,
+  uiRequestStore,
   type TranscriptLine,
 } from "@/lib/agent/store";
 
@@ -85,6 +87,7 @@ export function CallEngine({
       <TranscriptReader />
       <BookingReader />
       <SlotsReader />
+      <RpcBridge />
       <ChatBridge />
     </RoomContext.Provider>
   );
@@ -193,6 +196,42 @@ function SlotsReader() {
       }
     });
     return () => room.unregisterTextStreamHandler(topic);
+  }, [room]);
+
+  return null;
+}
+
+// lets the agent ask the browser for typed input instead of dictated speech
+function RpcBridge() {
+  const room = useContext(RoomContext);
+
+  useEffect(() => {
+    if (!room) return;
+    const method = "ui.collectEmail";
+    room.localParticipant.registerRpcMethod(method, async (data) => {
+      let prompt = "What's your email?";
+      try {
+        const parsed = JSON.parse(data.payload || "{}");
+        if (typeof parsed.prompt === "string") prompt = parsed.prompt;
+      } catch {
+        // keep the default prompt
+      }
+      try {
+        const email = await uiRequestStore.open({
+          id: data.requestId,
+          kind: "email",
+          prompt,
+        });
+        return JSON.stringify({ email });
+      } catch {
+        // dismissed or superseded — tell the agent so it can ask by voice
+        throw new RpcError(1, "visitor dismissed the input");
+      }
+    });
+    return () => {
+      room.localParticipant.unregisterRpcMethod(method);
+      uiRequestStore.cancel();
+    };
   }, [room]);
 
   return null;
