@@ -207,9 +207,9 @@ function RpcBridge() {
 
   useEffect(() => {
     if (!room) return;
-    const method = "ui.collectEmail";
+    const method = "ui.collectDetails";
     room.localParticipant.registerRpcMethod(method, async (data) => {
-      let prompt = "What's your email?";
+      let prompt = "Your details";
       try {
         const parsed = JSON.parse(data.payload || "{}");
         if (typeof parsed.prompt === "string") prompt = parsed.prompt;
@@ -217,12 +217,12 @@ function RpcBridge() {
         // keep the default prompt
       }
       try {
-        const email = await uiRequestStore.open({
+        const details = await uiRequestStore.open({
           id: data.requestId,
-          kind: "email",
+          kind: "details",
           prompt,
         });
-        return JSON.stringify({ email });
+        return JSON.stringify(details);
       } catch {
         // dismissed or superseded — tell the agent so it can ask by voice
         throw new RpcError(1, "visitor dismissed the input");
@@ -242,6 +242,9 @@ function ChatBridge() {
   const { send } = useChat();
   useEffect(() => {
     sendRef.current = (text: string) => {
+      // Show it too — a tapped slot or typed email is a turn in the
+      // conversation, and a transcript that omits it reads as broken.
+      transcriptStore.addTyped(text);
       void send(text);
     };
     return () => {
