@@ -100,7 +100,9 @@ export const privacyContent: PageContent = {
     {
       heading: "The voice agent",
       body: [
-        "The contact section includes an optional voice agent. If you choose to start a call, your microphone audio is processed in real time to power the conversation. Please don't share sensitive personal information with it — it exists as a demo and a friendly way to say hi, not as a system of record.",
+        "The contact section includes an optional voice agent. Nothing happens until you start a call. If you do, your microphone audio is streamed and transcribed in real time so the agent can hold a conversation — speech recognition, language and speech synthesis are handled by Sarvam AI, and the realtime connection by LiveKit.",
+        "The agent can also do two things on my behalf, and only ever when you ask it to. If you give it a way to reach you — an email address, a phone number or a social handle — it saves that, along with a short note on what you wanted, so I can follow up. If you book a call, it writes the booking to my Google Calendar with your name, email and that same note. There is nothing else stored, and none of it is used for marketing.",
+        "Please don't tell it anything sensitive. It's a way to talk to me, not a secure channel. If you'd like whatever you left removed, email me and it's gone.",
       ],
     },
     {
