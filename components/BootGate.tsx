@@ -91,8 +91,15 @@ export function BootGate() {
     };
     raf = requestAnimationFrame(tick);
 
+    // requestAnimationFrame doesn't run in a background tab, so a page opened
+    // via cmd-click would sit behind a frozen curtain with scroll locked until
+    // it was looked at. The curtain must never be the thing keeping the page
+    // hostage, so lift it on a wall-clock timer no matter what rAF is doing.
+    const failsafe = window.setTimeout(leave, DUR + 1200);
+
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(failsafe);
       document.body.style.overflow = "";
     };
   }, []);
