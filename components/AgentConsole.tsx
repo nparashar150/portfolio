@@ -12,6 +12,7 @@ import {
   sendRef,
   slotsStore,
   transcriptStore,
+  uiRequestStore,
 } from "@/lib/agent/store";
 import { downloadIcs } from "@/lib/agent/ics";
 import { Visualizer } from "./agent/Visualizer";
@@ -53,6 +54,12 @@ export function AgentConsole() {
     slotsStore.get,
     () => EMPTY_SLOTS,
   );
+  const uiRequest = useSyncExternalStore(
+    uiRequestStore.subscribe,
+    uiRequestStore.get,
+    () => null,
+  );
+  const [draft, setDraft] = useState("");
   const [token, setToken] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
   const busy = useRef(false);
@@ -136,6 +143,7 @@ export function AgentConsole() {
     agentStatus.set("idle");
     transcriptStore.clear();
     slotsStore.clear();
+    uiRequestStore.cancel();
   };
   endRef.current = end;
 
@@ -188,6 +196,57 @@ export function AgentConsole() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* the agent asked for something typed. Beats dictating an address: the
+          STT mangles them and confirming one aloud costs a whole turn. */}
+      {uiRequest && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const value = draft.trim();
+            if (!value) return;
+            setDraft("");
+            uiRequestStore.submit(value);
+          }}
+          className="mt-4 border border-green/40 bg-surface-2 p-5"
+        >
+          <label
+            htmlFor="agent-input"
+            className="font-mono text-[11px] tracking-[0.06em] text-green"
+          >
+            {uiRequest.prompt.toUpperCase()}
+          </label>
+          <div className="flex flex-wrap items-center gap-2.5 pt-3.5">
+            <input
+              id="agent-input"
+              type="email"
+              required
+              autoFocus
+              autoComplete="email"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="you@company.com"
+              className="min-w-0 flex-1 border border-line-3 bg-surface px-4 py-2.5 font-mono text-sm text-cream outline-none placeholder:text-faint focus:border-green"
+            />
+            <button
+              type="submit"
+              className="rounded-full bg-green px-4 py-2.5 font-mono text-xs font-bold text-green-deep transition-opacity hover:opacity-90"
+            >
+              Send
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDraft("");
+                uiRequestStore.cancel();
+              }}
+              className="rounded-full border border-line-3 px-4 py-2.5 font-mono text-xs text-muted-2 transition-colors hover:border-green/50 hover:text-cream"
+            >
+              I&apos;ll say it
+            </button>
+          </div>
+        </form>
       )}
 
       {/* times the agent just offered. Tapping one sends it back as a chat turn
