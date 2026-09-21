@@ -43,6 +43,11 @@ VISITOR_LATEST_HOUR = 22           # a call must have *ended* by 22:00 local
 # and never trips on Naman's real meetings.
 AGENT_TAG = "naman-voice-agent"
 
+# A service account cannot create a Google Meet link on a consumer gmail account
+# ("Invalid conference type value"), so the call carries a fixed personal meeting
+# room instead. Set MEETING_LINK to a permanent Meet/Zoom/Whereby URL.
+MEETING_LINK = os.environ.get("MEETING_LINK", "").strip()
+
 
 @dataclass(frozen=True)
 class Slot:
@@ -149,32 +154,62 @@ def _service():
 
 
 def _calendar_id() -> str:
+    """The calendar bookings are written to."""
     return os.environ.get("CALENDAR_ID", "nparashar150@gmail.com")
 
 
+def _busy_calendar_ids() -> list[str]:
+    """Every calendar that counts as "Naman is busy".
+
+    A Google account usually has several calendars, and freebusy only reports
+    the ones you ask for. Querying just the primary made the agent blind to real
+    commitments and book straight over them, so every calendar must be listed
+    here AND shared with the service account.
+    """
+    extra = [c.strip() for c in os.environ.get("BUSY_CALENDAR_IDS", "").split(",") if c.strip()]
+    ids = [_calendar_id()]
+    ids += [c for c in extra if c != _calendar_id()]
+    return ids
+
+
 def _busy_blocks(svc, start: dt.datetime, end: dt.datetime):
-    """Busy intervals from freebusy.
+    """Busy intervals across every calendar in `_busy_calendar_ids()`.
 
     freebusy already accounts for out-of-office and focus-time events. Events
-    Naman has explicitly marked "Free" (transparent) are excluded by design —
-    that's what marking them Free means.
+    explicitly marked "Free" (transparent) are excluded by design.
+
+    If any calendar can't be read, this raises. An unreadable calendar must
+    never be mistaken for an empty one — that books over real commitments.
     """
-    cal = _calendar_id()
+    ids = _busy_calendar_ids()
     resp = svc.freebusy().query(body={
         "timeMin": start.isoformat(),
         "timeMax": end.isoformat(),
         "timeZone": "Asia/Kolkata",
-        "items": [{"id": cal}],
+        "items": [{"id": c} for c in ids],
     }).execute()
 
-    entry = resp["calendars"][cal]
-    if entry.get("errors"):
-        raise RuntimeError(f"calendar unreadable: {entry['errors']}")
+    cals = resp.get("calendars", {})
+    blocks, unreadable = [], []
+    for cid in ids:
+        entry = cals.get(cid)
+        if entry is None:
+            unreadable.append((cid, "not in response"))
+            continue
+        if entry.get("errors"):
+            unreadable.append((cid, entry["errors"]))
+            continue
+        blocks += [
+            (dt.datetime.fromisoformat(b["start"]), dt.datetime.fromisoformat(b["end"]))
+            for b in entry.get("busy", [])
+        ]
 
-    return [
-        (dt.datetime.fromisoformat(b["start"]), dt.datetime.fromisoformat(b["end"]))
-        for b in entry.get("busy", [])
-    ]
+    if unreadable:
+        raise RuntimeError(
+            "cannot read calendar(s), refusing to offer times: "
+            + "; ".join(f"{c}: {e}" for c, e in unreadable)
+        )
+    return blocks
 
 
 def _agent_bookings_on(svc, day: dt.date) -> int:
@@ -259,7 +294,9 @@ def book(start_iso: str, name: str, email: str, brief: str, visitor_tz: str) -> 
             f"Email:    {email}\n"
             f"Timezone: {visitor_tz}\n\n"
             f"What they need:\n{brief}\n"
+            + (f"\nJoin: {MEETING_LINK}\n" if MEETING_LINK else "")
         ),
+        **({"location": MEETING_LINK} if MEETING_LINK else {}),
         "start": {"dateTime": start.isoformat(), "timeZone": "UTC"},
         "end": {"dateTime": end.isoformat(), "timeZone": "UTC"},
         "extendedProperties": {"private": {"source": AGENT_TAG, "email": email}},
@@ -309,11 +346,18 @@ def check_access() -> bool:
     cal = _calendar_id()
     now = dt.datetime.now(dt.timezone.utc)
 
+    ids = _busy_calendar_ids()
+    print(f"CALENDARS: {len(ids)} configured")
+    for cid in ids:
+        print(f"  - {cid}")
     try:
         _busy_blocks(svc, now, now + dt.timedelta(days=1))
-        print("READ  : ok")
+        print("READ  : ok (all calendars readable)")
     except Exception as e:
         print(f"READ  : FAILED - {e}")
+        print("\n-> Share every listed calendar with the service account, or drop")
+        print("   it from BUSY_CALENDAR_IDS. An unreadable calendar is never")
+        print("   assumed free.")
         return False
 
     # A probe event far in the future, deleted immediately.
