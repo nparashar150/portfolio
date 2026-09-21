@@ -55,6 +55,7 @@ VOICE = os.environ.get("AGENT_VOICE", "shubh")          # bulbul:v3 preset
 USE_REALTIME_STT = os.environ.get("SARVAM_REALTIME_STT", "0") == "1"
 BOOKING_TOPIC = "booking.confirmed"                      # read by AgentConsole.tsx
 SLOTS_TOPIC = "slots.offered"                            # ditto — renders as chips
+EMAIL_RPC = "ui.collectEmail"                            # typed input in the browser
 
 
 @dataclass
@@ -91,7 +92,10 @@ class Assistant(Agent):
                     "Use this once the visitor is finished — they've said goodbye, "
                     "or the booking is done and they have nothing else to ask."
                 ),
-                end_instructions="Say a short goodbye, then end the call.",
+                # Returning an instruction makes the model read the call as
+                # unfinished and fire it again — it looped four times in a real
+                # session. End immediately; the prompt says goodbye first.
+                end_instructions=None,
             )],
         )
 
@@ -163,9 +167,11 @@ class Assistant(Agent):
         # So bail out, let the model collect the email, and have it call again.
         if not v.email:
             v.pending_slot = slot_id
-            return ("NOT BOOKED YET - no email on file. Call collect_email now, "
-                    f"then call book_call again with slot_id {slot_id}. "
-                    "Do not tell them it is booked yet.")
+            return ("FAILED: nothing was booked. The slot is still free and is "
+                    "NOT held. Do NOT say booked, confirmed, all set, or "
+                    "'you're in'. Tell them you need their email to confirm, "
+                    "then call collect_email, then call book_call again with "
+                    f"slot_id {slot_id}.")
 
         # Writing to the calendar can't be half-done, so hold the turn.
         context.disallow_interruptions()
@@ -193,9 +199,19 @@ class Assistant(Agent):
 
         Call this when book_call tells you an email is needed, or before booking
         if you don't have one. Do not ask for the address in your own words —
-        this reads it back to confirm it, which spoken addresses need.
+        this puts a box on screen and falls back to asking aloud.
         """
         v: Visitor = context.session.userdata
+
+        typed = await _ask_browser_for_email(v)
+        if typed:
+            v.email = typed
+            logger.info("email captured via UI input")
+            if v.pending_slot:
+                return (f"Email is {v.email}. Now call book_call again with slot_id "
+                        f"{v.pending_slot}. It is NOT booked until that succeeds.")
+            return f"Email is {v.email}."
+
         result = await GetEmailTask(chat_ctx=self.chat_ctx)
         v.email = getattr(result, "email_address", None)
         if not v.email:
@@ -287,6 +303,37 @@ async def _log(context: RunContext, v: Visitor, method: str, handle: str,
     v.contacted = True
     logger.info("lead logged: %s -> %s", method, handle)
     return f"Saved. Tell them Naman will reach out via {method}."
+
+
+async def _ask_browser_for_email(v: Visitor) -> str | None:
+    """Ask the page for a typed address. Returns None if it can't or won't.
+
+    Typing beats dictation: STT mangles addresses, and reading one back to
+    confirm costs an entire turn. But a caller may have no UI at all (SIP, the
+    Agent Console), and may dismiss the box, so every failure falls back to
+    asking aloud rather than dead-ending.
+    """
+    room = v.room
+    if room is None:
+        return None
+    try:
+        identity = next(iter(room.remote_participants))
+    except StopIteration:
+        return None
+
+    try:
+        raw = await room.local_participant.perform_rpc(
+            destination_identity=identity,
+            method=EMAIL_RPC,
+            payload=json.dumps({"prompt": "Your email"}),
+            response_timeout=90.0,   # a human has to type it
+        )
+        email = (json.loads(raw) or {}).get("email", "").strip()
+        return email or None
+    except Exception as e:
+        logger.info("no typed email (%s: %s); asking by voice",
+                    type(e).__name__, str(e)[:200])
+        return None
 
 
 async def _publish(v: Visitor, topic: str, payload: dict) -> None:
