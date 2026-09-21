@@ -206,7 +206,9 @@ class Assistant(Agent):
         v.pending_slot = None
         await _publish_booking(context, res, v)
         logger.info("booked %s for %s", res["label"], v.email)
-        return f"Booked {res['label']}. Tell them it's confirmed and he'll see it."
+        return (f"Booked {res['label']}. Tell them it's confirmed, that the join "
+                "link is on screen and in the calendar invite, and that Naman "
+                "will see it. Do not read the link out loud.")
 
     # --- contact capture ---------------------------------------------------
 
@@ -378,6 +380,9 @@ async def _publish_booking(context: RunContext, res: dict, v: Visitor) -> None: 
         "minutes": booking.SLOT_MINUTES,
         "email": v.email,
         "tz": v.tz,
+        "joinUrl": res.get("join_url"),
+        # True when Google emailed a real invite, so the UI can drop the .ics
+        "invited": bool(res.get("invited")),
     })
     # The offer is spent; clear the chips so a stale list can't be tapped.
     await _publish(v, SLOTS_TOPIC, {"slots": [], "tz": v.tz})
