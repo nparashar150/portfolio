@@ -83,6 +83,35 @@ export const bookingStore = {
   },
 };
 
+// slots the agent just offered, pushed over `slots.offered`. Reading six times
+// aloud is unusable, so the UI renders them as chips the visitor can tap; the
+// tap is sent back as a chat turn, keeping the conversation the source of truth.
+export type Slot = { id: string; label: string };
+
+let slots: Slot[] = [];
+const sSubs = new Set<() => void>();
+
+export const EMPTY_SLOTS: Slot[] = [];
+
+export const slotsStore = {
+  get: (): Slot[] => slots,
+  set: (next: Slot[]) => {
+    slots = next.length === 0 ? EMPTY_SLOTS : next;
+    sSubs.forEach((cb) => cb());
+  },
+  clear: () => {
+    if (slots.length === 0) return;
+    slots = EMPTY_SLOTS;
+    sSubs.forEach((cb) => cb());
+  },
+  subscribe: (cb: () => void) => {
+    sSubs.add(cb);
+    return () => {
+      sSubs.delete(cb);
+    };
+  },
+};
+
 // chat send fn, set by a component mounted inside the LiveKit room context
 export const sendRef: { current: ((text: string) => void) | null } = {
   current: null,
