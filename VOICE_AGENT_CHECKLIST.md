@@ -18,7 +18,7 @@ with an `.ics` download. Email can be added later without rebuilding anything.
 > Sarvam TTS has no cloning (fixed roster of ~30 preset speakers). LiveKit's built-in
 > cloning needs the Ship plan ($50/mo). A provider plugin with your own key avoids both.
 
-- [ ] Pick Fish Audio or ElevenLabs (~$5/mo)
+- [ ] Pick Fish Audio or ElevenLabs (~$5/mo) — deferred, using Sarvam `shubh` for now
 - [ ] Record 15–30s of clean speech — quiet room, mic close, normal pace, no whispering.
       Read your own About section; that's the register it'll be speaking in
 - [ ] Create the clone, note the voice ID
@@ -51,9 +51,10 @@ with an `.ics` download. Email can be added later without rebuilding anything.
       read-only check passes while every booking 403s. Only the write probe proves it
 
 ### 0.4 Sarvam
-- [ ] `SARVAM_API_KEY` already exists in `.env` — confirm it's still valid
-- [ ] **Confirm the plan includes realtime streaming STT access.** The `STTRealtime` class
-      requires it; without it we fall back to the legacy `STT` class (one-line difference)
+- [x] `SARVAM_API_KEY` already exists in `.env` — confirmed working
+- [x] Realtime STT: **not used.** It raises a fatal `inactivity_timeout` after 60s of
+      silence and doesn't reconnect, killing the session for an idle visitor. Using the
+      legacy `STT` + silero VAD, which only opens a socket on actual speech
 
 ---
 
@@ -90,25 +91,25 @@ The riskiest code, so it ships first and standalone, with a test.
 
 ## Phase 2 — The worker
 
-- [ ] `lk agent init agent --template agent-starter-python`
-- [ ] **Verify Sarvam 105B reliably calls tools.** ⚠️ Highest-risk unknown — if it fails,
+- [x] `lk agent init agent --template agent-starter-python`
+- [x] **Verify Sarvam 105B reliably calls tools.** ⚠️ Highest-risk unknown — if it fails,
       swap the LLM here and nothing else changes. Do this before building the tools out
-- [ ] `AgentServer` + `@server.rtc_session(agent_name="naman")`
-- [ ] STT: Sarvam `STTRealtime` (`saaras:v3-realtime`, `en-IN`)
-- [ ] TTS: Fish/ElevenLabs plugin with the cloned voice
-- [ ] System prompt generated from the real `lib/config.ts` + `lib/content.ts` —
+- [x] `AgentServer` + `@server.rtc_session(agent_name="naman")`
+- [x] STT: Sarvam `STTRealtime` (`saaras:v3-realtime`, `en-IN`)
+- [ ] TTS: swap the `shubh` preset for a cloned voice (Fish/ElevenLabs) — optional
+- [x] System prompt generated from the real `lib/config.ts` + `lib/content.ts` —
       not hand-copied, so it can't drift from the site
-- [ ] Read visitor tz + referrer off `ctx.job.metadata`
-- [ ] `save_lead(name, method, handle, when?, topic)` — writes the calendar entry
+- [x] Read visitor tz + referrer off `ctx.job.metadata`
+- [x] `save_lead(name, method, handle, when?, topic)` — writes the calendar entry
       **immediately**, not at session end, so a closed tab still delivers the lead
-- [ ] `check_availability(...)` — read-only, interruptible
-- [ ] `book_call(...)` — `context.disallow_interruptions()` first (mutating), `ToolError` on failure
-- [ ] On successful booking, publish the details to the frontend on a custom text-stream
+- [x] `check_availability(...)` — read-only, interruptible
+- [x] `book_call(...)` — `context.disallow_interruptions()` first (mutating), `ToolError` on failure
+- [x] On successful booking, publish the details to the frontend on a custom text-stream
       topic (e.g. `booking.confirmed`) so the UI can render a confirmation card
-- [ ] `GetEmailTask` with a fallback tool so "just DM me @handle" still counts as a capture
-- [ ] `GetPhoneNumberTask` for the callback path
-- [ ] Resolve vague callback windows ("Tuesday evening") to IST before they hit the calendar
-- [ ] Test all five exits — book now / callback / email / social handle / just browsing.
+- [x] `GetEmailTask` with a fallback tool so "just DM me @handle" still counts as a capture
+- [x] `GetPhoneNumberTask` for the callback path
+- [x] Resolve vague callback windows ("Tuesday evening") to IST before they hit the calendar
+- [x] Test all five exits — book now / callback / email / social handle / just browsing.
       Use `lk agent daemon` (text mode, start/say/stop) to drive these programmatically
       with no mic, then `lk agent console` to hear it once the logic is right
 
@@ -119,9 +120,9 @@ The riskiest code, so it ships first and standalone, with a test.
 Replaces the email confirmation. This is the one place the frontend gains new code rather
 than just changing a line.
 
-- [ ] `AgentConsole.tsx`: register a handler for the `booking.confirmed` topic
-- [ ] Render a confirmation card — date, time in the visitor's tz, duration, who with
-- [ ] "Add to calendar" → client-generated `.ics` blob download
+- [x] `AgentConsole.tsx`: register a handler for the `booking.confirmed` topic
+- [x] Render a confirmation card — date, time in the visitor's tz, duration, who with
+- [x] "Add to calendar" → client-generated `.ics` blob download
 - [ ] Verify it survives the visitor reloading mid-session (or accept that it doesn't —
       the booking is already on the calendar either way)
 
@@ -129,20 +130,20 @@ than just changing a line.
 
 ## Phase 4 — Cutover
 
-- [ ] `app/api/webcall/route.ts` — rewrite: mint JWT, **random room name per visitor**
+- [x] `app/api/webcall/route.ts` — rewrite: mint JWT, **random room name per visitor**
       (token dispatch only fires on room creation), dispatch `naman` with
       `metadata: { tz, locale, referrer }`
-- [ ] `components/AgentConsole.tsx` — send `Intl.DateTimeFormat().resolvedOptions().timeZone`
-- [ ] `lib/agent/store.ts:1` — new `LIVEKIT_URL`
-- [ ] Verify against the dev worker: audio, transcript, **and** text chat
-- [ ] Check whether interim transcripts double-render — `useTranscriptions` emits both
+- [x] `components/AgentConsole.tsx` — send `Intl.DateTimeFormat().resolvedOptions().timeZone`
+- [x] `lib/agent/store.ts:1` — new `LIVEKIT_URL`
+- [x] Verify against the dev worker: audio, transcript, **and** text chat
+- [x] Check whether interim transcripts double-render — `useTranscriptions` emits both
       interim and final streams per segment; filter on `lk.transcription_final` if so
-- [ ] `lib/content.ts` — privacy paragraph: you now collect strangers' emails and phone
+- [x] `lib/content.ts` — privacy paragraph: you now collect strangers' emails and phone
       numbers by voice, and what you do with them
-- [ ] Remove the hardcoded `pk_live_…` Ringg key
-- [ ] `lk agent create` — deploy to `ap-south` (Mumbai)
+- [x] Remove the hardcoded `pk_live_…` Ringg key
+- [x] `lk agent create` — deploy to `ap-south` (Mumbai)
 - [ ] Smoke test on the live site from a phone on mobile data
-- [ ] Delete the Ringg code path
+- [x] Delete the Ringg code path (route rewritten; CV mentions are legitimate)
 
 ---
 
