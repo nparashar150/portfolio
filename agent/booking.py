@@ -18,6 +18,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
+import secrets
 from dataclasses import dataclass
 from zoneinfo import ZoneInfo
 
@@ -44,9 +45,25 @@ VISITOR_LATEST_HOUR = 22           # a call must have *ended* by 22:00 local
 AGENT_TAG = "naman-voice-agent"
 
 # A service account cannot create a Google Meet link on a consumer gmail account
-# ("Invalid conference type value"), so the call carries a fixed personal meeting
-# room instead. Set MEETING_LINK to a permanent Meet/Zoom/Whereby URL.
+# ("Invalid conference type value"), so the join URL comes from here instead.
+#
+#   MEETING_LINK set  -> that exact URL every time (your Meet room, a Zoom PMI)
+#   unset             -> a fresh Jitsi room per booking, no account needed
+#
+# Per-booking rooms beat one shared link: two visitors booked an hour apart can
+# never walk into each other's call. The room name carries 128 bits of entropy
+# because a Jitsi room is open to anyone holding the URL.
 MEETING_LINK = os.environ.get("MEETING_LINK", "").strip()
+MEETING_FALLBACK_BASE = os.environ.get(
+    "MEETING_FALLBACK_BASE", "https://meet.jit.si"
+).rstrip("/")
+
+
+def meeting_url() -> str:
+    """The join link for a booking."""
+    if MEETING_LINK:
+        return MEETING_LINK
+    return f"{MEETING_FALLBACK_BASE}/naman-{secrets.token_urlsafe(16)}"
 
 
 @dataclass(frozen=True)
@@ -129,6 +146,40 @@ def is_civil_for_visitor(slot: "Slot", tz: ZoneInfo) -> bool:
 # --- Google Calendar ---------------------------------------------------------
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
+
+# Reading and writing use different identities on purpose:
+#
+#   READ  - the service account, because it's the thing every calendar (personal,
+#           Sylva, Ringg) is shared with, and it needs no refresh token.
+#   WRITE - Naman himself over OAuth, because a service account on a consumer
+#           gmail can neither create a Meet link nor invite an attendee.
+#
+# Without OAuth configured, writes fall back to the service account: the booking
+# still lands, but with no Meet link and no invite email. See authorize.py.
+OAUTH_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip()
+OAUTH_CLIENT_SECRET = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "").strip()
+OAUTH_REFRESH_TOKEN = os.environ.get("GOOGLE_OAUTH_REFRESH_TOKEN", "").strip()
+
+
+def _oauth_service():
+    """Calendar client acting as Naman, or None if OAuth isn't configured."""
+    if not (OAUTH_CLIENT_ID and OAUTH_CLIENT_SECRET and OAUTH_REFRESH_TOKEN):
+        return None
+    try:
+        from google.oauth2.credentials import Credentials
+        from googleapiclient.discovery import build
+
+        creds = Credentials(
+            token=None,
+            refresh_token=OAUTH_REFRESH_TOKEN,
+            client_id=OAUTH_CLIENT_ID,
+            client_secret=OAUTH_CLIENT_SECRET,
+            token_uri="https://oauth2.googleapis.com/token",
+            scopes=["https://www.googleapis.com/auth/calendar.events"],
+        )
+        return build("calendar", "v3", credentials=creds, cache_discovery=False)
+    except Exception:
+        return None
 
 
 def _service():
@@ -284,9 +335,12 @@ def book(start_iso: str, name: str, email: str, brief: str, visitor_tz: str) -> 
     if not is_civil_for_visitor(Slot(start, end), vtz):
         raise RuntimeError("that time is the middle of the night where you are")
 
-    # No `attendees` key: service accounts get 403 adding attendees on a
-    # consumer gmail. The visitor's address lives in the description instead.
-    event = svc.events().insert(calendarId=_calendar_id(), body={
+    writer = _oauth_service()
+    as_naman = writer is not None
+    if writer is None:
+        writer = svc
+
+    body: dict = {
         "summary": f"Call: {name} (via site agent)",
         "description": (
             f"Booked by the voice agent on nparashar150.com\n\n"
@@ -294,15 +348,38 @@ def book(start_iso: str, name: str, email: str, brief: str, visitor_tz: str) -> 
             f"Email:    {email}\n"
             f"Timezone: {visitor_tz}\n\n"
             f"What they need:\n{brief}\n"
-            + (f"\nJoin: {MEETING_LINK}\n" if MEETING_LINK else "")
         ),
-        **({"location": MEETING_LINK} if MEETING_LINK else {}),
         "start": {"dateTime": start.isoformat(), "timeZone": "UTC"},
         "end": {"dateTime": end.isoformat(), "timeZone": "UTC"},
         "extendedProperties": {"private": {"source": AGENT_TAG, "email": email}},
-    }).execute()
+    }
+
+    join = ""
+    if as_naman:
+        # Acting as Naman, Google mints a real Meet room and emails the invite.
+        body["attendees"] = [{"email": email, "displayName": name or email}]
+        body["conferenceData"] = {"createRequest": {
+            "requestId": secrets.token_hex(16),
+            "conferenceSolutionKey": {"type": "hangoutsMeet"},
+        }}
+        event = writer.events().insert(
+            calendarId=_calendar_id(), body=body,
+            conferenceDataVersion=1,
+            sendUpdates="all",          # the invite email
+        ).execute()
+        join = event.get("hangoutLink") or ""
+    else:
+        join = meeting_url()
+        body["location"] = join
+        body["description"] += f"\nJoin: {join}\n"
+        event = writer.events().insert(calendarId=_calendar_id(), body=body).execute()
+
+    if not join:
+        join = meeting_url()
 
     return {"event_id": event["id"],
+            "join_url": join,
+            "invited": as_naman,
             "start": start.isoformat(),
             "label": Slot(start, end).label(ZoneInfo(visitor_tz) if visitor_tz else IST)}
 
