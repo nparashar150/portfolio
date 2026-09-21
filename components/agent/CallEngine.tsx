@@ -24,6 +24,8 @@ import {
   bookingStore,
   LIVEKIT_URL,
   sendRef,
+  type Slot,
+  slotsStore,
   transcriptStore,
   type TranscriptLine,
 } from "@/lib/agent/store";
@@ -82,6 +84,7 @@ export function CallEngine({
       <BandReader />
       <TranscriptReader />
       <BookingReader />
+      <SlotsReader />
       <ChatBridge />
     </RoomContext.Provider>
   );
@@ -158,6 +161,35 @@ function BookingReader() {
         });
       } catch {
         // ignore: the booking is already on the calendar, the card is cosmetic
+      }
+    });
+    return () => room.unregisterTextStreamHandler(topic);
+  }, [room]);
+
+  return null;
+}
+
+// the times the agent just offered, so the visitor can tap one instead of
+// memorising six spoken options
+function SlotsReader() {
+  const room = useContext(RoomContext);
+
+  useEffect(() => {
+    if (!room) return;
+    const topic = "slots.offered";
+    room.registerTextStreamHandler(topic, async (reader) => {
+      try {
+        const parsed = JSON.parse(await reader.readAll()) as { slots?: unknown };
+        if (!Array.isArray(parsed.slots)) return;
+        const clean = parsed.slots.filter(
+          (s): s is Slot =>
+            !!s &&
+            typeof (s as Slot).id === "string" &&
+            typeof (s as Slot).label === "string",
+        );
+        slotsStore.set(clean);
+      } catch {
+        // a malformed payload just means no chips; the agent still speaks them
       }
     });
     return () => room.unregisterTextStreamHandler(topic);
