@@ -16,10 +16,12 @@ import {
   RoomEvent,
   Track,
 } from "livekit-client";
-import { useEffect, useMemo, useRef } from "react";
+import { useContext, useEffect, useMemo, useRef } from "react";
 import {
   agentStatus,
   bandsRef,
+  type Booking,
+  bookingStore,
   LIVEKIT_URL,
   sendRef,
   transcriptStore,
@@ -79,6 +81,7 @@ export function CallEngine({
       <RoomAudioRenderer />
       <BandReader />
       <TranscriptReader />
+      <BookingReader />
       <ChatBridge />
     </RoomContext.Provider>
   );
@@ -127,6 +130,38 @@ function TranscriptReader() {
       }));
     transcriptStore.set(mapped);
   }, [lines, localParticipant?.identity]);
+
+  return null;
+}
+
+// the agent announces a booked call on its own text-stream topic, separate from
+// the transcript, so the UI can render a card rather than parse speech for a date
+function BookingReader() {
+  const room = useContext(RoomContext);
+
+  useEffect(() => {
+    if (!room) return;
+    const topic = "booking.confirmed";
+    room.registerTextStreamHandler(topic, async (reader) => {
+      try {
+        const parsed = JSON.parse(await reader.readAll()) as Partial<Booking>;
+        // Trust nothing: a malformed payload must not blank the card or throw.
+        if (typeof parsed.start !== "string" || typeof parsed.label !== "string") {
+          return;
+        }
+        bookingStore.set({
+          start: parsed.start,
+          label: parsed.label,
+          minutes: typeof parsed.minutes === "number" ? parsed.minutes : 30,
+          email: typeof parsed.email === "string" ? parsed.email : null,
+          tz: typeof parsed.tz === "string" ? parsed.tz : "Asia/Kolkata",
+        });
+      } catch {
+        // ignore: the booking is already on the calendar, the card is cosmetic
+      }
+    });
+    return () => room.unregisterTextStreamHandler(topic);
+  }, [room]);
 
   return null;
 }
