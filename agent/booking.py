@@ -31,6 +31,7 @@ WORK_END_HOUR = 24                 # midnight IST; a call must *end* by then
 SLOT_MINUTES = 30
 MIN_LEAD_HOURS = 2                 # earliest a stranger can book from now
 MAX_BOOKINGS_PER_DAY = 3           # cap on agent-made bookings, anti-abuse
+MAX_LEADS_PER_DAY = 25             # cap on lead entries, so nobody can flood the calendar
 SEARCH_DAYS = 14                   # how far ahead to offer
 
 # Naman is free until midnight IST, but midnight IST is 2:30pm in New York and
@@ -263,17 +264,35 @@ def _busy_blocks(svc, start: dt.datetime, end: dt.datetime):
     return blocks
 
 
-def _agent_bookings_on(svc, day: dt.date) -> int:
-    """How many bookings this agent already made on `day` (for the daily cap)."""
+def _agent_events_on(svc, day: dt.date, *, leads: bool) -> int:
+    """Count this agent's own events on `day`.
+
+    Only agent-created events are counted — they carry a private tag — so
+    Naman's real meetings can never trip a cap meant for strangers.
+    """
     lo = dt.datetime.combine(day, dt.time(0, 0), tzinfo=IST)
     hi = lo + dt.timedelta(days=1)
+    props = [f"source={AGENT_TAG}"]
+    if leads:
+        props.append("lead=1")
     resp = svc.events().list(
         calendarId=_calendar_id(),
         timeMin=lo.isoformat(), timeMax=hi.isoformat(),
-        privateExtendedProperty=f"source={AGENT_TAG}",
+        privateExtendedProperty=props,
         singleEvents=True,
     ).execute()
-    return len(resp.get("items", []))
+    items = resp.get("items", [])
+    if leads:
+        return len(items)
+    # Bookings are everything tagged that is NOT a lead entry.
+    return len([e for e in items
+                if (e.get("extendedProperties", {}).get("private", {})
+                    .get("lead") != "1")])
+
+
+def _agent_bookings_on(svc, day: dt.date) -> int:
+    """How many calls this agent already booked on `day`."""
+    return _agent_events_on(svc, day, leads=False)
 
 
 def free_slots(visitor_tz: str, *, days: int = SEARCH_DAYS, limit: int = 6):
@@ -394,6 +413,13 @@ def log_lead(name: str, method: str, handle: str, brief: str,
     """
     svc = _service()
     today = dt.datetime.now(IST).date()
+
+    # Leads are cheap to create and land on a real calendar, so an uncapped
+    # tool is an invitation to flood it. Bookings were already capped; this
+    # closes the same hole on the other write path.
+    if _agent_events_on(svc, today, leads=True) >= MAX_LEADS_PER_DAY:
+        raise RuntimeError("too many contacts recorded today")
+
     event = svc.events().insert(calendarId=_calendar_id(), body={
         "summary": f"Lead: {name or 'anon'} ({method})",
         "description": (
