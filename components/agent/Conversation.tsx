@@ -17,6 +17,9 @@ import {
 /** Shared layout id, so motion morphs the panel between dock and section. */
 export const CONVERSATION_LAYOUT_ID = "agent-conversation";
 
+/** One spring for every part of the handoff, so nothing arrives out of step. */
+export const HANDOFF = { type: "spring", bounce: 0.12, duration: 0.42 } as const;
+
 /**
  * The whole exchange — transcript, offered slots, the details form and the
  * confirmation — as one scrolling thread.
@@ -65,13 +68,21 @@ export function Conversation({ compact = false }: { compact?: boolean }) {
   }
 
   return (
+    // The scroller is a child, not this element: animating layout on a box
+    // that is itself scrolling makes the content jitter as the height springs.
+    // `layout="position"` keeps the text still and moves the frame instead.
     <motion.div
       layoutId={CONVERSATION_LAYOUT_ID}
-      ref={logRef}
-      className={`flex flex-col gap-3 overflow-y-auto border border-line bg-surface-2 p-5 ${
-        compact ? "max-h-[18rem]" : "mt-4 max-h-[26rem]"
-      }`}
+      layout="position"
+      transition={HANDOFF}
+      className={`border border-line bg-surface-2 ${compact ? "" : "mt-4"}`}
     >
+      <div
+        ref={logRef}
+        className={`flex flex-col gap-3 overflow-y-auto p-5 ${
+          compact ? "max-h-[15rem]" : "max-h-[26rem]"
+        }`}
+      >
         {transcript.map((line) => (
           <div key={line.id} className="flex gap-3">
             <span
@@ -215,6 +226,7 @@ export function Conversation({ compact = false }: { compact?: boolean }) {
             </div>
           </div>
         )}
+      </div>
     </motion.div>
   );
 }

@@ -8,7 +8,7 @@ import {
   type AgentStatus,
   consoleInViewStore,
 } from "@/lib/agent/store";
-import { Conversation } from "./agent/Conversation";
+import { Conversation, HANDOFF } from "./agent/Conversation";
 import { gateStore, AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
 import { Magnetic } from "./Magnetic";
 
@@ -122,13 +122,21 @@ export function TalkDock() {
           initial={{ opacity: 0, y: 24, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.95 }}
-          transition={{ duration: 0.25, scale: { type: "spring", visualDuration: 0.25, bounce: 0.15 } }}
+          // Entrance keeps its own snap; only the dock<->console handoff uses
+          // the shared spring, so the two never fight over the same frame.
+          transition={{
+            duration: 0.25,
+            scale: { type: "spring", visualDuration: 0.25, bounce: 0.15 },
+            layout: HANDOFF,
+          }}
         >
           <motion.div
             layout
+            transition={HANDOFF}
             className={`flex flex-col gap-3 border border-line bg-surface/95 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.9)] backdrop-blur ${
               expanded ? "rounded-2xl p-3" : "rounded-full"
             }`}
+            style={{ borderRadius: expanded ? 16 : 999 }}
           >
           {expanded && <Conversation compact />}
           <div className={`flex items-center gap-3 sm:gap-5 ${
