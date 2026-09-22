@@ -12,7 +12,7 @@ import {
   transcriptStore,
   uiRequestStore,
 } from "@/lib/agent/store";
-import { sendRef } from "@/lib/agent/store";
+import { micRef, micStore, sendRef } from "@/lib/agent/store";
 import { Conversation } from "./agent/Conversation";
 import { trackCallStarted } from "@/lib/analytics";
 import { Visualizer } from "./agent/Visualizer";
@@ -39,6 +39,7 @@ export function AgentConsole() {
     agentStatus.get,
     () => "idle" as AgentStatus,
   );
+  const micOn = useSyncExternalStore(micStore.subscribe, micStore.get, () => true);
   const [token, setToken] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
   const busy = useRef(false);
@@ -173,7 +174,9 @@ export function AgentConsole() {
     status === "connecting"
       ? "Connecting…"
       : status === "live"
-        ? "End call"
+        ? micOn
+          ? "Mute"
+          : "Unmute"
         : "Talk — and book 30 min";
 
   return (
@@ -204,17 +207,40 @@ export function AgentConsole() {
       {/* try an agent + quick prompts */}
       <div className="flex flex-wrap items-center gap-2.5 pt-5">
         <button
-          onClick={() => (active ? end() : start())}
+          onClick={() => (status === "live" ? micRef.current?.(!micOn) : start())}
           disabled={status === "connecting"}
+          aria-label={
+            status === "live"
+              ? micOn
+                ? "Mute your microphone"
+                : "Unmute your microphone"
+              : "Talk to the agent"
+          }
+          aria-pressed={status === "live" ? !micOn : undefined}
           className="flex shrink-0 items-center gap-2.5 rounded-full border border-line-3 bg-surface py-2 pr-5 pl-2 transition-colors hover:border-green/60 disabled:opacity-70"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green text-green-deep">
-            <span className="text-[11px]">{active ? "■" : "▶"}</span>
+          <span
+            className={`flex h-7 w-7 items-center justify-center rounded-full ${
+              status === "live" && !micOn
+                ? "bg-line-3 text-cream"
+                : "bg-green text-green-deep"
+            }`}
+          >
+            <span className="text-[11px]">
+              {status === "live" ? (micOn ? "\u25CF" : "\u2298") : "\u25B6"}
+            </span>
           </span>
-          <span className="text-[14px] font-semibold text-cream">
-            {ctaLabel}
-          </span>
+          <span className="text-[14px] font-semibold text-cream">{ctaLabel}</span>
         </button>
+        {active && (
+          <button
+            onClick={end}
+            aria-label="End call"
+            className="shrink-0 rounded-full border border-line-3 px-4 py-2.5 font-mono text-xs font-bold tracking-[0.06em] text-muted-2 transition-colors hover:border-cream hover:text-cream"
+          >
+            END CALL
+          </button>
+        )}
         {config.agentPrompts.map((p, idx) => (
           <button
             key={p}

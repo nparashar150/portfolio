@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   agentStatus,
+  micRef,
+  micStore,
   bandsRef,
   type AgentStatus,
   consoleInViewStore,
@@ -72,6 +74,7 @@ export function TalkDock() {
     () => false,
   );
   const [seconds, setSeconds] = useState(0);
+  const micOn = useSyncExternalStore(micStore.subscribe, micStore.get, () => true);
 
   const live = status === "live";
 
@@ -148,15 +151,32 @@ export function TalkDock() {
           }`}>
             <Magnetic strength={0.25}>
               <motion.button
-                onClick={toggle}
+                onClick={() =>
+                  live ? micRef.current?.(!micOn) : toggle()
+                }
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.94 }}
                 disabled={status === "connecting"}
-                aria-label={live ? "End call" : "Talk to the agent"}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-green disabled:opacity-60 sm:h-[52px] sm:w-[52px]"
+                aria-label={
+                  live
+                    ? micOn
+                      ? "Mute your microphone"
+                      : "Unmute your microphone"
+                    : "Talk to the agent"
+                }
+                aria-pressed={live ? !micOn : undefined}
+                // The round green button is what people reach for mid-call, and
+                // they reach for it expecting mute. So mid-call it IS mute.
+                className={`flex h-10 w-10 items-center justify-center rounded-full disabled:opacity-60 sm:h-[52px] sm:w-[52px] ${
+                  live && !micOn ? "bg-line-3" : "bg-green"
+                }`}
               >
-                <span className="text-[12px] text-green-deep sm:text-[13px]">
-                  {live ? "■" : "▶"}
+                <span
+                  className={`text-[12px] sm:text-[13px] ${
+                    live && !micOn ? "text-cream" : "text-green-deep"
+                  }`}
+                >
+                  {live ? (micOn ? "\u25CF" : "\u2298") : "\u25B6"}
                 </span>
               </motion.button>
             </Magnetic>
@@ -182,6 +202,20 @@ export function TalkDock() {
             >
               {fmt(seconds)}
             </span>
+            {live && (
+              <button
+                onClick={toggle}
+                aria-label="End call"
+                // Its own control, its own shape, its own weight: a written
+                // word in an outlined pill, next to a filled circle with an
+                // icon. Sharing one button for "mute" and "hang up" is how
+                // people hung up by accident. The palette has no red, so the
+                // separation is structural rather than chromatic.
+                className="shrink-0 rounded-full border border-line-3 px-3.5 py-2 font-mono text-[11px] font-bold tracking-[0.06em] text-muted-2 transition-colors hover:border-cream hover:text-cream"
+              >
+                END
+              </button>
+            )}
           </div>
           </motion.div>
         </motion.div>
