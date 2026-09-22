@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import logging
 import os
 import secrets
 from dataclasses import dataclass
@@ -54,17 +55,13 @@ AGENT_TAG = "naman-voice-agent"
 # Per-booking rooms beat one shared link: two visitors booked an hour apart can
 # never walk into each other's call. The room name carries 128 bits of entropy
 # because a Jitsi room is open to anyone holding the URL.
-MEETING_LINK = os.environ.get("MEETING_LINK", "").strip()
-MEETING_FALLBACK_BASE = os.environ.get(
-    "MEETING_FALLBACK_BASE", "https://meet.jit.si"
-).rstrip("/")
-
-
 def meeting_url() -> str:
-    """The join link for a booking."""
-    if MEETING_LINK:
-        return MEETING_LINK
-    return f"{MEETING_FALLBACK_BASE}/naman-{secrets.token_urlsafe(16)}"
+    """The join link for a booking, when Google isn't providing one."""
+    fixed = os.environ.get("MEETING_LINK", "").strip()
+    if fixed:
+        return fixed
+    base = os.environ.get("MEETING_FALLBACK_BASE", "https://meet.jit.si").rstrip("/")
+    return f"{base}/naman-{secrets.token_urlsafe(16)}"
 
 
 @dataclass(frozen=True)
@@ -157,14 +154,26 @@ SCOPES = ["https://www.googleapis.com/auth/calendar"]
 #
 # Without OAuth configured, writes fall back to the service account: the booking
 # still lands, but with no Meet link and no invite email. See authorize.py.
-OAUTH_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip()
-OAUTH_CLIENT_SECRET = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "").strip()
-OAUTH_REFRESH_TOKEN = os.environ.get("GOOGLE_OAUTH_REFRESH_TOKEN", "").strip()
+def oauth_env() -> tuple[str, str, str]:
+    """OAuth credentials, read fresh every time.
+
+    These were module-level constants, which bound them to whatever the
+    environment held at import. `agent.py` imports this module *before* calling
+    load_dotenv, so locally they were always empty — OAuth silently never
+    engaged and every booking fell back to a Jitsi room. Read them lazily and
+    no import order can break it again.
+    """
+    return (
+        os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip(),
+        os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "").strip(),
+        os.environ.get("GOOGLE_OAUTH_REFRESH_TOKEN", "").strip(),
+    )
 
 
 def _oauth_service():
     """Calendar client acting as Naman, or None if OAuth isn't configured."""
-    if not (OAUTH_CLIENT_ID and OAUTH_CLIENT_SECRET and OAUTH_REFRESH_TOKEN):
+    client_id, client_secret, refresh_token = oauth_env()
+    if not (client_id and client_secret and refresh_token):
         return None
     try:
         from google.oauth2.credentials import Credentials
@@ -172,14 +181,16 @@ def _oauth_service():
 
         creds = Credentials(
             token=None,
-            refresh_token=OAUTH_REFRESH_TOKEN,
-            client_id=OAUTH_CLIENT_ID,
-            client_secret=OAUTH_CLIENT_SECRET,
+            refresh_token=refresh_token,
+            client_id=client_id,
+            client_secret=client_secret,
             token_uri="https://oauth2.googleapis.com/token",
             scopes=["https://www.googleapis.com/auth/calendar.events"],
         )
         return build("calendar", "v3", credentials=creds, cache_discovery=False)
     except Exception:
+        # Silently returning None here is how this went unnoticed for a day.
+        logging.getLogger(__name__).exception("OAuth client could not be built")
         return None
 
 

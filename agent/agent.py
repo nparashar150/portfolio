@@ -40,10 +40,11 @@ from livekit.agents.beta.workflows import GetEmailTask, GetPhoneNumberTask
 from livekit import rtc
 from livekit.plugins import sarvam, silero
 
-import booking
-import content
-
+# Before importing anything that reads the environment.
 load_dotenv(".env.local")
+
+import booking  # noqa: E402
+import content  # noqa: E402
 logger = logging.getLogger("naman-agent")
 
 # The daemon detaches, so its stdout is lost. Set AGENT_LOG_FILE to keep tracebacks.
