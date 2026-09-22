@@ -147,7 +147,7 @@ export function TalkDock() {
             style={{ borderRadius: expanded ? 16 : 999 }}
           >
           {expanded && <Conversation compact />}
-          <div className={`flex items-center gap-3 sm:gap-5 ${
+          <div className={`flex items-center gap-3 sm:gap-4 ${
             expanded ? "px-1 pb-1" : "py-2 pr-5 pl-2 sm:py-3 sm:pr-7 sm:pl-3"
           }`}>
             <Magnetic strength={0.25}>
@@ -177,7 +177,11 @@ export function TalkDock() {
                     live && !micOn ? "text-cream" : "text-green-deep"
                   }
                 >
-                  {live ? <MicIcon muted={!micOn} /> : <PlayIcon />}
+                  {live ? (
+                    <MicIcon muted={!micOn} size={20} />
+                  ) : (
+                    <PlayIcon size={20} />
+                  )}
                 </span>
               </motion.button>
             </Magnetic>
@@ -198,25 +202,27 @@ export function TalkDock() {
             </div>
             <span
               className={`font-mono text-[11px] tracking-[0.05em] text-muted tabular-nums ${
-                live ? "" : "hidden sm:inline"
+                live ? "ml-auto" : "ml-auto hidden sm:inline"
               }`}
             >
               {fmt(seconds)}
             </span>
             {live && (
-              <button
-                onClick={toggle}
-                aria-label="End call"
-                // Its own control, its own shape, its own weight: a written
-                // word in an outlined pill, next to a filled circle with an
-                // icon. Sharing one button for "mute" and "hang up" is how
-                // people hung up by accident. The palette has no red, so the
-                // separation is structural rather than chromatic.
-                className="flex shrink-0 items-center gap-1.5 rounded-full bg-danger px-3.5 py-2 font-mono text-[11px] font-bold tracking-[0.06em] text-white transition-opacity hover:opacity-90"
-              >
-                <HangUpIcon />
-                END
-              </button>
+              <Magnetic strength={0.25}>
+                <motion.button
+                  onClick={toggle}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.94 }}
+                  aria-label="End call"
+                  // A circle of equal weight to the mic, in red, at the far end
+                  // of the row. Two round buttons is the shape language every
+                  // call UI uses — a text pill beside a circle reads as a
+                  // secondary action, which hanging up is not.
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger text-white sm:h-[52px] sm:w-[52px]"
+                >
+                  <HangUpIcon size={20} />
+                </motion.button>
+              </Magnetic>
             )}
           </div>
           </motion.div>

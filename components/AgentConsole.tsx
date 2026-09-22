@@ -227,7 +227,11 @@ export function AgentConsole() {
                 : "bg-green text-green-deep"
             }`}
           >
-            {status === "live" ? <MicIcon muted={!micOn} /> : <PlayIcon />}
+            {status === "live" ? (
+              <MicIcon muted={!micOn} size={16} />
+            ) : (
+              <PlayIcon size={16} />
+            )}
           </span>
           <span className="text-[14px] font-semibold text-cream">{ctaLabel}</span>
         </button>
@@ -237,7 +241,7 @@ export function AgentConsole() {
             aria-label="End call"
             className="flex shrink-0 items-center gap-2 rounded-full bg-danger px-4 py-2.5 font-mono text-xs font-bold tracking-[0.06em] text-white transition-opacity hover:opacity-90"
           >
-            <HangUpIcon />
+            <HangUpIcon size={14} />
             END CALL
           </button>
         )}
