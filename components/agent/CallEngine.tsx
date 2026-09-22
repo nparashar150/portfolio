@@ -18,6 +18,7 @@ import {
   Track,
 } from "livekit-client";
 import { useContext, useEffect, useMemo, useRef } from "react";
+import { trackCallBooked } from "@/lib/analytics";
 import {
   agentStatus,
   bandsRef,
@@ -164,6 +165,10 @@ function BookingReader() {
           joinUrl: typeof parsed.joinUrl === "string" ? parsed.joinUrl : null,
           invited: parsed.invited === true,
         });
+        // Fired here rather than in a render effect: this handler runs exactly
+        // once per booking, so the conversion can't be double-counted by a
+        // re-render or a remount.
+        trackCallBooked(parsed.start, parsed.email ?? null);
       } catch {
         // ignore: the booking is already on the calendar, the card is cosmetic
       }

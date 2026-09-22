@@ -14,6 +14,7 @@ import {
 } from "@/lib/agent/store";
 import { sendRef } from "@/lib/agent/store";
 import { Conversation } from "./agent/Conversation";
+import { trackCallStarted } from "@/lib/analytics";
 import { Visualizer } from "./agent/Visualizer";
 import { AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
 
@@ -146,6 +147,9 @@ export function AgentConsole() {
       const data = await res.json();
       if (!res.ok || !data?.user_token) throw new Error("token");
       setToken(data.user_token);
+      // Only now: the mic was granted and a session really exists. Firing on
+      // the click would count people who dismissed the permission prompt.
+      trackCallStarted();
     } catch {
       agentStatus.set("error");
       setTimeout(() => agentStatus.set("idle"), 2600);
