@@ -1,12 +1,21 @@
 // Controls for a live call should look like what they do. A glyph like "■"
 // reads as "stop" in a media player, which is how people ended up hanging up
 // when they meant to mute.
+//
+// Sizes are passed in rather than fixed: an icon that looks right at 40px is
+// lost inside a 52px circle. Aim for roughly 40% of the circle.
 
-export function MicIcon({ muted = false }: { muted?: boolean }) {
+export function MicIcon({
+  muted = false,
+  size = 22,
+}: {
+  muted?: boolean;
+  size?: number;
+}) {
   return (
     <svg
-      width="15"
-      height="15"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -24,11 +33,11 @@ export function MicIcon({ muted = false }: { muted?: boolean }) {
   );
 }
 
-export function HangUpIcon() {
+export function HangUpIcon({ size = 22 }: { size?: number }) {
   return (
     <svg
-      width="15"
-      height="15"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -45,10 +54,18 @@ export function HangUpIcon() {
   );
 }
 
-export function PlayIcon() {
+export function PlayIcon({ size = 22 }: { size?: number }) {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M8 5.5v13l11-6.5z" />
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden
+    >
+      {/* Nudged right: a triangle centred on its bounding box looks off-centre
+          inside a circle, because its visual mass sits left of centre. */}
+      <path d="M9 5.5v13l10.5-6.5z" />
     </svg>
   );
 }
