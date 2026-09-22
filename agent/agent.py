@@ -17,6 +17,7 @@ import asyncio
 import json
 import logging
 import os
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 
 from dotenv import load_dotenv
@@ -45,6 +46,7 @@ load_dotenv(".env.local")
 
 import booking  # noqa: E402
 import content  # noqa: E402
+import notify  # noqa: E402
 logger = logging.getLogger("naman-agent")
 
 # The daemon detaches, so its stdout is lost. Set AGENT_LOG_FILE to keep tracebacks.
@@ -79,6 +81,10 @@ MAX_SESSION_SECONDS = float(os.environ.get("AGENT_MAX_SESSION_SECONDS", "600"))
 # element start — so the keyboard won the audio session and the agent's voice
 # was silent on phones. Filling a pause isn't worth losing the voice.
 # Set AGENT_THINKING_SOUND=1 to re-enable once that's solved per-platform.
+# Don't mail about someone who clicked play and wandered off. Two real turns is
+# the line between "a visitor" and "a misclick".
+MIN_TURNS_TO_REPORT = int(os.environ.get("AGENT_MIN_TURNS_TO_REPORT", "2"))
+
 THINKING_SOUND = os.environ.get("AGENT_THINKING_SOUND", "0") == "1"
 THINKING_VOLUME = float(os.environ.get("AGENT_THINKING_VOLUME", "0.5"))
 
@@ -97,6 +103,11 @@ class Visitor:
     # AgentSession exposes room_io, not room, so keep an explicit handle for
     # publishing to the browser.
     room: "rtc.Room | None" = None
+    # Set by the entrypoint. Called from end_call as well as on shutdown,
+    # because a killed process never runs its shutdown callbacks — and the
+    # goodbye path is the one that matters most.
+    report: "Callable[[], Awaitable[None]] | None" = None
+    reported: bool = False
 
 
 # Names and product words the STT otherwise mangles ("Naman" -> "Laman").
@@ -136,6 +147,14 @@ class Assistant(Agent):
             logger.debug("sign-off failed", exc_info=True)
 
         logger.info("visitor ended the call")
+
+        v: Visitor = context.session.userdata
+        if v.report is not None:
+            try:
+                await v.report()
+            except Exception:
+                logger.warning("session report failed", exc_info=True)
+
         try:
             await get_job_context().delete_room()
         except Exception:
@@ -424,6 +443,54 @@ def _build_stt():
                       high_vad_sensitivity=True), silero.VAD.load()
 
 
+def _readable_transcript(session: AgentSession) -> tuple[str, int]:
+    """The conversation as plain text, plus how many turns the visitor took."""
+    lines: list[str] = []
+    turns = 0
+    for item in session.history.items:
+        if getattr(item, "type", None) != "message":
+            continue
+        role = getattr(item, "role", "")
+        content = getattr(item, "content", None)
+        text = " ".join(c for c in content if isinstance(c, str)) if isinstance(
+            content, list
+        ) else str(content or "")
+        text = text.strip()
+        if not text:
+            continue
+        if role == "user":
+            turns += 1
+            lines.append(f"Them: {text}")
+        elif role == "assistant":
+            lines.append(f"Agent: {text}")
+    return "\n".join(lines), turns
+
+
+async def _summarise(transcript: str) -> str:
+    """One short paragraph on what they wanted. Falls back to the raw text."""
+    try:
+        from livekit.agents import llm as lk_llm
+
+        model = sarvam.LLM(model="sarvam-105b-conversations")
+        ctx = lk_llm.ChatContext.empty()
+        ctx.add_message(role="system", content=(
+            "Summarise this conversation between a visitor and Naman's website "
+            "agent, for Naman. Three sentences at most: who they seem to be, "
+            "what they wanted, and whether anything needs his follow-up. Plain "
+            "prose, no bullet points, no preamble."
+        ))
+        ctx.add_message(role="user", content=transcript[:6000])
+        out = ""
+        async with model.chat(chat_ctx=ctx) as stream:
+            async for chunk in stream:
+                if chunk.delta and chunk.delta.content:
+                    out += chunk.delta.content
+        return out.strip() or "(summary unavailable)"
+    except Exception:
+        logger.warning("could not summarise", exc_info=True)
+        return "(summary unavailable)"
+
+
 # --- entrypoint --------------------------------------------------------------
 
 server = AgentServer()
@@ -483,6 +550,42 @@ async def entrypoint(ctx: agents.JobContext):
             logger.debug("wrap-up line failed", exc_info=True)
         finally:
             await session.aclose()
+
+    async def _report() -> None:
+        """Mail Naman what happened. Safe to call more than once."""
+        if visitor.reported:
+            return
+        visitor.reported = True
+        logger.info("building session report")
+        transcript, turns = _readable_transcript(session)
+        logger.info("session report: %d turn(s), %d chars", turns, len(transcript))
+        if turns < MIN_TURNS_TO_REPORT:
+            logger.info("only %d visitor turn(s); not reporting", turns)
+            return
+
+        summary = await _summarise(transcript)
+        v = visitor
+        outcome = "Booked a call" if v.pending_slot is None and v.contacted else (
+            "Left contact details" if v.contacted else "No contact left"
+        )
+        body = (
+            f"{summary}\n\n"
+            f"Outcome:  {outcome}\n"
+            f"Contact:  {v.email or '(none given)'}\n"
+            f"Name:     {v.name or '(not given)'}\n"
+            f"Timezone: {v.tz}\n"
+            f"Came from: {v.referrer or '(direct)'}\n"
+            f"Turns:    {turns}\n\n"
+            f"--- full transcript ---\n{transcript}\n"
+        )
+        who = v.name or v.email or v.tz
+        await asyncio_to_thread(
+            notify.send_to_self, f"Someone talked to your site agent — {who}", body
+        )
+
+    visitor.report = _report
+    # Still registered, to catch closed tabs, the idle timeout and the ceiling.
+    ctx.add_shutdown_callback(_report)
 
     ceiling = asyncio.create_task(_hard_stop())
 

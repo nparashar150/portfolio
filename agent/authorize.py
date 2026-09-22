@@ -31,7 +31,13 @@ import pathlib
 import re
 import sys
 
-SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar.events",
+    # Lets the agent mail Naman a summary after each conversation, sent from
+    # his own account to himself. Adding a scope invalidates the old token —
+    # re-run this and push again after changing this list.
+    "https://www.googleapis.com/auth/gmail.send",
+]
 CLIENT_FILE = pathlib.Path(__file__).parent / "oauth-client.json"
 
 
