@@ -14,6 +14,7 @@ import {
 } from "@/lib/agent/store";
 import { micRef, micStore, sendRef } from "@/lib/agent/store";
 import { Conversation } from "./agent/Conversation";
+import { HangUpIcon, MicIcon, PlayIcon } from "./agent/CallIcons";
 import { trackCallStarted } from "@/lib/analytics";
 import { Visualizer } from "./agent/Visualizer";
 import { AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
@@ -226,9 +227,7 @@ export function AgentConsole() {
                 : "bg-green text-green-deep"
             }`}
           >
-            <span className="text-[11px]">
-              {status === "live" ? (micOn ? "\u25CF" : "\u2298") : "\u25B6"}
-            </span>
+            {status === "live" ? <MicIcon muted={!micOn} /> : <PlayIcon />}
           </span>
           <span className="text-[14px] font-semibold text-cream">{ctaLabel}</span>
         </button>
@@ -236,8 +235,9 @@ export function AgentConsole() {
           <button
             onClick={end}
             aria-label="End call"
-            className="shrink-0 rounded-full border border-line-3 px-4 py-2.5 font-mono text-xs font-bold tracking-[0.06em] text-muted-2 transition-colors hover:border-cream hover:text-cream"
+            className="flex shrink-0 items-center gap-2 rounded-full bg-danger px-4 py-2.5 font-mono text-xs font-bold tracking-[0.06em] text-white transition-opacity hover:opacity-90"
           >
+            <HangUpIcon />
             END CALL
           </button>
         )}

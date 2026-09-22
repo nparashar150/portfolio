@@ -11,6 +11,7 @@ import {
   consoleInViewStore,
 } from "@/lib/agent/store";
 import { Conversation } from "./agent/Conversation";
+import { HangUpIcon, MicIcon, PlayIcon } from "./agent/CallIcons";
 import { gateStore, AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
 import { Magnetic } from "./Magnetic";
 
@@ -172,11 +173,11 @@ export function TalkDock() {
                 }`}
               >
                 <span
-                  className={`text-[12px] sm:text-[13px] ${
+                  className={
                     live && !micOn ? "text-cream" : "text-green-deep"
-                  }`}
+                  }
                 >
-                  {live ? (micOn ? "\u25CF" : "\u2298") : "\u25B6"}
+                  {live ? <MicIcon muted={!micOn} /> : <PlayIcon />}
                 </span>
               </motion.button>
             </Magnetic>
@@ -211,8 +212,9 @@ export function TalkDock() {
                 // icon. Sharing one button for "mute" and "hang up" is how
                 // people hung up by accident. The palette has no red, so the
                 // separation is structural rather than chromatic.
-                className="shrink-0 rounded-full border border-line-3 px-3.5 py-2 font-mono text-[11px] font-bold tracking-[0.06em] text-muted-2 transition-colors hover:border-cream hover:text-cream"
+                className="flex shrink-0 items-center gap-1.5 rounded-full bg-danger px-3.5 py-2 font-mono text-[11px] font-bold tracking-[0.06em] text-white transition-opacity hover:opacity-90"
               >
+                <HangUpIcon />
                 END
               </button>
             )}
