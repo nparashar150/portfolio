@@ -16,6 +16,9 @@
   --color-line: #e7e1d6;
   --color-line-2: #d8d1c2;
   --color-line-3: #c3bba9;
+  /* destructive. Deep enough not to be mistaken for the orange signal. */
+  --color-danger: #c1121f;
+  --color-danger-soft: #fde8e8;
 }
 
 @theme inline {
@@ -54,6 +57,9 @@ html[data-theme="dark"] {
   --color-line: #1e222b;
   --color-line-2: #262a34;
   --color-line-3: #343946;
+  /* lifted for contrast on black; the daylight red reads as brown here */
+  --color-danger: #ff5a5a;
+  --color-danger-soft: #2a1113;
   --cell-0: #16201a;
   --cell-1: #0e2c1a;
   --cell-2: #15803d;

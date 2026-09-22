@@ -4,11 +4,14 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   agentStatus,
+  micRef,
+  micStore,
   bandsRef,
   type AgentStatus,
   consoleInViewStore,
 } from "@/lib/agent/store";
 import { Conversation } from "./agent/Conversation";
+import { HangUpIcon, MicIcon, PlayIcon } from "./agent/CallIcons";
 import { gateStore, AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
 import { Magnetic } from "./Magnetic";
 
@@ -72,6 +75,7 @@ export function TalkDock() {
     () => false,
   );
   const [seconds, setSeconds] = useState(0);
+  const micOn = useSyncExternalStore(micStore.subscribe, micStore.get, () => true);
 
   const live = status === "live";
 
@@ -143,20 +147,41 @@ export function TalkDock() {
             style={{ borderRadius: expanded ? 16 : 999 }}
           >
           {expanded && <Conversation compact />}
-          <div className={`flex items-center gap-3 sm:gap-5 ${
+          <div className={`flex items-center gap-3 sm:gap-4 ${
             expanded ? "px-1 pb-1" : "py-2 pr-5 pl-2 sm:py-3 sm:pr-7 sm:pl-3"
           }`}>
             <Magnetic strength={0.25}>
               <motion.button
-                onClick={toggle}
+                onClick={() =>
+                  live ? micRef.current?.(!micOn) : toggle()
+                }
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.94 }}
                 disabled={status === "connecting"}
-                aria-label={live ? "End call" : "Talk to the agent"}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-green disabled:opacity-60 sm:h-[52px] sm:w-[52px]"
+                aria-label={
+                  live
+                    ? micOn
+                      ? "Mute your microphone"
+                      : "Unmute your microphone"
+                    : "Talk to the agent"
+                }
+                aria-pressed={live ? !micOn : undefined}
+                // The round green button is what people reach for mid-call, and
+                // they reach for it expecting mute. So mid-call it IS mute.
+                className={`flex h-10 w-10 items-center justify-center rounded-full disabled:opacity-60 sm:h-[52px] sm:w-[52px] ${
+                  live && !micOn ? "bg-line-3" : "bg-green"
+                }`}
               >
-                <span className="text-[12px] text-green-deep sm:text-[13px]">
-                  {live ? "■" : "▶"}
+                <span
+                  className={
+                    live && !micOn ? "text-cream" : "text-green-deep"
+                  }
+                >
+                  {live ? (
+                    <MicIcon muted={!micOn} size={20} />
+                  ) : (
+                    <PlayIcon size={20} />
+                  )}
                 </span>
               </motion.button>
             </Magnetic>
@@ -177,11 +202,28 @@ export function TalkDock() {
             </div>
             <span
               className={`font-mono text-[11px] tracking-[0.05em] text-muted tabular-nums ${
-                live ? "" : "hidden sm:inline"
+                live ? "ml-auto" : "ml-auto hidden sm:inline"
               }`}
             >
               {fmt(seconds)}
             </span>
+            {live && (
+              <Magnetic strength={0.25}>
+                <motion.button
+                  onClick={toggle}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.94 }}
+                  aria-label="End call"
+                  // A circle of equal weight to the mic, in red, at the far end
+                  // of the row. Two round buttons is the shape language every
+                  // call UI uses — a text pill beside a circle reads as a
+                  // secondary action, which hanging up is not.
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger text-white sm:h-[52px] sm:w-[52px]"
+                >
+                  <HangUpIcon size={20} />
+                </motion.button>
+              </Magnetic>
+            )}
           </div>
           </motion.div>
         </motion.div>

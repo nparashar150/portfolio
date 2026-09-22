@@ -244,6 +244,35 @@ export const consoleInViewStore = {
   },
 };
 
+// Mic state, so the dock and the console show the same thing.
+//
+// A live mic on a stranger's site with no way to silence it is why people were
+// tapping "end call" — the round green button read as a mic toggle, and the
+// only way to stop transmitting was to hang up. Mute is the control they were
+// actually reaching for.
+let micOn = true;
+const mSubs = new Set<() => void>();
+
+export const micStore = {
+  get: (): boolean => micOn,
+  set: (next: boolean) => {
+    if (next === micOn) return;
+    micOn = next;
+    mSubs.forEach((cb) => cb());
+  },
+  subscribe: (cb: () => void) => {
+    mSubs.add(cb);
+    return () => {
+      mSubs.delete(cb);
+    };
+  },
+};
+
+/** Set by a component inside the room; toggles the published mic track. */
+export const micRef: { current: ((on: boolean) => void) | null } = {
+  current: null,
+};
+
 // chat send fn, set by a component mounted inside the LiveKit room context
 export const sendRef: { current: ((text: string) => void) | null } = {
   current: null,

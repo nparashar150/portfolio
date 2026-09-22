@@ -25,6 +25,8 @@ import {
   type Booking,
   bookingStore,
   LIVEKIT_URL,
+  micRef,
+  micStore,
   sendRef,
   type Slot,
   slotsStore,
@@ -90,6 +92,7 @@ export function CallEngine({
       <SlotsReader />
       <RpcBridge />
       <ChatBridge />
+      <MicBridge />
     </RoomContext.Provider>
   );
 }
@@ -245,6 +248,30 @@ function RpcBridge() {
     return () => {
       room.localParticipant.unregisterRpcMethod(method);
       uiRequestStore.cancel();
+    };
+  }, [room]);
+
+  return null;
+}
+
+// exposes mic control, so mute lives in the UI rather than only in the browser
+function MicBridge() {
+  const room = useContext(RoomContext);
+
+  useEffect(() => {
+    if (!room) return;
+    micStore.set(true);
+    micRef.current = (on: boolean) => {
+      // Optimistic: reflect the intent immediately, then reconcile if the
+      // track refuses. A mute button that lags feels broken.
+      micStore.set(on);
+      void room.localParticipant
+        .setMicrophoneEnabled(on)
+        .catch(() => micStore.set(!on));
+    };
+    return () => {
+      micRef.current = null;
+      micStore.set(true);
     };
   }, [room]);
 
