@@ -142,6 +142,29 @@ SPOKEN_AS = {
     "API": "A P I",
     "UI": "U I",
     "MCP": "M C P",
+    # Roman numeral in his title — read as letters or "eleven" otherwise.
+    # Keyed with context because a bare "II" would match inside other capitals.
+    "Software Engineer II": "Software Engineer two",
+    "Sylva, NY": "Sylva, New York",
+    "New Delhi, IND": "New Delhi, India",
+    # Compound product names TTS runs together.
+    "CareCred": "Care Cred",
+    "CareFi": "Care Fi",
+    "OffsetFarm": "Offset Farm",
+    "HubSpot": "Hub Spot",
+    "Memberstack": "Member stack",
+    "Slackbot": "Slack bot",
+    "Fillout": "Fill out",
+    "Demoday": "Demo day",
+    "Ringg": "Ring",
+    # Domains, read as URLs rather than words.
+    "offsetfarm.io": "offset farm dot I O",
+    "vipsace.org": "vips ace dot org",
+    "github.com": "github dot com",
+    "linkedin.com": "linked in dot com",
+    "medium.com": "medium dot com",
+    "withsylva.com": "with sylva dot com",
+    "quik.run": "Quick Run",
     "TTS": "text to speech",
     "STT": "speech to text",
     "AI": "A I",
@@ -151,7 +174,10 @@ SPOKEN_AS = {
 # Names and product words the STT otherwise mangles ("Naman" -> "Laman").
 STT_PROMPT = (
     "Naman Parashar, nparashar150, Sylva, Ringg AI, DesiVocal, QuikRun, Pixio, "
-    "Antler, CareFi, LiveKit, Sarvam, voice AI, Next.js, TypeScript"
+    "Antler, CareFi, CareCred, OffsetFarm, LiveKit, Sarvam, voice AI, Next.js, "
+    "TypeScript, React, Flutter, Android, Attio, HubSpot, Stripe, Supabase, "
+    "Postgres, Memberstack, Fillout, Miitra, Exchange, Chief of Staff, "
+    "monorepo, embeddable, realtime, frontend, Cloudflare, Remotion"
 )
 
 
