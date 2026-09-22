@@ -13,6 +13,7 @@ import {
   uiRequestStore,
 } from "@/lib/agent/store";
 import { sendRef } from "@/lib/agent/store";
+import { AnimatePresence } from "motion/react";
 import { Conversation } from "./agent/Conversation";
 import { Visualizer } from "./agent/Visualizer";
 import { AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
@@ -195,7 +196,9 @@ export function AgentConsole() {
 
       {/* The conversation lives here only while this console is on screen;
           otherwise the floating dock holds it. See Conversation. */}
-      {inView && <Conversation />}
+      <AnimatePresence mode="wait">
+        {inView && <Conversation key="in-console" />}
+      </AnimatePresence>
 
       {/* try an agent + quick prompts */}
       <div className="flex flex-wrap items-center gap-2.5 pt-5">

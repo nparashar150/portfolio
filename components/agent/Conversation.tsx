@@ -14,11 +14,20 @@ import {
   uiRequestStore,
 } from "@/lib/agent/store";
 
-/** Shared layout id, so motion morphs the panel between dock and section. */
-export const CONVERSATION_LAYOUT_ID = "agent-conversation";
+/**
+ * The handoff is a crossfade, not a morph.
+ *
+ * This used to share a `layoutId` between the dock and the console, which made
+ * motion animate the panel across the gap between them — a box visibly flying
+ * up the page on every scroll. Fading out of one home and into the other reads
+ * as blending, costs nothing to interpolate, and can't distort the text on the
+ * way.
+ */
+export const HANDOFF = { duration: 0.22, ease: [0.4, 0, 0.2, 1] } as const;
 
-/** One spring for every part of the handoff, so nothing arrives out of step. */
-export const HANDOFF = { type: "spring", bounce: 0.12, duration: 0.42 } as const;
+/** The dock's own pill <-> panel resize. Slower than the fade, so the frame
+ *  settles after the content has already arrived rather than racing it. */
+export const DOCK_RESIZE = { duration: 0.32, ease: [0.4, 0, 0.2, 1] } as const;
 
 /**
  * The whole exchange — transcript, offered slots, the details form and the
@@ -68,12 +77,12 @@ export function Conversation({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    // The scroller is a child, not this element: animating layout on a box
-    // that is itself scrolling makes the content jitter as the height springs.
-    // `layout="position"` keeps the text still and moves the frame instead.
     <motion.div
-      layoutId={CONVERSATION_LAYOUT_ID}
-      layout="position"
+      // Keyed by home so each mount is its own fade; no shared layout, nothing
+      // to interpolate between two very different parents.
+      initial={{ opacity: 0, y: compact ? 8 : -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: compact ? 8 : -8 }}
       transition={HANDOFF}
       className={`border border-line bg-surface-2 ${compact ? "" : "mt-4"}`}
     >
