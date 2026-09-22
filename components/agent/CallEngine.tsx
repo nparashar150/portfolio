@@ -212,17 +212,24 @@ function RpcBridge() {
     const method = "ui.collectDetails";
     room.localParticipant.registerRpcMethod(method, async (data) => {
       let prompt = "Your details";
+      let fields: ("name" | "email" | "phone")[] = ["name", "email"];
       try {
         const parsed = JSON.parse(data.payload || "{}");
         if (typeof parsed.prompt === "string") prompt = parsed.prompt;
+        if (Array.isArray(parsed.fields) && parsed.fields.length) {
+          fields = parsed.fields.filter((f: string) =>
+            ["name", "email", "phone"].includes(f),
+          );
+        }
       } catch {
-        // keep the default prompt
+        // keep the defaults
       }
       try {
         const details = await uiRequestStore.open({
           id: data.requestId,
           kind: "details",
           prompt,
+          fields,
         });
         return JSON.stringify(details);
       } catch {

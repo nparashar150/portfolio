@@ -167,10 +167,12 @@ export type UiRequest = {
   id: string;
   kind: "details";
   prompt: string;
+  /** Which inputs to render. The agent decides; the form obeys. */
+  fields: ("name" | "email" | "phone")[];
 };
 
-/** What the form hands back. */
-export type Details = { name: string; email: string };
+/** What the form hands back. Unrequested fields come back empty. */
+export type Details = { name: string; email: string; phone: string };
 
 let uiRequest: UiRequest | null = null;
 let pending: {
