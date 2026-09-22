@@ -85,6 +85,10 @@ MAX_SESSION_SECONDS = float(os.environ.get("AGENT_MAX_SESSION_SECONDS", "600"))
 # the line between "a visitor" and "a misclick".
 MIN_TURNS_TO_REPORT = int(os.environ.get("AGENT_MIN_TURNS_TO_REPORT", "2"))
 
+# After the idle timeout, ask once before hanging up. Dropping the call on the
+# first silence is rude to anyone who paused to think or look something up.
+IDLE_GRACE_SECONDS = float(os.environ.get("AGENT_IDLE_GRACE_SECONDS", "20"))
+
 THINKING_SOUND = os.environ.get("AGENT_THINKING_SOUND", "0") == "1"
 THINKING_VOLUME = float(os.environ.get("AGENT_THINKING_VOLUME", "0.5"))
 
@@ -108,6 +112,7 @@ class Visitor:
     # goodbye path is the one that matters most.
     report: "Callable[[], Awaitable[None]] | None" = None
     reported: bool = False
+    spoke_since_check: bool = False
 
 
 # Names and product words the STT otherwise mangles ("Naman" -> "Laman").
@@ -268,7 +273,7 @@ class Assistant(Agent):
         """
         v: Visitor = context.session.userdata
 
-        typed = await _ask_browser_for_details(v)
+        typed = await _ask_browser_for_details(v, ["name", "email"])
         if typed:
             v.name = typed.get("name") or v.name
             v.email = typed.get("email") or v.email
@@ -321,26 +326,37 @@ class Assistant(Agent):
         self,
         context: RunContext,
         method: str,
-        handle: str,
         brief: str,
+        handle: str = "",
         when: str = "",
     ) -> str:
         """Take a phone number or social handle instead of an email.
 
+        Call this the moment they offer one. Do NOT ask for the number or handle
+        first — for a phone number this opens a keypad on their screen, and
+        asking by voice only makes them say it twice.
+
         Args:
             method: One of "phone", "instagram", "twitter", "linkedin", "other".
-            handle: The handle as they gave it. For a phone number, pass anything
-                and it will be confirmed properly.
-            brief: One or two sentences on what they want.
+            brief: One or two sentences on what they want. Infer it if unsaid.
+            handle: Only if they already said it. Leave empty for a phone number.
             when: When they'd like to be contacted, in their words.
         """
         v: Visitor = context.session.userdata
         method = (method or "other").lower().strip()
 
         if method == "phone":
-            # Spoken digits are as unreliable as spoken email; confirm them.
-            result = await GetPhoneNumberTask(chat_ctx=self.chat_ctx)
-            handle = getattr(result, "phone_number", None) or handle
+            # Never take digits by ear. A real session produced "2 9 9 3 4 6 8"
+            # from "double nine three four six eight" — spoken numbers are the
+            # single worst thing to transcribe. Ask the browser for a keypad,
+            # and only fall back to the task if there's no UI at all.
+            typed = await _ask_browser_for_details(v, ["name", "phone"])
+            if typed and typed.get("phone"):
+                v.name = typed.get("name") or v.name
+                handle = typed["phone"]
+            else:
+                result = await GetPhoneNumberTask(chat_ctx=self.chat_ctx)
+                handle = getattr(result, "phone_number", None) or handle
             if not handle:
                 return "They didn't give a usable number. Offer another way."
 
@@ -372,7 +388,7 @@ async def _log(context: RunContext, v: Visitor, method: str, handle: str,
     return f"Saved. Tell them Naman will reach out via {method}."
 
 
-async def _ask_browser_for_details(v: Visitor) -> dict | None:
+async def _ask_browser_for_details(v: Visitor, fields: list[str]) -> dict | None:
     """Ask the page for a typed name and email. None if it can't or won't.
 
     Typing beats dictation: STT mangles both names ("Naman" -> "Laman") and
@@ -392,14 +408,15 @@ async def _ask_browser_for_details(v: Visitor) -> dict | None:
         raw = await room.local_participant.perform_rpc(
             destination_identity=identity,
             method=DETAILS_RPC,
-            payload=json.dumps({"prompt": "Your details"}),
+            payload=json.dumps({"prompt": "Your details", "fields": fields}),
             response_timeout=120.0,   # a human has to type two fields
         )
         got = json.loads(raw) or {}
-        email = (got.get("email") or "").strip()
-        if not email:
+        out = {k: (got.get(k) or "").strip() for k in ("name", "email", "phone")}
+        # Nothing usable came back; let the caller fall through to voice.
+        if not (out["email"] or out["phone"]):
             return None
-        return {"name": (got.get("name") or "").strip(), "email": email}
+        return out
     except Exception as e:
         logger.info("no typed details (%s: %s); asking by voice",
                     type(e).__name__, str(e)[:200])
@@ -523,6 +540,16 @@ async def entrypoint(ctx: agents.JobContext):
     session = AgentSession[Visitor](
         userdata=visitor,
         user_away_timeout=IDLE_SECONDS,
+        # Stop talking almost immediately when someone starts. The default
+        # waits long enough that the agent talks over the first few words,
+        # which is what makes it feel like it isn't listening.
+        min_interruption_duration=0.2,
+        min_interruption_words=0,
+        # Don't keep processing audio the agent was told to ignore.
+        discard_audio_if_uninterruptible=True,
+        # If the "interruption" was a cough, pick the sentence back up.
+        resume_false_interruption=True,
+        false_interruption_timeout=1.0,
         stt=stt,
         vad=vad,
         # Sarvam's realtime API detects turns itself; the default TurnDetector
@@ -598,21 +625,41 @@ async def entrypoint(ctx: agents.JobContext):
     @session.on("user_state_changed")
     def _on_user_state(ev) -> None:
         # Fires once the visitor has been silent for IDLE_SECONDS.
+        if getattr(ev, "new_state", None) == "speaking":
+            visitor.spoke_since_check = True
+            return
         if getattr(ev, "new_state", None) != "away":
             return
         logger.info("visitor idle for %.0fs; closing", IDLE_SECONDS)
 
         async def _wrap_up() -> None:
             try:
-                await session.generate_reply(instructions=(
-                    "Say one short line that you'll let them go, and that they "
-                    "can start again any time. Do not ask a question."
-                ))
+                await session.say("Are you still there?")
+            except Exception:
+                logger.debug("idle check-in failed", exc_info=True)
+
+            # If they answer, user_state flips back to speaking and this is
+            # cancelled by the next state change guard below.
+            await asyncio.sleep(IDLE_GRACE_SECONDS)
+            if visitor.spoke_since_check:
+                logger.info("visitor came back; staying on")
+                return
+
+            try:
+                await session.say(
+                    "No worries — I'll let you go. Start again any time."
+                )
             except Exception:
                 logger.debug("idle goodbye failed", exc_info=True)
             finally:
+                if visitor.report is not None:
+                    try:
+                        await visitor.report()
+                    except Exception:
+                        logger.warning("report failed", exc_info=True)
                 await session.aclose()
 
+        visitor.spoke_since_check = False
         asyncio.create_task(_wrap_up())
 
     await session.start(
