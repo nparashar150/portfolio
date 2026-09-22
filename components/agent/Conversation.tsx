@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { motion } from "motion/react";
 import { config } from "@/lib/config";
 import { downloadIcs } from "@/lib/agent/ics";
 import {
@@ -15,19 +14,14 @@ import {
 } from "@/lib/agent/store";
 
 /**
- * The handoff is a crossfade, not a morph.
+ * The handoff between dock and console is deliberately NOT animated.
  *
- * This used to share a `layoutId` between the dock and the console, which made
- * motion animate the panel across the gap between them — a box visibly flying
- * up the page on every scroll. Fading out of one home and into the other reads
- * as blending, costs nothing to interpolate, and can't distort the text on the
- * way.
+ * It was a shared-layout morph first — the panel flew across the page on every
+ * scroll. Then a crossfade, which was worse. Both were animating something the
+ * reader isn't looking at: they're reading the conversation, and the container
+ * it happens to live in is not the subject. A swap that simply happens is
+ * quieter than one that announces itself, and it can't jank.
  */
-export const HANDOFF = { duration: 0.22, ease: [0.4, 0, 0.2, 1] } as const;
-
-/** The dock's own pill <-> panel resize. Slower than the fade, so the frame
- *  settles after the content has already arrived rather than racing it. */
-export const DOCK_RESIZE = { duration: 0.32, ease: [0.4, 0, 0.2, 1] } as const;
 
 /**
  * The whole exchange — transcript, offered slots, the details form and the
@@ -59,7 +53,7 @@ export function Conversation({ compact = false }: { compact?: boolean }) {
     uiRequestStore.get,
     () => null,
   );
-  const [draft, setDraft] = useState({ name: "", email: "" });
+  const [draft, setDraft] = useState({ name: "", email: "", phone: "" });
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -77,15 +71,7 @@ export function Conversation({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <motion.div
-      // Keyed by home so each mount is its own fade; no shared layout, nothing
-      // to interpolate between two very different parents.
-      initial={{ opacity: 0, y: compact ? 8 : -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: compact ? 8 : -8 }}
-      transition={HANDOFF}
-      className={`border border-line bg-surface-2 ${compact ? "" : "mt-4"}`}
-    >
+    <div className={`border border-line bg-surface-2 ${compact ? "" : "mt-4"}`}>
       <div
         ref={logRef}
         className={`flex flex-col gap-3 overflow-y-auto p-5 ${
@@ -138,10 +124,14 @@ export function Conversation({ compact = false }: { compact?: boolean }) {
               e.preventDefault();
               const name = draft.name.trim();
               const email = draft.email.trim();
-              if (!email) return;
-              setDraft({ name: "", email: "" });
-              transcriptStore.addTyped(`${name || "I"} — ${email}`);
-              uiRequestStore.submit({ name, email });
+              const phone = draft.phone.trim();
+              if (uiRequest.fields.includes("email") && !email) return;
+              if (uiRequest.fields.includes("phone") && !phone) return;
+              setDraft({ name: "", email: "", phone: "" });
+              transcriptStore.addTyped(
+                [name, email || phone].filter(Boolean).join(" — "),
+              );
+              uiRequestStore.submit({ name, email, phone });
             }}
             className="flex gap-3"
           >
@@ -149,36 +139,56 @@ export function Conversation({ compact = false }: { compact?: boolean }) {
               DETAILS
             </span>
             <div className="flex min-w-0 flex-1 flex-col gap-2">
-              <input
-                aria-label="Your name"
-                autoFocus
-                value={draft.name}
-                onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-                placeholder="Your name"
-                autoComplete="name"
-                className="border border-line-3 bg-surface px-3.5 py-2 font-mono text-[13px] text-cream outline-none placeholder:text-faint focus:border-green"
-              />
-              <input
-                aria-label="Your email"
-                type="email"
-                required
-                value={draft.email}
-                onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
-                placeholder="you@company.com"
-                autoComplete="email"
-                className="border border-line-3 bg-surface px-3.5 py-2 font-mono text-[13px] text-cream outline-none placeholder:text-faint focus:border-green"
-              />
+              {uiRequest.fields.includes("name") && (
+                <input
+                  aria-label="Your name"
+                  autoFocus
+                  value={draft.name}
+                  onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                  placeholder="Your name"
+                  autoComplete="name"
+                  className="border border-line-3 bg-surface px-3.5 py-2 font-mono text-[13px] text-cream outline-none placeholder:text-faint focus:border-green"
+                />
+              )}
+              {uiRequest.fields.includes("email") && (
+                <input
+                  aria-label="Your email"
+                  type="email"
+                  required
+                  value={draft.email}
+                  onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  className="border border-line-3 bg-surface px-3.5 py-2 font-mono text-[13px] text-cream outline-none placeholder:text-faint focus:border-green"
+                />
+              )}
+              {uiRequest.fields.includes("phone") && (
+                <input
+                  aria-label="Your phone number"
+                  // Spoken digits are hopeless - "double nine" came back as
+                  // "2 9 9". A keypad is the whole fix.
+                  type="tel"
+                  inputMode="tel"
+                  required
+                  autoFocus
+                  value={draft.phone}
+                  onChange={(e) => setDraft((d) => ({ ...d, phone: e.target.value }))}
+                  placeholder="+91 98765 43210"
+                  autoComplete="tel"
+                  className="border border-line-3 bg-surface px-3.5 py-2 font-mono text-[13px] text-cream outline-none placeholder:text-faint focus:border-green"
+                />
+              )}
               <div className="flex flex-wrap gap-2 pt-0.5">
                 <button
                   type="submit"
                   className="rounded-full bg-green px-4 py-2 font-mono text-[11px] font-bold text-green-deep transition-opacity hover:opacity-90"
                 >
-                  Confirm booking
+                  Send
                 </button>
                 <button
                   type="button"
                   onClick={() => {
-                    setDraft({ name: "", email: "" });
+                    setDraft({ name: "", email: "", phone: "" });
                     uiRequestStore.cancel();
                   }}
                   className="rounded-full border border-line-3 px-4 py-2 font-mono text-[11px] text-muted-2 transition-colors hover:border-green/50 hover:text-cream"
@@ -236,6 +246,6 @@ export function Conversation({ compact = false }: { compact?: boolean }) {
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

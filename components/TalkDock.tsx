@@ -8,7 +8,7 @@ import {
   type AgentStatus,
   consoleInViewStore,
 } from "@/lib/agent/store";
-import { Conversation, DOCK_RESIZE } from "./agent/Conversation";
+import { Conversation } from "./agent/Conversation";
 import { gateStore, AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
 import { Magnetic } from "./Magnetic";
 
@@ -131,20 +131,18 @@ export function TalkDock() {
           transition={{
             duration: 0.25,
             scale: { type: "spring", visualDuration: 0.25, bounce: 0.15 },
-            layout: DOCK_RESIZE,
+            layout: { duration: 0.28, ease: [0.4, 0, 0.2, 1] },
           }}
         >
           <motion.div
             layout
-            transition={DOCK_RESIZE}
+            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
             className={`flex flex-col gap-3 border border-line bg-surface/95 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.9)] backdrop-blur ${
               expanded ? "rounded-2xl p-3" : "rounded-full"
             }`}
             style={{ borderRadius: expanded ? 16 : 999 }}
           >
-          <AnimatePresence mode="wait">
-            {expanded && <Conversation key="in-dock" compact />}
-          </AnimatePresence>
+          {expanded && <Conversation compact />}
           <div className={`flex items-center gap-3 sm:gap-5 ${
             expanded ? "px-1 pb-1" : "py-2 pr-5 pl-2 sm:py-3 sm:pr-7 sm:pl-3"
           }`}>
