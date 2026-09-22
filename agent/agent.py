@@ -73,9 +73,13 @@ IDLE_SECONDS = float(os.environ.get("AGENT_IDLE_SECONDS", "30"))
 # STT, the LLM and TTS billing indefinitely. This is the ceiling regardless.
 MAX_SESSION_SECONDS = float(os.environ.get("AGENT_MAX_SESSION_SECONDS", "600"))
 
-# check_availability queries three calendars and book_call re-validates before
-# writing. Both are silent seconds mid-conversation, which reads as a dropped
-# call rather than as thinking. A faint keyboard fills them.
+# Thinking sounds fill the silence while check_availability queries three
+# calendars. They're OFF by default because BackgroundAudioPlayer publishes them
+# as a SEPARATE audio track, and mobile browsers generally let only one audio
+# element start — so the keyboard won the audio session and the agent's voice
+# was silent on phones. Filling a pause isn't worth losing the voice.
+# Set AGENT_THINKING_SOUND=1 to re-enable once that's solved per-platform.
+THINKING_SOUND = os.environ.get("AGENT_THINKING_SOUND", "0") == "1"
 THINKING_VOLUME = float(os.environ.get("AGENT_THINKING_VOLUME", "0.5"))
 
 
@@ -514,18 +518,17 @@ async def entrypoint(ctx: agents.JobContext):
         room_options=room_io.RoomOptions(close_on_disconnect=True),
     )
 
-    # Published as a separate track, so it never mixes into the agent's speech.
-    background = BackgroundAudioPlayer(
-        thinking_sound=[
-            AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=THINKING_VOLUME),
-            AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=THINKING_VOLUME),
-        ],
-    )
-    try:
-        await background.start(room=ctx.room, agent_session=session)
-    except Exception:
-        # Cosmetic: a silent pause is worse than no pause, but not fatal.
-        logger.warning("background audio unavailable", exc_info=True)
+    if THINKING_SOUND:
+        background = BackgroundAudioPlayer(
+            thinking_sound=[
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=THINKING_VOLUME),
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=THINKING_VOLUME),
+            ],
+        )
+        try:
+            await background.start(room=ctx.room, agent_session=session)
+        except Exception:
+            logger.warning("background audio unavailable", exc_info=True)
 
     await session.generate_reply(instructions=(
         "Greet them in one short sentence. Say you're Naman's site agent and "
