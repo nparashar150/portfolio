@@ -6,9 +6,14 @@ import dynamic from "next/dynamic";
 import {
   agentStatus,
   type AgentStatus,
-  EMPTY_TRANSCRIPT,
+  bookingStore,
+  consoleInViewStore,
+  slotsStore,
   transcriptStore,
+  uiRequestStore,
 } from "@/lib/agent/store";
+import { sendRef } from "@/lib/agent/store";
+import { Conversation } from "./agent/Conversation";
 import { Visualizer } from "./agent/Visualizer";
 import { AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
 
@@ -33,15 +38,16 @@ export function AgentConsole() {
     agentStatus.get,
     () => "idle" as AgentStatus,
   );
-  const transcript = useSyncExternalStore(
-    transcriptStore.subscribe,
-    transcriptStore.get,
-    () => EMPTY_TRANSCRIPT,
-  );
   const [token, setToken] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
   const busy = useRef(false);
-  const logRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  // Plays the moment they click, to cover the gap before the agent's first
+  // word — mic prompt, token, connect, then a worker cold start on the free
+  // tier. Browsers allow it because a click preceded it. Optional: if the file
+  // isn't there, play() rejects and we carry on in silence.
+  const intro = useRef<HTMLAudioElement | null>(null);
   const startRef = useRef<(() => void) | null>(null);
   const endRef = useRef<(() => void) | null>(null);
 
@@ -56,10 +62,33 @@ export function AgentConsole() {
     return () => clearInterval(id);
   }, [status]);
 
+  // Hand the conversation between the dock and this console as it scrolls.
+  // A generous negative margin means the swap happens while the console is
+  // comfortably on screen, not the instant one pixel of it appears.
   useEffect(() => {
-    const el = logRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [transcript]);
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+        consoleInViewStore.set(entry.isIntersecting);
+      },
+      { rootMargin: "-15% 0px -15% 0px" },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      consoleInViewStore.set(false);
+    };
+  }, []);
+
+  // Stop the clip the instant the real agent has something to say.
+  useEffect(() => {
+    if (status === "live" || status === "error" || status === "idle") {
+      intro.current?.pause();
+      intro.current = null;
+    }
+  }, [status]);
 
   // boot gate's "enter with voice" and the talk dock drive the call remotely
   useEffect(() => {
@@ -78,6 +107,19 @@ export function AgentConsole() {
     busy.current = true;
     agentStatus.set("connecting");
     transcriptStore.clear();
+    bookingStore.clear();
+    slotsStore.clear();
+
+    try {
+      const clip = new Audio("/agent-intro.mp3");
+      clip.volume = 0.85;
+      intro.current = clip;
+      void clip.play().catch(() => {
+        intro.current = null;
+      });
+    } catch {
+      intro.current = null;
+    }
 
     // tie mic permission to the user gesture (before any async work)
     try {
@@ -91,7 +133,16 @@ export function AgentConsole() {
     }
 
     try {
-      const res = await fetch("/api/webcall", { method: "POST" });
+      // The browser is the only thing that knows the visitor's timezone, and
+      // the agent needs it to offer slots in their local time.
+      const res = await fetch("/api/webcall", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          referrer: document.referrer,
+        }),
+      });
       const data = await res.json();
       if (!res.ok || !data?.user_token) throw new Error("token");
       setToken(data.user_token);
@@ -109,6 +160,8 @@ export function AgentConsole() {
     setToken(null);
     agentStatus.set("idle");
     transcriptStore.clear();
+    slotsStore.clear();
+    uiRequestStore.cancel();
   };
   endRef.current = end;
 
@@ -117,10 +170,10 @@ export function AgentConsole() {
       ? "Connecting…"
       : status === "live"
         ? "End call"
-        : "Try an agent";
+        : "Talk — and book 30 min";
 
   return (
-    <div id="console" className="w-full">
+    <div id="console" ref={rootRef} className="w-full">
       {/* contribution grid ⇄ live waveform */}
       <div className="border border-line bg-surface-2 p-4 md:p-6">
         <Visualizer live={status === "live"} />
@@ -140,28 +193,9 @@ export function AgentConsole() {
         </div>
       </div>
 
-      {/* live transcript */}
-      {transcript.length > 0 && (
-        <div
-          ref={logRef}
-          className="mt-4 flex max-h-52 flex-col gap-3 overflow-y-auto border border-line bg-surface-2 p-5"
-        >
-          {transcript.map((line) => (
-            <div key={line.id} className="flex gap-3">
-              <span
-                className={`mt-0.5 w-16 shrink-0 font-mono text-[10px] font-bold tracking-[0.06em] ${
-                  line.role === "agent" ? "text-green" : "text-muted"
-                }`}
-              >
-                {line.role === "agent" ? "NAMAN.AI" : "YOU"}
-              </span>
-              <p className="text-[14px] leading-relaxed text-cream">
-                {line.text}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* The conversation lives here only while this console is on screen;
+          otherwise the floating dock holds it. See Conversation. */}
+      {inView && <Conversation />}
 
       {/* try an agent + quick prompts */}
       <div className="flex flex-wrap items-center gap-2.5 pt-5">
@@ -180,7 +214,9 @@ export function AgentConsole() {
         {config.agentPrompts.map((p, idx) => (
           <button
             key={p}
-            onClick={() => start()}
+            // Mid-call these read as "ask this" — so ask it. Before a call they
+            // start one; the agent opens with its greeting either way.
+            onClick={() => (status === "live" ? sendRef.current?.(p) : start())}
             className={
               idx === config.agentPrompts.length - 1
                 ? "rounded-full bg-green px-4 py-2.5 font-mono text-xs font-bold text-green-deep transition-opacity hover:opacity-90"
@@ -191,6 +227,12 @@ export function AgentConsole() {
           </button>
         ))}
       </div>
+
+      {!active && (
+        <p className="pt-3 font-mono text-[11px] leading-relaxed tracking-[0.04em] text-faint">
+          No form. No email thread. It reads my actual calendar and books you in.
+        </p>
+      )}
 
       {token && (
         <div className="hidden">

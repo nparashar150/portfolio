@@ -1,0 +1,760 @@
+"""The voice agent behind nparashar150.com.
+
+Talks about Naman, books 30-minute calls against his real calendar, and records
+contact details as calendar entries so he can follow up.
+
+Two hard-won constraints shape the tool design (see tools_probe.py):
+
+  * The LLM gets the *year* wrong when composing timestamps, so `book_call` takes
+    an opaque slot id. It never sees or constructs a date.
+  * The LLM passes spoken email through raw ("rahul at acme dot com"), so email
+    is only ever collected by GetEmailTask, never as a tool argument.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import logging
+import os
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass, field
+
+from dotenv import load_dotenv
+from livekit import agents
+from livekit.agents import (
+    Agent,
+    text_transforms,
+    get_job_context,
+    AgentServer,
+    AgentSession,
+    RunContext,
+    ToolError,
+    function_tool,
+    room_io,
+)
+from livekit.agents.voice.background_audio import (
+    AudioConfig,
+    BackgroundAudioPlayer,
+    BuiltinAudioClip,
+)
+from livekit.agents.beta.workflows import GetEmailTask, GetPhoneNumberTask
+from livekit import rtc
+from livekit.plugins import sarvam, silero
+
+# Before importing anything that reads the environment.
+load_dotenv(".env.local")
+
+import booking  # noqa: E402
+import content  # noqa: E402
+import notify  # noqa: E402
+logger = logging.getLogger("naman-agent")
+
+# The daemon detaches, so its stdout is lost. Set AGENT_LOG_FILE to keep tracebacks.
+if os.environ.get("AGENT_LOG_FILE"):
+    _h = logging.FileHandler(os.environ["AGENT_LOG_FILE"])
+    _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+    logging.getLogger().addHandler(_h)
+    logging.getLogger().setLevel(logging.INFO)
+
+VOICE = os.environ.get("AGENT_VOICE", "shubh")          # bulbul:v3 preset
+# Legacy STT + silero VAD by default. Sarvam's realtime API raises a *fatal*
+# inactivity_timeout after 60s of silence and does not reconnect (it bills per
+# connection), which kills the session for a visitor who starts a call and then
+# just reads the page. Silero gates the audio so the socket only opens on speech.
+USE_REALTIME_STT = os.environ.get("SARVAM_REALTIME_STT", "0") == "1"
+BOOKING_TOPIC = "booking.confirmed"                      # read by AgentConsole.tsx
+SLOTS_TOPIC = "slots.offered"                            # ditto — renders as chips
+DETAILS_RPC = "ui.collectDetails"                        # typed name + email in the browser
+
+# Hang up on a silent visitor. Someone who clicked play and wandered off would
+# otherwise hold an open session (and keep billing) indefinitely.
+IDLE_SECONDS = float(os.environ.get("AGENT_IDLE_SECONDS", "30"))
+
+# The idle timeout only fires on silence, so it does nothing against someone
+# holding a session open with continuous audio — a podcast into the mic keeps
+# STT, the LLM and TTS billing indefinitely. This is the ceiling regardless.
+MAX_SESSION_SECONDS = float(os.environ.get("AGENT_MAX_SESSION_SECONDS", "600"))
+
+# Thinking sounds fill the silence while check_availability queries three
+# calendars. They're OFF by default because BackgroundAudioPlayer publishes them
+# as a SEPARATE audio track, and mobile browsers generally let only one audio
+# element start — so the keyboard won the audio session and the agent's voice
+# was silent on phones. Filling a pause isn't worth losing the voice.
+# Set AGENT_THINKING_SOUND=1 to re-enable once that's solved per-platform.
+# Don't mail about someone who clicked play and wandered off. Two real turns is
+# the line between "a visitor" and "a misclick".
+MIN_TURNS_TO_REPORT = int(os.environ.get("AGENT_MIN_TURNS_TO_REPORT", "2"))
+
+# After the idle timeout, ask once before hanging up. Dropping the call on the
+# first silence is rude to anyone who paused to think or look something up.
+IDLE_GRACE_SECONDS = float(os.environ.get("AGENT_IDLE_GRACE_SECONDS", "20"))
+
+THINKING_SOUND = os.environ.get("AGENT_THINKING_SOUND", "0") == "1"
+THINKING_VOLUME = float(os.environ.get("AGENT_THINKING_VOLUME", "0.5"))
+
+
+@dataclass
+class Visitor:
+    """Per-session state. `offered` is the slot-id map the LLM books against."""
+
+    tz: str = "Asia/Kolkata"
+    referrer: str = ""
+    offered: dict[str, str] = field(default_factory=dict)  # "s1" -> ISO start
+    email: str | None = None
+    pending_slot: str | None = None   # slot id held while we collect an email
+    name: str = ""
+    contacted: bool = False       # already logged a lead; don't duplicate
+    # AgentSession exposes room_io, not room, so keep an explicit handle for
+    # publishing to the browser.
+    room: "rtc.Room | None" = None
+    # Set by the entrypoint. Called from end_call as well as on shutdown,
+    # because a killed process never runs its shutdown callbacks — and the
+    # goodbye path is the one that matters most.
+    report: "Callable[[], Awaitable[None]] | None" = None
+    reported: bool = False
+    spoke_since_check: bool = False
+
+
+# How the agent SAYS things. Separate problem from hearing them: nothing stops
+# TTS reading "nparashar150" as a jumble or "Next.js" as "next dot jay ess".
+# Applied as a streaming transform before synthesis, so it works across token
+# boundaries without a custom node.
+SPOKEN_AS = {
+    # Longest match wins, so the full address has to be listed before the
+    # domain and the bare handle it contains.
+    "nparashar150@gmail.com": "N Parashar one fifty at gmail dot com",
+    "nparashar150.com": "N Parashar one fifty dot com",
+    "www.nparashar150.com": "N Parashar one fifty dot com",
+    "nparashar150": "N Parashar one fifty",
+    "naman@withsylva.com": "naman at with sylva dot com",
+    "naman@ringg.ai": "naman at ringg dot A I",
+    "QuikRun": "Quick Run",
+    "quik.run": "Quick Run",
+    "DesiVocal": "Desi Vocal",
+    "Miitra": "Meetra",
+    "Attio": "Attio",
+    "LiveKit": "Live Kit",
+    "Next.js": "Next J S",
+    "Node.js": "Node J S",
+    "TypeScript": "Type Script",
+    "SDK": "S D K",
+    "API": "A P I",
+    "UI": "U I",
+    "MCP": "M C P",
+    # Roman numeral in his title — read as letters or "eleven" otherwise.
+    # Keyed with context because a bare "II" would match inside other capitals.
+    "Software Engineer II": "Software Engineer two",
+    "Sylva, NY": "Sylva, New York",
+    "New Delhi, IND": "New Delhi, India",
+    # Compound product names TTS runs together.
+    "CareCred": "Care Cred",
+    "CareFi": "Care Fi",
+    "OffsetFarm": "Offset Farm",
+    "HubSpot": "Hub Spot",
+    "Memberstack": "Member stack",
+    "Slackbot": "Slack bot",
+    "Fillout": "Fill out",
+    "Demoday": "Demo day",
+    "Ringg": "Ring",
+    # Domains, read as URLs rather than words.
+    "offsetfarm.io": "offset farm dot I O",
+    "vipsace.org": "vips ace dot org",
+    "github.com": "github dot com",
+    "linkedin.com": "linked in dot com",
+    "medium.com": "medium dot com",
+    "withsylva.com": "with sylva dot com",
+    "quik.run": "Quick Run",
+    "TTS": "text to speech",
+    "STT": "speech to text",
+    "AI": "A I",
+    "IST": "I S T",
+}
+
+# Names and product words the STT otherwise mangles ("Naman" -> "Laman").
+STT_PROMPT = (
+    "Naman Parashar, nparashar150, Sylva, Ringg AI, DesiVocal, QuikRun, Pixio, "
+    "Antler, CareFi, CareCred, OffsetFarm, LiveKit, Sarvam, voice AI, Next.js, "
+    "TypeScript, React, Flutter, Android, Attio, HubSpot, Stripe, Supabase, "
+    "Postgres, Memberstack, Fillout, Miitra, Exchange, Chief of Staff, "
+    "monorepo, embeddable, realtime, frontend, Cloudflare, Remotion"
+)
+
+
+class Assistant(Agent):
+    def __init__(self, visitor_tz: str) -> None:
+        super().__init__(
+            instructions=content.instructions(visitor_tz),
+            # No EndCallTool here: it terminates the moment it's invoked, so the
+            # visitor got hung up on mid-sentence. end_call below says goodbye
+            # first and waits for the audio to actually play out.
+        )
+
+    @function_tool()
+    async def end_call(self, context: RunContext) -> None:
+        """Say goodbye and hang up. Call this once the visitor is finished.
+
+        Use it when they say goodbye, or when the booking is done and they have
+        nothing else. Don't say goodbye yourself first — this does it.
+        """
+        # Returns None on purpose: a tool that returns text reads to the model
+        # as unfinished work, and it called the old end tool four times in a row
+        # in a real session. Nothing to reply to means nothing to retry.
+        try:
+            await context.session.say(
+                "Thanks for stopping by — good talking to you. Take care.",
+            )
+            # Let the sign-off actually reach their speakers before we tear the
+            # room down, otherwise it's cut off mid-word.
+            await context.wait_for_playout()
+        except Exception:
+            logger.debug("sign-off failed", exc_info=True)
+
+        logger.info("visitor ended the call")
+
+        v: Visitor = context.session.userdata
+        if v.report is not None:
+            try:
+                await v.report()
+            except Exception:
+                logger.warning("session report failed", exc_info=True)
+
+        try:
+            await get_job_context().delete_room()
+        except Exception:
+            logger.debug("room already gone", exc_info=True)
+
+    # --- availability ------------------------------------------------------
+
+    @function_tool()
+    async def check_availability(self, context: RunContext, date_hint: str = "") -> str:
+        """Find open 30-minute call slots on Naman's calendar.
+
+        Call this whenever the visitor wants to book, schedule, or asks what times
+        are free. Read back two or three of the labels exactly as given, then use
+        the matching id with book_call.
+
+        Args:
+            date_hint: Any timing preference they mentioned, e.g. "next week".
+                Free text, may be empty. Used only for logging.
+        """
+        v: Visitor = context.session.userdata
+        try:
+            slots = await asyncio_to_thread(booking.free_slots, v.tz, limit=6)
+        except Exception as e:
+            logger.exception("availability lookup failed")
+            raise ToolError("I couldn't reach his calendar just then.") from e
+
+        if not slots:
+            return ("No open slots in the next two weeks. Offer to take their "
+                    "contact details instead.")
+
+        v.offered = {f"s{i+1}": s["start"] for i, s in enumerate(slots)}
+        listed = [{"id": f"s{i+1}", "label": s["label"]} for i, s in enumerate(slots)]
+
+        # Reading six times aloud is unusable; the browser renders them as chips
+        # the visitor can just tap. Speech and UI stay in sync because both come
+        # from this one list.
+        await _publish(v, SLOTS_TOPIC, {"slots": listed, "tz": v.tz})
+
+        logger.info("offered %d slots (hint=%r)", len(slots), date_hint)
+        return json.dumps(listed)
+
+    # --- booking -----------------------------------------------------------
+
+    @function_tool()
+    async def book_call(
+        self, context: RunContext, slot_id: str, brief: str, name: str = ""
+    ) -> str:
+        """Book a 30-minute call in a slot that check_availability offered.
+
+        Call this as soon as they pick a time. Do NOT ask for their name or
+        email first — collect_details gathers both on screen, and asking for
+        them by voice only makes the visitor say it twice.
+
+        Args:
+            slot_id: The id of the chosen slot, e.g. "s1". Never a date.
+            brief: One or two sentences on what they want to discuss, so Naman
+                can prepare. Summarise it from the conversation; if they haven't
+                said, put what you can infer.
+            name: Only if they already volunteered it. Leave empty otherwise.
+        """
+        v: Visitor = context.session.userdata
+
+        start = v.offered.get(slot_id)
+        if start is None:
+            raise ToolError(
+                "I've lost track of those times. Check availability again."
+            )
+
+        v.name = name or v.name
+
+        # An email is required, but it CANNOT be collected here: GetEmailTask
+        # hands control away, this invocation ends, and the booking is lost.
+        # So bail out, let the model collect the email, and have it call again.
+        if not v.email:
+            v.pending_slot = slot_id
+            return ("FAILED: nothing was booked. The slot is still free and is "
+                    "NOT held. Do NOT say booked, confirmed, all set, or "
+                    "'you're in'. Tell them you just need a couple of details, "
+                    "then call collect_details, then call book_call again with "
+                    f"slot_id {slot_id}.")
+
+        # Writing to the calendar can't be half-done, so hold the turn.
+        context.disallow_interruptions()
+        try:
+            res = await asyncio_to_thread(
+                booking.book, start, v.name or "Visitor", v.email, brief, v.tz
+            )
+        except RuntimeError as e:
+            raise ToolError(f"{e}. Offer one of the other times.") from e
+        except Exception as e:
+            logger.exception("booking failed")
+            raise ToolError("Something went wrong writing to his calendar.") from e
+
+        v.contacted = True
+        v.pending_slot = None
+        await _publish_booking(context, res, v)
+        logger.info("booked %s for %s", res["label"], v.email)
+        return (f"Booked {res['label']}. Tell them it's confirmed, that the join "
+                "link is on screen and in the calendar invite, and that Naman "
+                "will see it. Do not read the link out loud.")
+
+    # --- contact capture ---------------------------------------------------
+
+    @function_tool()
+    async def collect_details(self, context: RunContext) -> str:
+        """Ask for the visitor's name and email so a call can be booked.
+
+        Call this when book_call says details are needed. Don't ask for a name
+        or an address in your own words — this puts a short form on screen and
+        falls back to asking aloud if there's no browser.
+        """
+        v: Visitor = context.session.userdata
+
+        typed = await _ask_browser_for_details(v, ["name", "email"])
+        if typed:
+            v.name = typed.get("name") or v.name
+            v.email = typed.get("email") or v.email
+            logger.info("details captured via UI form")
+            if v.email:
+                if v.pending_slot:
+                    return (f"Got {v.name} at {v.email}. Now call book_call again "
+                            f"with slot_id {v.pending_slot}. It is NOT booked "
+                            "until that succeeds.")
+                return f"Got {v.name} at {v.email}."
+
+        result = await GetEmailTask(chat_ctx=self.chat_ctx)
+        v.email = getattr(result, "email_address", None)
+        if not v.email:
+            return ("No email given. Offer leave_other_contact instead, or drop "
+                    "the booking.")
+        if v.pending_slot:
+            return (f"Email is {v.email}. Now call book_call again with slot_id "
+                    f"{v.pending_slot}. It is NOT booked until that succeeds.")
+        return f"Email is {v.email}."
+
+    @function_tool()
+    async def leave_contact(
+        self, context: RunContext, brief: str, when: str = ""
+    ) -> str:
+        """Take the visitor's email so Naman can reach out.
+
+        Call this when they'd rather be contacted than book now, or when they
+        offer an email address. Do not ask for the address yourself — this
+        collects and confirms it.
+
+        Args:
+            brief: One or two sentences on what they want. Summarise it.
+            when: When they'd like to be contacted, in their words. May be empty.
+        """
+        v: Visitor = context.session.userdata
+        email = v.email
+        if not email:
+            result = await GetEmailTask(chat_ctx=self.chat_ctx)
+            email = getattr(result, "email_address", None)
+        if not email:
+            return ("They didn't give an email. Offer to take a phone number or a "
+                    "social handle via leave_other_contact.")
+
+        v.email = email
+        return await _log(context, v, "email", email, brief, when)
+
+    @function_tool()
+    async def leave_other_contact(
+        self,
+        context: RunContext,
+        method: str,
+        brief: str,
+        handle: str = "",
+        when: str = "",
+    ) -> str:
+        """Take a phone number or social handle instead of an email.
+
+        Call this the moment they offer one. Do NOT ask for the number or handle
+        first — for a phone number this opens a keypad on their screen, and
+        asking by voice only makes them say it twice.
+
+        Args:
+            method: One of "phone", "instagram", "twitter", "linkedin", "other".
+            brief: One or two sentences on what they want. Infer it if unsaid.
+            handle: Only if they already said it. Leave empty for a phone number.
+            when: When they'd like to be contacted, in their words.
+        """
+        v: Visitor = context.session.userdata
+        method = (method or "other").lower().strip()
+
+        if method == "phone":
+            # Never take digits by ear. A real session produced "2 9 9 3 4 6 8"
+            # from "double nine three four six eight" — spoken numbers are the
+            # single worst thing to transcribe. Ask the browser for a keypad,
+            # and only fall back to the task if there's no UI at all.
+            typed = await _ask_browser_for_details(v, ["name", "phone"])
+            if typed and typed.get("phone"):
+                v.name = typed.get("name") or v.name
+                handle = typed["phone"]
+            else:
+                result = await GetPhoneNumberTask(chat_ctx=self.chat_ctx)
+                handle = getattr(result, "phone_number", None) or handle
+            if not handle:
+                return "They didn't give a usable number. Offer another way."
+
+        return await _log(context, v, method, handle, brief, when)
+
+
+# --- helpers -----------------------------------------------------------------
+
+async def asyncio_to_thread(fn, *args, **kwargs):
+    """Google's client is blocking; keep it off the event loop."""
+    import functools
+
+    return await asyncio.to_thread(functools.partial(fn, *args, **kwargs))
+
+
+async def _log(context: RunContext, v: Visitor, method: str, handle: str,
+               brief: str, when: str) -> str:
+    """Write the lead immediately — a closed tab must still deliver it."""
+    try:
+        await asyncio_to_thread(
+            booking.log_lead, v.name or "anon", method, handle, brief, when or None
+        )
+    except Exception as e:
+        logger.exception("lead logging failed")
+        raise ToolError("I couldn't save that just now.") from e
+
+    v.contacted = True
+    logger.info("lead logged: %s -> %s", method, handle)
+    return f"Saved. Tell them Naman will reach out via {method}."
+
+
+async def _ask_browser_for_details(v: Visitor, fields: list[str]) -> dict | None:
+    """Ask the page for a typed name and email. None if it can't or won't.
+
+    Typing beats dictation: STT mangles both names ("Naman" -> "Laman") and
+    addresses, and reading either back to confirm costs a whole turn. But a
+    caller may have no UI at all (SIP, the Agent Console) and may dismiss the
+    form, so every failure falls back to asking aloud rather than dead-ending.
+    """
+    room = v.room
+    if room is None:
+        return None
+    try:
+        identity = next(iter(room.remote_participants))
+    except StopIteration:
+        return None
+
+    try:
+        raw = await room.local_participant.perform_rpc(
+            destination_identity=identity,
+            method=DETAILS_RPC,
+            payload=json.dumps({"prompt": "Your details", "fields": fields}),
+            response_timeout=120.0,   # a human has to type two fields
+        )
+        got = json.loads(raw) or {}
+        out = {k: (got.get(k) or "").strip() for k in ("name", "email", "phone")}
+        # Nothing usable came back; let the caller fall through to voice.
+        if not (out["email"] or out["phone"]):
+            return None
+        return out
+    except Exception as e:
+        logger.info("no typed details (%s: %s); asking by voice",
+                    type(e).__name__, str(e)[:200])
+        return None
+
+
+async def _publish(v: Visitor, topic: str, payload: dict) -> None:
+    """Push structured state to the browser. Never fatal — the UI is a bonus."""
+    if v.room is None:
+        logger.warning("no room handle; skipping %s", topic)
+        return
+    try:
+        await v.room.local_participant.send_text(json.dumps(payload), topic=topic)
+        logger.info("published %s", topic)
+    except Exception:
+        logger.warning("could not publish %s", topic, exc_info=True)
+
+
+async def _publish_booking(context: RunContext, res: dict, v: Visitor) -> None:  # noqa: ARG001
+    """Tell the browser, so the site can render a card with an .ics link."""
+    await _publish(v, BOOKING_TOPIC, {
+        "start": res["start"],
+        "label": res["label"],
+        "minutes": booking.SLOT_MINUTES,
+        "email": v.email,
+        "tz": v.tz,
+        "joinUrl": res.get("join_url"),
+        # True when Google emailed a real invite, so the UI can drop the .ics
+        "invited": bool(res.get("invited")),
+    })
+    # The offer is spent; clear the chips so a stale list can't be tapped.
+    await _publish(v, SLOTS_TOPIC, {"slots": [], "tz": v.tz})
+
+
+def _build_stt():
+    if USE_REALTIME_STT:
+        # Sarvam's realtime API brings its own VAD, so no silero needed.
+        return sarvam.STTRealtime(language="en-IN", stream_type="balanced"), None
+    return sarvam.STT(language="en-IN", model="saaras:v4",
+                      prompt=STT_PROMPT,
+                      high_vad_sensitivity=True), silero.VAD.load()
+
+
+def _readable_transcript(session: AgentSession) -> tuple[str, int]:
+    """The conversation as plain text, plus how many turns the visitor took."""
+    lines: list[str] = []
+    turns = 0
+    for item in session.history.items:
+        if getattr(item, "type", None) != "message":
+            continue
+        role = getattr(item, "role", "")
+        content = getattr(item, "content", None)
+        text = " ".join(c for c in content if isinstance(c, str)) if isinstance(
+            content, list
+        ) else str(content or "")
+        text = text.strip()
+        if not text:
+            continue
+        if role == "user":
+            turns += 1
+            lines.append(f"Them: {text}")
+        elif role == "assistant":
+            lines.append(f"Agent: {text}")
+    return "\n".join(lines), turns
+
+
+async def _summarise(transcript: str) -> str:
+    """One short paragraph on what they wanted. Falls back to the raw text."""
+    try:
+        from livekit.agents import llm as lk_llm
+
+        model = sarvam.LLM(model="sarvam-105b-conversations")
+        ctx = lk_llm.ChatContext.empty()
+        ctx.add_message(role="system", content=(
+            "Summarise this conversation between a visitor and Naman's website "
+            "agent, for Naman. Three sentences at most: who they seem to be, "
+            "what they wanted, and whether anything needs his follow-up. Plain "
+            "prose, no bullet points, no preamble."
+        ))
+        ctx.add_message(role="user", content=transcript[:6000])
+        out = ""
+        async with model.chat(chat_ctx=ctx) as stream:
+            async for chunk in stream:
+                if chunk.delta and chunk.delta.content:
+                    out += chunk.delta.content
+        return out.strip() or "(summary unavailable)"
+    except Exception:
+        logger.warning("could not summarise", exc_info=True)
+        return "(summary unavailable)"
+
+
+# --- entrypoint --------------------------------------------------------------
+
+server = AgentServer()
+
+
+@server.rtc_session(agent_name="naman")
+async def entrypoint(ctx: agents.JobContext):
+    meta: dict = {}
+    if ctx.job.metadata:
+        try:
+            meta = json.loads(ctx.job.metadata)
+        except ValueError:
+            logger.warning("unparseable job metadata: %r", ctx.job.metadata)
+
+    visitor = Visitor(
+        tz=meta.get("tz") or "Asia/Kolkata",
+        referrer=meta.get("referrer", ""),
+        room=ctx.room,
+    )
+    # Whether writes go out as Naman (real Meet + invite) or fall back to the
+    # service account (no conferencing). Logged every session because the
+    # difference is invisible until someone books.
+    logger.info(
+        "session start tz=%s referrer=%s oauth=%s",
+        visitor.tz, visitor.referrer,
+        "on" if booking._oauth_service() is not None else "OFF-fallback",
+    )
+
+    stt, vad = _build_stt()
+    session = AgentSession[Visitor](
+        userdata=visitor,
+        user_away_timeout=IDLE_SECONDS,
+        # Stop talking almost immediately when someone starts. The default
+        # waits long enough that the agent talks over the first few words,
+        # which is what makes it feel like it isn't listening.
+        min_interruption_duration=0.2,
+        min_interruption_words=0,
+        # Don't keep processing audio the agent was told to ignore.
+        discard_audio_if_uninterruptible=True,
+        # If the "interruption" was a cough, pick the sentence back up.
+        resume_false_interruption=True,
+        false_interruption_timeout=1.0,
+        stt=stt,
+        vad=vad,
+        # Sarvam's realtime API detects turns itself; the default TurnDetector
+        # would need a separate VAD model we don't otherwise load.
+        turn_detection=None if USE_REALTIME_STT else agents.NOT_GIVEN,
+        llm=sarvam.LLM(model="sarvam-105b-conversations"),
+        tts_text_transforms=[
+            # The prompt forbids markdown and emoji, but a model will slip
+            # eventually and "**Sylva**" read aloud is unforgivable.
+            "filter_emoji",
+            "filter_markdown",
+            # case_sensitive is essential, not a nicety: the default matches
+            # substrings case-insensitively, so "AI" hit the middle of "email",
+            # "UI" hit "built" and "IST" would hit "exist". Acronyms must only
+            # match when they're actually written as acronyms.
+            text_transforms.replace(SPOKEN_AS, case_sensitive=True),
+        ],
+        tts=sarvam.TTS(
+            target_language_code="en-IN",
+            model="bulbul:v3",
+            speaker=VOICE,
+            speech_sample_rate=22050,
+            pace=1.0,
+        ),
+    )
+
+    async def _hard_stop() -> None:
+        await asyncio.sleep(MAX_SESSION_SECONDS)
+        logger.info("session hit the %.0fs ceiling; closing", MAX_SESSION_SECONDS)
+        try:
+            await session.generate_reply(instructions=(
+                "Say one short line that you have to wrap up there, and they can "
+                "start again any time. Do not ask a question."
+            ))
+        except Exception:
+            logger.debug("wrap-up line failed", exc_info=True)
+        finally:
+            await session.aclose()
+
+    async def _report() -> None:
+        """Mail Naman what happened. Safe to call more than once."""
+        if visitor.reported:
+            return
+        visitor.reported = True
+        logger.info("building session report")
+        transcript, turns = _readable_transcript(session)
+        logger.info("session report: %d turn(s), %d chars", turns, len(transcript))
+        if turns < MIN_TURNS_TO_REPORT:
+            logger.info("only %d visitor turn(s); not reporting", turns)
+            return
+
+        summary = await _summarise(transcript)
+        v = visitor
+        outcome = "Booked a call" if v.pending_slot is None and v.contacted else (
+            "Left contact details" if v.contacted else "No contact left"
+        )
+        body = (
+            f"{summary}\n\n"
+            f"Outcome:  {outcome}\n"
+            f"Contact:  {v.email or '(none given)'}\n"
+            f"Name:     {v.name or '(not given)'}\n"
+            f"Timezone: {v.tz}\n"
+            f"Came from: {v.referrer or '(direct)'}\n"
+            f"Turns:    {turns}\n\n"
+            f"--- full transcript ---\n{transcript}\n"
+        )
+        who = v.name or v.email or v.tz
+        await asyncio_to_thread(
+            notify.send_to_self, f"Someone talked to your site agent — {who}", body
+        )
+
+    visitor.report = _report
+    # Still registered, to catch closed tabs, the idle timeout and the ceiling.
+    ctx.add_shutdown_callback(_report)
+
+    ceiling = asyncio.create_task(_hard_stop())
+
+    async def _cancel_ceiling() -> None:
+        # Must be a coroutine: add_shutdown_callback awaits what it's given.
+        ceiling.cancel()
+
+    ctx.add_shutdown_callback(_cancel_ceiling)
+
+    @session.on("user_state_changed")
+    def _on_user_state(ev) -> None:
+        # Fires once the visitor has been silent for IDLE_SECONDS.
+        if getattr(ev, "new_state", None) == "speaking":
+            visitor.spoke_since_check = True
+            return
+        if getattr(ev, "new_state", None) != "away":
+            return
+        logger.info("visitor idle for %.0fs; closing", IDLE_SECONDS)
+
+        async def _wrap_up() -> None:
+            try:
+                await session.say("Are you still there?")
+            except Exception:
+                logger.debug("idle check-in failed", exc_info=True)
+
+            # If they answer, user_state flips back to speaking and this is
+            # cancelled by the next state change guard below.
+            await asyncio.sleep(IDLE_GRACE_SECONDS)
+            if visitor.spoke_since_check:
+                logger.info("visitor came back; staying on")
+                return
+
+            try:
+                await session.say(
+                    "No worries — I'll let you go. Start again any time."
+                )
+            except Exception:
+                logger.debug("idle goodbye failed", exc_info=True)
+            finally:
+                if visitor.report is not None:
+                    try:
+                        await visitor.report()
+                    except Exception:
+                        logger.warning("report failed", exc_info=True)
+                await session.aclose()
+
+        visitor.spoke_since_check = False
+        asyncio.create_task(_wrap_up())
+
+    await session.start(
+        room=ctx.room,
+        agent=Assistant(visitor.tz),
+        room_options=room_io.RoomOptions(close_on_disconnect=True),
+    )
+
+    if THINKING_SOUND:
+        background = BackgroundAudioPlayer(
+            thinking_sound=[
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=THINKING_VOLUME),
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=THINKING_VOLUME),
+            ],
+        )
+        try:
+            await background.start(room=ctx.room, agent_session=session)
+        except Exception:
+            logger.warning("background audio unavailable", exc_info=True)
+
+    await session.generate_reply(instructions=(
+        "Greet them in one short sentence. Say you're Naman's site agent and "
+        "they can ask about his work, or book a call right now. Don't list anything."
+    ))
+
+
+if __name__ == "__main__":
+    agents.cli.run_app(server)

@@ -11,18 +11,24 @@ import {
 } from "@livekit/components-react";
 import {
   type LocalAudioTrack,
+  RpcError,
   type RemoteAudioTrack,
   Room,
   RoomEvent,
   Track,
 } from "livekit-client";
-import { useEffect, useMemo, useRef } from "react";
+import { useContext, useEffect, useMemo, useRef } from "react";
 import {
   agentStatus,
   bandsRef,
+  type Booking,
+  bookingStore,
   LIVEKIT_URL,
   sendRef,
+  type Slot,
+  slotsStore,
   transcriptStore,
+  uiRequestStore,
   type TranscriptLine,
 } from "@/lib/agent/store";
 
@@ -79,6 +85,9 @@ export function CallEngine({
       <RoomAudioRenderer />
       <BandReader />
       <TranscriptReader />
+      <BookingReader />
+      <SlotsReader />
+      <RpcBridge />
       <ChatBridge />
     </RoomContext.Provider>
   );
@@ -131,11 +140,120 @@ function TranscriptReader() {
   return null;
 }
 
+// the agent announces a booked call on its own text-stream topic, separate from
+// the transcript, so the UI can render a card rather than parse speech for a date
+function BookingReader() {
+  const room = useContext(RoomContext);
+
+  useEffect(() => {
+    if (!room) return;
+    const topic = "booking.confirmed";
+    room.registerTextStreamHandler(topic, async (reader) => {
+      try {
+        const parsed = JSON.parse(await reader.readAll()) as Partial<Booking>;
+        // Trust nothing: a malformed payload must not blank the card or throw.
+        if (typeof parsed.start !== "string" || typeof parsed.label !== "string") {
+          return;
+        }
+        bookingStore.set({
+          start: parsed.start,
+          label: parsed.label,
+          minutes: typeof parsed.minutes === "number" ? parsed.minutes : 30,
+          email: typeof parsed.email === "string" ? parsed.email : null,
+          tz: typeof parsed.tz === "string" ? parsed.tz : "Asia/Kolkata",
+          joinUrl: typeof parsed.joinUrl === "string" ? parsed.joinUrl : null,
+          invited: parsed.invited === true,
+        });
+      } catch {
+        // ignore: the booking is already on the calendar, the card is cosmetic
+      }
+    });
+    return () => room.unregisterTextStreamHandler(topic);
+  }, [room]);
+
+  return null;
+}
+
+// the times the agent just offered, so the visitor can tap one instead of
+// memorising six spoken options
+function SlotsReader() {
+  const room = useContext(RoomContext);
+
+  useEffect(() => {
+    if (!room) return;
+    const topic = "slots.offered";
+    room.registerTextStreamHandler(topic, async (reader) => {
+      try {
+        const parsed = JSON.parse(await reader.readAll()) as { slots?: unknown };
+        if (!Array.isArray(parsed.slots)) return;
+        const clean = parsed.slots.filter(
+          (s): s is Slot =>
+            !!s &&
+            typeof (s as Slot).id === "string" &&
+            typeof (s as Slot).label === "string",
+        );
+        slotsStore.set(clean);
+      } catch {
+        // a malformed payload just means no chips; the agent still speaks them
+      }
+    });
+    return () => room.unregisterTextStreamHandler(topic);
+  }, [room]);
+
+  return null;
+}
+
+// lets the agent ask the browser for typed input instead of dictated speech
+function RpcBridge() {
+  const room = useContext(RoomContext);
+
+  useEffect(() => {
+    if (!room) return;
+    const method = "ui.collectDetails";
+    room.localParticipant.registerRpcMethod(method, async (data) => {
+      let prompt = "Your details";
+      let fields: ("name" | "email" | "phone")[] = ["name", "email"];
+      try {
+        const parsed = JSON.parse(data.payload || "{}");
+        if (typeof parsed.prompt === "string") prompt = parsed.prompt;
+        if (Array.isArray(parsed.fields) && parsed.fields.length) {
+          fields = parsed.fields.filter((f: string) =>
+            ["name", "email", "phone"].includes(f),
+          );
+        }
+      } catch {
+        // keep the defaults
+      }
+      try {
+        const details = await uiRequestStore.open({
+          id: data.requestId,
+          kind: "details",
+          prompt,
+          fields,
+        });
+        return JSON.stringify(details);
+      } catch {
+        // dismissed or superseded — tell the agent so it can ask by voice
+        throw new RpcError(1, "visitor dismissed the input");
+      }
+    });
+    return () => {
+      room.localParticipant.unregisterRpcMethod(method);
+      uiRequestStore.cancel();
+    };
+  }, [room]);
+
+  return null;
+}
+
 // exposes the chat send fn so the console input can message the agent mid-call
 function ChatBridge() {
   const { send } = useChat();
   useEffect(() => {
     sendRef.current = (text: string) => {
+      // Show it too — a tapped slot or typed email is a turn in the
+      // conversation, and a transcript that omits it reads as broken.
+      transcriptStore.addTyped(text);
       void send(text);
     };
     return () => {

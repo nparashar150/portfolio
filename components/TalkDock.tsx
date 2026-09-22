@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { agentStatus, bandsRef, type AgentStatus } from "@/lib/agent/store";
+import {
+  agentStatus,
+  bandsRef,
+  type AgentStatus,
+  consoleInViewStore,
+} from "@/lib/agent/store";
+import { Conversation } from "./agent/Conversation";
 import { gateStore, AGENT_START_EVENT, AGENT_END_EVENT } from "@/lib/gateStore";
 import { Magnetic } from "./Magnetic";
 
@@ -60,7 +66,11 @@ export function TalkDock() {
     () => "idle" as AgentStatus,
   );
   const gateDone = useSyncExternalStore(gateStore.subscribe, gateStore.get, () => false);
-  const [consoleVisible, setConsoleVisible] = useState(true);
+  const consoleVisible = useSyncExternalStore(
+    consoleInViewStore.subscribe,
+    consoleInViewStore.get,
+    () => false,
+  );
   const [seconds, setSeconds] = useState(0);
 
   const live = status === "live";
@@ -74,18 +84,6 @@ export function TalkDock() {
     return () => clearInterval(id);
   }, [live]);
 
-  // hide while the console section is on screen, it has its own controls
-  useEffect(() => {
-    const el = document.getElementById("console");
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setConsoleVisible(entry.isIntersecting),
-      { threshold: 0.12 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
   const toggle = () => {
     window.dispatchEvent(
       new Event(status === "idle" ? AGENT_START_EVENT : AGENT_END_EVENT),
@@ -93,18 +91,61 @@ export function TalkDock() {
   };
 
   const show = gateDone && (!consoleVisible || live);
+  // Expanded only when the call has nowhere else to live. Scrolling to the
+  // console hands the thread over and collapses this back to a pill.
+  const expanded = live && !consoleVisible;
 
   return (
-    <AnimatePresence>
+    <>
+      {/* Dim everything else so the call is the only thing in the room.
+          It DOES take pointer events: without that, hovering a work row behind
+          the scrim still fired the site-preview popup, which floated over the
+          dimmed page mid-call. Wheel events still reach the document because
+          nothing inside the scrim scrolls, so scrolling to the console — and
+          the handoff that depends on it — keeps working. */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            aria-hidden
+            className="fixed inset-0 z-30 bg-ink/70 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
       {show && (
         <motion.div
-          className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2"
+          layout
+          className={`fixed bottom-6 left-1/2 z-40 -translate-x-1/2 ${
+            expanded ? "w-[min(92vw,640px)]" : ""
+          }`}
           initial={{ opacity: 0, y: 24, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.95 }}
-          transition={{ duration: 0.25, scale: { type: "spring", visualDuration: 0.25, bounce: 0.15 } }}
+          // Entrance keeps its own snap; only the dock<->console handoff uses
+          // the shared spring, so the two never fight over the same frame.
+          transition={{
+            duration: 0.25,
+            scale: { type: "spring", visualDuration: 0.25, bounce: 0.15 },
+            layout: { duration: 0.28, ease: [0.4, 0, 0.2, 1] },
+          }}
         >
-          <div className="flex items-center gap-3 rounded-full border border-line bg-surface/95 py-2 pr-5 pl-2 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.9)] backdrop-blur sm:gap-5 sm:py-3 sm:pr-7 sm:pl-3">
+          <motion.div
+            layout
+            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+            className={`flex flex-col gap-3 border border-line bg-surface/95 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.9)] backdrop-blur ${
+              expanded ? "rounded-2xl p-3" : "rounded-full"
+            }`}
+            style={{ borderRadius: expanded ? 16 : 999 }}
+          >
+          {expanded && <Conversation compact />}
+          <div className={`flex items-center gap-3 sm:gap-5 ${
+            expanded ? "px-1 pb-1" : "py-2 pr-5 pl-2 sm:py-3 sm:pr-7 sm:pl-3"
+          }`}>
             <Magnetic strength={0.25}>
               <motion.button
                 onClick={toggle}
@@ -128,7 +169,7 @@ export function TalkDock() {
                     : "TAP TO TALK"}
               </span>
               <span className="hidden font-mono text-[11px] tracking-[0.05em] text-muted sm:block">
-                live voice agent · trained on me
+                answers now · books a real slot
               </span>
             </div>
             <div className="hidden sm:block">
@@ -142,8 +183,10 @@ export function TalkDock() {
               {fmt(seconds)}
             </span>
           </div>
+          </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   );
 }

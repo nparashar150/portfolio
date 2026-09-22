@@ -15,6 +15,18 @@ export const config = {
     { label: "Based", value: "India · Remote" },
   ],
 
+  // No published numbers, deliberately. A rate on a public page is an anchor
+  // every conversation gets negotiated down from, and the same build is worth
+  // very different amounts to a seed startup and a funded platform. The agent
+  // qualifies instead — what it is, the timeline, who they are — and that brief
+  // reaches the calendar before the call, which a rate card could never do.
+  rates: {
+    positioning:
+      "Realtime voice AI and front-of-stack product work — agents, embeddable SDKs, interfaces.",
+    model: "Project-based: a fixed price against a defined scope and outcome.",
+    note: "Priced per project once the scope is clear. Smaller ongoing work can be hourly.",
+  },
+
   about:
     "I live where design meets systems. Lately that means voice and video AI: agents that sound human and interfaces that feel alive.",
 
@@ -24,44 +36,85 @@ export const config = {
       role: "Software Engineer II",
       company: "Sylva, NY",
       url: "https://withsylva.com",
-      desc: "Ran the HubSpot to Attio migration of 500K+ records and scaled Miitra to 20+ communities.",
+      desc: "Own Exchange, a members-only platform for 900+ Chiefs of Staff. Ran the HubSpot to Attio migration of 500K+ records.",
       stat: "500K+ RECORDS MIGRATED",
       preview: "/previews/sylva.webp",
       embed: false, // withsylva.com sets frame-ancestors 'none'
-      tech: ["TypeScript", "React", "Node.js"],
+      tech: ["TypeScript", "React", "Node.js", "Stripe", "Supabase", "Postgres"],
+      // Longer form, used by the markdown rendering and the voice agent.
+      detail: [
+        "Build and own Exchange, a members-only platform for 900+ Chiefs of Staff, including auth, applications and the member directory.",
+        "Led the HubSpot to Attio migration: rebuilt 500+ automations and moved 500K+ records with idempotent writeback.",
+        "Built a multi-tenant sync engine across Fillout, Attio, Stripe, Memberstack and Supabase.",
+        "Built Stripe billing, subscription state, webhooks and lifecycle emails with audit trails.",
+        "Built a read-only Postgres MCP server with query guards and rate limiting for AI access.",
+        "Earlier at Sylva: built the Miitra frontend, scaling it to 100K+ members across 30+ communities.",
+      ],
     },
     {
       period: "2023 → NOW",
-      role: "Product & Frontend Consultant",
+      role: "Frontend Engineer, Voice AI",
       company: "Ringg AI",
       url: "https://www.ringg.ai",
-      desc: "Led the RinggAI and DesiVocal frontends. Shipped a TTS interface at 7M+ generations.",
+      desc: "Joined as the 5th person and grew with the team to ~50. Built the embeddable voice SDK and co-led DesiVocal at 7M+ generations.",
       stat: "TTS AT 7M+ GENERATIONS",
       preview: "/previews/ringg.webp",
       embed: false, // ringg.ai sets frame-ancestors 'self' https://*.prismic.io
-      tech: ["React", "Next.js", "TypeScript", "Zustand", "AWS"],
+      tech: ["React", "Next.js", "TypeScript", "Flutter", "Android", "Zustand", "AWS"],
+      detail: [
+        "Built Ringg's embeddable voice and chat UI SDK across React, Flutter and Android, with realtime audio, transcription and data-channel messaging.",
+        "Top contributor to the core agent frontend across 16 engineers: the visual flow builder, agent editor and realtime execution dashboards.",
+        "Co-led the DesiVocal frontend monorepo across 5 applications, supporting 7M+ voice generations.",
+        "Authored the internal component library — components, editor, hooks, stores and providers.",
+        "Owned frontend architecture, state management, API patterns and performance as the product scaled.",
+      ],
     },
     {
       period: "2022 → 2023",
-      role: "Product Engineer",
+      role: "Product Engineering Intern",
       company: "Antler",
       url: "https://www.antler.co",
       desc: "Built internal tools for 500+ portfolio companies and automated their content migrations.",
       stat: "TOOLS FOR 500+ STARTUPS",
       preview: "/previews/antler.webp",
       embed: true,
-      tech: ["React", "TypeScript", "Node.js"],
+      tech: ["React", "TypeScript", "Node.js", "Firebase"],
+      detail: [
+        "Streamlined employee onboarding by integrating it with Antler's existing product suite.",
+        "Automated a broken data migration covering 500+ portfolio companies and 250+ blogs.",
+        "Automated bug and ticket management through a Slackbot and Notion.",
+        "Shipped fixes and features across antler.co, Antler Hub, Fusion and Demoday.",
+      ],
     },
     {
       period: "2022",
-      role: "Software Developer",
+      role: "Product Engineer",
+      company: "OffsetFarm",
+      url: "https://offsetfarm.io",
+      desc: "Built app.offsetfarm.io from scratch, letting investors finance climate projects and earn carbon offsets.",
+      stat: "CLIMATE FINANCE APP",
+      preview: "/previews/carefi.webp",
+      embed: true,
+      tech: ["React", "TypeScript", "JavaScript"],
+      detail: [
+        "Built app.offsetfarm.io from scratch so investors could design deals, finance projects and earn carbon offsets.",
+        "Refactored the marketing site for faster load times and revamped its interface.",
+      ],
+    },
+    {
+      period: "2022",
+      role: "Product Engineer",
       company: "CareFi",
       url: "https://carefi.in",
       desc: "Built CareCred's onboarding and dashboards, helping secure early-stage funding.",
       stat: "CARECRED MVP → FUNDED",
       preview: "/previews/carefi.webp",
       embed: true,
-      tech: ["React", "TypeScript", "Firebase"],
+      tech: ["React", "TypeScript", "Firebase", "Ionic"],
+      detail: [
+        "Built the CareCred frontend from scratch so healthcare suppliers could reach financing quickly.",
+        "Mentored new team members and contributed to product decisions.",
+      ],
     },
   ],
 
@@ -126,11 +179,13 @@ export const config = {
     { name: "Medium", handle: "@nparashar150", url: "https://medium.com/@nparashar150" },
   ],
 
+  // Questions someone deciding whether to hire or work with me actually has.
+  // "Who is Naman?" is a fan's question; these move toward a booking.
   agentPrompts: [
-    "Who is Naman?",
-    "Show me your work",
-    "Your tech stack",
-    "Are you hireable?",
+    "Are you available?",
+    "Have you shipped voice AI?",
+    "How do you work?",
+    "Book a call",
   ],
 };
 

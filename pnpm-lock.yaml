@@ -11,9 +11,15 @@ importers:
       '@livekit/components-react':
         specifier: ^2.9.21
         version: 2.9.21(livekit-client@2.20.0(@types/dom-mediacapture-record@1.0.22))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tslib@2.8.1)
+      '@livekit/protocol':
+        specifier: ^1.52.0
+        version: 1.52.0
       livekit-client:
         specifier: ^2.20.0
         version: 2.20.0(@types/dom-mediacapture-record@1.0.22)
+      livekit-server-sdk:
+        specifier: ^2.19.1
+        version: 2.19.1
       motion:
         specifier: ^12.42.0
         version: 12.42.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -385,6 +391,12 @@ packages:
 
   '@livekit/protocol@1.46.6':
     resolution: {integrity: sha512-upzlHP1vi/kZ/QqALZTFskQ0ifqc2f15RKucHYOsIHJsaXvEYanG75mAb7o+Yomfs4XhQ4BaRsdY+TFHXpaqrg==}
+
+  '@livekit/protocol@1.51.0':
+    resolution: {integrity: sha512-kEDEDaFvIcp5VlYBromdSKMJMEJKfPvXPfEaJPdEz1Qgo84gZAoLF2g58CcMlVYGsjrwE5XYgQxRS5B7KuEj3w==}
+
+  '@livekit/protocol@1.52.0':
+    resolution: {integrity: sha512-zIzWF1sB4Y7B+NsG8QJFUkTCKDGNS/+b8xYLoVsBPMDL4y1MNUCTi4Ld9fuiKe/Fm2T/N/fyhphkPBx+FlRwGw==}
 
   '@napi-rs/wasm-runtime@1.1.6':
     resolution: {integrity: sha512-ZLv/JdUfkvOy9eCnnBaGfiO+XimbjebAeO+MRQqD/B+FR1tnRN0tpKSJHRbE8sFfS6aqsXZ67TQjfwfsxULVbg==}
@@ -1433,6 +1445,9 @@ packages:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
+  jose@5.10.0:
+    resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
+
   jose@6.2.3:
     resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
 
@@ -1558,6 +1573,10 @@ packages:
     resolution: {integrity: sha512-RIJcpvBmOmwz3jTj3rmdY6Dzr55HrhcaJjMgY+HSmoEM+yIRyA40m7r8UKv0hnZWM3z/AYhP1q8C8ciz5UWFKQ==}
     peerDependencies:
       '@types/dom-mediacapture-record': ^1
+
+  livekit-server-sdk@2.19.1:
+    resolution: {integrity: sha512-tqjM5oPDDNBrkb/64YReta9UWP32l1a2m0HHXq8WOuEzwxh4zsaXjeZZtPG4Er4eVAk4kjR+EMxH7lPKzg1g6g==}
+    engines: {node: '>=19'}
 
   locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
@@ -2421,6 +2440,14 @@ snapshots:
   '@livekit/mutex@1.1.1': {}
 
   '@livekit/protocol@1.46.6':
+    dependencies:
+      '@bufbuild/protobuf': 1.10.1
+
+  '@livekit/protocol@1.51.0':
+    dependencies:
+      '@bufbuild/protobuf': 1.10.1
+
+  '@livekit/protocol@1.52.0':
     dependencies:
       '@bufbuild/protobuf': 1.10.1
 
@@ -3596,6 +3623,8 @@ snapshots:
 
   jiti@2.7.0: {}
 
+  jose@5.10.0: {}
+
   jose@6.2.3: {}
 
   js-tokens@4.0.0: {}
@@ -3701,6 +3730,12 @@ snapshots:
       tslib: 2.8.1
       typed-emitter: 2.1.0
       webrtc-adapter: 9.0.5
+
+  livekit-server-sdk@2.19.1:
+    dependencies:
+      '@bufbuild/protobuf': 1.10.1
+      '@livekit/protocol': 1.51.0
+      jose: 5.10.0
 
   locate-path@6.0.0:
     dependencies:

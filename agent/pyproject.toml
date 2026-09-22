@@ -1,0 +1,16 @@
+[project]
+name = "naman-voice-agent"
+version = "0.1.0"
+description = "Voice agent for nparashar150.com - talks about Naman, books calls, captures leads."
+requires-python = ">=3.11"
+dependencies = [
+    "google-auth~=2.35",
+    "google-api-python-client~=2.149",
+    "livekit-agents[sarvam]~=1.7",
+    "livekit-plugins-silero>=1.8.2",
+    "python-dotenv>=1.2.3",
+    "google-auth-oauthlib>=1.4.1",
+]
+
+[tool.uv]
+package = false
