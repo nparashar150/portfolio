@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+
+// OpenAI conversion tracking. A pixel id is public by design — it ships in the
+// page either way — so it lives here rather than in an env var that would only
+// create the illusion of a secret.
+const OAI_PIXEL_ID = "JYNaH6sMbBUMJWkrfP53rc";
 import { Archivo, Inter, Space_Mono } from "next/font/google";
 import { Cursor } from "@/components/Cursor";
 import { PreviewLayer } from "@/components/preview/PreviewLayer";
@@ -108,6 +113,14 @@ export default function RootLayout({
           data-key="DeirVMR5+FCfCin7Jdrutw"
           strategy="afterInteractive"
         />
+        {/* OpenAI conversion pixel. Loaded through next/script rather than a
+            raw tag so it stays out of the critical path — the vendor snippet's
+            own async loader would otherwise run during hydration. */}
+        <Script id="oai-pixel" strategy="afterInteractive">
+          {`!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:${JSON.stringify(
+            OAI_PIXEL_ID,
+          )},debug:${process.env.NODE_ENV !== "production"}});`}
+        </Script>
       </body>
     </html>
   );

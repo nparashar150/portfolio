@@ -94,7 +94,8 @@ export const privacyContent: PageContent = {
     {
       heading: "What this site collects",
       body: [
-        "The site uses privacy-friendly analytics (Ahrefs Web Analytics) to count visits and understand which pages are useful. It does not use advertising cookies and does not build personal profiles for marketing purposes.",
+        "The site uses privacy-friendly analytics (Ahrefs Web Analytics) to count visits and understand which pages are useful.",
+        "It also loads an OpenAI conversion pixel, which tells me whether someone who found this site through a ChatGPT ad went on to get in touch. It reports that a visit happened — it doesn't tell me who you are, and I don't use it to build a profile of you or to target you anywhere else.",
       ],
     },
     {
