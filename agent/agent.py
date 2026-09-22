@@ -121,8 +121,14 @@ class Visitor:
 # Applied as a streaming transform before synthesis, so it works across token
 # boundaries without a custom node.
 SPOKEN_AS = {
-    "nparashar150": "N Parashar one fifty",
+    # Longest match wins, so the full address has to be listed before the
+    # domain and the bare handle it contains.
+    "nparashar150@gmail.com": "N Parashar one fifty at gmail dot com",
     "nparashar150.com": "N Parashar one fifty dot com",
+    "www.nparashar150.com": "N Parashar one fifty dot com",
+    "nparashar150": "N Parashar one fifty",
+    "naman@withsylva.com": "naman at with sylva dot com",
+    "naman@ringg.ai": "naman at ringg dot A I",
     "QuikRun": "Quick Run",
     "quik.run": "Quick Run",
     "DesiVocal": "Desi Vocal",
@@ -588,7 +594,11 @@ async def entrypoint(ctx: agents.JobContext):
             # eventually and "**Sylva**" read aloud is unforgivable.
             "filter_emoji",
             "filter_markdown",
-            text_transforms.replace(SPOKEN_AS),
+            # case_sensitive is essential, not a nicety: the default matches
+            # substrings case-insensitively, so "AI" hit the middle of "email",
+            # "UI" hit "built" and "IST" would hit "exist". Acronyms must only
+            # match when they're actually written as acronyms.
+            text_transforms.replace(SPOKEN_AS, case_sensitive=True),
         ],
         tts=sarvam.TTS(
             target_language_code="en-IN",
