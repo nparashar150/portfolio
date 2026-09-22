@@ -171,14 +171,12 @@ SPOKEN_AS = {
     "IST": "I S T",
 }
 
-# Names and product words the STT otherwise mangles ("Naman" -> "Laman").
-STT_PROMPT = (
-    "Naman Parashar, nparashar150, Sylva, Ringg AI, DesiVocal, QuikRun, Pixio, "
-    "Antler, CareFi, CareCred, OffsetFarm, LiveKit, Sarvam, voice AI, Next.js, "
-    "TypeScript, React, Flutter, Android, Attio, HubSpot, Stripe, Supabase, "
-    "Postgres, Memberstack, Fillout, Miitra, Exchange, Chief of Staff, "
-    "monorepo, embeddable, realtime, frontend, Cloudflare, Remotion"
-)
+# NOTE: Sarvam's saaras:v3 and saaras:v4 both report supports_prompt=False, so
+# the plugin silently drops any terminology hint — keyword boosting is simply
+# not available on this STT. Only saaras:v3-realtime accepts one, and that model
+# raises a fatal inactivity_timeout after 60s of silence, which killed sessions
+# for anyone who paused. So name recovery is handled in the prompt instead; see
+# content.py. Keeping a dead `prompt=` here would only look like it was working.
 
 
 class Assistant(Agent):
@@ -515,7 +513,6 @@ def _build_stt():
         # Sarvam's realtime API brings its own VAD, so no silero needed.
         return sarvam.STTRealtime(language="en-IN", stream_type="balanced"), None
     return sarvam.STT(language="en-IN", model="saaras:v4",
-                      prompt=STT_PROMPT,
                       high_vad_sensitivity=True), silero.VAD.load()
 
 
