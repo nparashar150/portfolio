@@ -24,6 +24,7 @@ from dotenv import load_dotenv
 from livekit import agents
 from livekit.agents import (
     Agent,
+    text_transforms,
     get_job_context,
     AgentServer,
     AgentSession,
@@ -114,6 +115,32 @@ class Visitor:
     reported: bool = False
     spoke_since_check: bool = False
 
+
+# How the agent SAYS things. Separate problem from hearing them: nothing stops
+# TTS reading "nparashar150" as a jumble or "Next.js" as "next dot jay ess".
+# Applied as a streaming transform before synthesis, so it works across token
+# boundaries without a custom node.
+SPOKEN_AS = {
+    "nparashar150": "N Parashar one fifty",
+    "nparashar150.com": "N Parashar one fifty dot com",
+    "QuikRun": "Quick Run",
+    "quik.run": "Quick Run",
+    "DesiVocal": "Desi Vocal",
+    "Miitra": "Meetra",
+    "Attio": "Attio",
+    "LiveKit": "Live Kit",
+    "Next.js": "Next J S",
+    "Node.js": "Node J S",
+    "TypeScript": "Type Script",
+    "SDK": "S D K",
+    "API": "A P I",
+    "UI": "U I",
+    "MCP": "M C P",
+    "TTS": "text to speech",
+    "STT": "speech to text",
+    "AI": "A I",
+    "IST": "I S T",
+}
 
 # Names and product words the STT otherwise mangles ("Naman" -> "Laman").
 STT_PROMPT = (
@@ -556,6 +583,13 @@ async def entrypoint(ctx: agents.JobContext):
         # would need a separate VAD model we don't otherwise load.
         turn_detection=None if USE_REALTIME_STT else agents.NOT_GIVEN,
         llm=sarvam.LLM(model="sarvam-105b-conversations"),
+        tts_text_transforms=[
+            # The prompt forbids markdown and emoji, but a model will slip
+            # eventually and "**Sylva**" read aloud is unforgivable.
+            "filter_emoji",
+            "filter_markdown",
+            text_transforms.replace(SPOKEN_AS),
+        ],
         tts=sarvam.TTS(
             target_language_code="en-IN",
             model="bulbul:v3",
