@@ -23,6 +23,7 @@ from dotenv import load_dotenv
 from livekit import agents
 from livekit.agents import (
     Agent,
+    get_job_context,
     AgentServer,
     AgentSession,
     RunContext,
@@ -30,7 +31,6 @@ from livekit.agents import (
     function_tool,
     room_io,
 )
-from livekit.agents.beta.tools import EndCallTool
 from livekit.agents.voice.background_audio import (
     AudioConfig,
     BackgroundAudioPlayer,
@@ -106,19 +106,36 @@ class Assistant(Agent):
     def __init__(self, visitor_tz: str) -> None:
         super().__init__(
             instructions=content.instructions(visitor_tz),
-            # Lets the agent hang up itself rather than leaving the line open
-            # (and billing) after the visitor is done.
-            tools=[EndCallTool(
-                extra_description=(
-                    "Use this once the visitor is finished — they've said goodbye, "
-                    "or the booking is done and they have nothing else to ask."
-                ),
-                # Returning an instruction makes the model read the call as
-                # unfinished and fire it again — it looped four times in a real
-                # session. End immediately; the prompt says goodbye first.
-                end_instructions=None,
-            )],
+            # No EndCallTool here: it terminates the moment it's invoked, so the
+            # visitor got hung up on mid-sentence. end_call below says goodbye
+            # first and waits for the audio to actually play out.
         )
+
+    @function_tool()
+    async def end_call(self, context: RunContext) -> None:
+        """Say goodbye and hang up. Call this once the visitor is finished.
+
+        Use it when they say goodbye, or when the booking is done and they have
+        nothing else. Don't say goodbye yourself first — this does it.
+        """
+        # Returns None on purpose: a tool that returns text reads to the model
+        # as unfinished work, and it called the old end tool four times in a row
+        # in a real session. Nothing to reply to means nothing to retry.
+        try:
+            await context.session.say(
+                "Thanks for stopping by — good talking to you. Take care.",
+            )
+            # Let the sign-off actually reach their speakers before we tear the
+            # room down, otherwise it's cut off mid-word.
+            await context.wait_for_playout()
+        except Exception:
+            logger.debug("sign-off failed", exc_info=True)
+
+        logger.info("visitor ended the call")
+        try:
+            await get_job_context().delete_room()
+        except Exception:
+            logger.debug("room already gone", exc_info=True)
 
     # --- availability ------------------------------------------------------
 
