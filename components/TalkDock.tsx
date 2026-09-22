@@ -98,12 +98,16 @@ export function TalkDock() {
   return (
     <>
       {/* Dim everything else so the call is the only thing in the room.
-          Clicking through is deliberate — it isn't a modal, just focus. */}
+          It DOES take pointer events: without that, hovering a work row behind
+          the scrim still fired the site-preview popup, which floated over the
+          dimmed page mid-call. Wheel events still reach the document because
+          nothing inside the scrim scrolls, so scrolling to the console — and
+          the handoff that depends on it — keeps working. */}
       <AnimatePresence>
         {expanded && (
           <motion.div
             aria-hidden
-            className="pointer-events-none fixed inset-0 z-30 bg-ink/70 backdrop-blur-[2px]"
+            className="fixed inset-0 z-30 bg-ink/70 backdrop-blur-[2px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
