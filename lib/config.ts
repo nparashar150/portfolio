@@ -15,12 +15,16 @@ export const config = {
     { label: "Based", value: "India · Remote" },
   ],
 
-  // What the agent answers "what do you charge?" with. Kept here so the site
-  // and the agent can't disagree about it.
+  // No published numbers, deliberately. A rate on a public page is an anchor
+  // every conversation gets negotiated down from, and the same build is worth
+  // very different amounts to a seed startup and a funded platform. The agent
+  // qualifies instead — what it is, the timeline, who they are — and that brief
+  // reaches the calendar before the call, which a rate card could never do.
   rates: {
-    preferred: "Project-based — a fixed price for a defined scope.",
-    hourly: "$60/hr when time-based suits the work better.",
-    note: "Happy to scope a project on a call.",
+    positioning:
+      "Realtime voice AI and front-of-stack product work — agents, embeddable SDKs, interfaces.",
+    model: "Project-based: a fixed price against a defined scope and outcome.",
+    note: "Priced per project once the scope is clear. Smaller ongoing work can be hourly.",
   },
 
   about:
@@ -180,7 +184,7 @@ export const config = {
   agentPrompts: [
     "Are you available?",
     "Have you shipped voice AI?",
-    "What do you charge?",
+    "How do you work?",
     "Book a call",
   ],
 };

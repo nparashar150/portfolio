@@ -40,11 +40,11 @@ Just an engineer who likes building products. I love playing with UI, and I've b
 - **Pixio** — Long-form video into captioned shorts for Reels, TikTok and Shorts.
 - **ACE Monorepo** — Rebuilt vipsace.org with micro-frontends. 45% faster, 15+ devs led.
 
-## Rates
+## Working together
 
-- Project-based — a fixed price for a defined scope.
-- $60/hr when time-based suits the work better.
-- Happy to scope a project on a call.
+- Realtime voice AI and front-of-stack product work — agents, embeddable SDKs, interfaces.
+- Project-based: a fixed price against a defined scope and outcome.
+- Priced per project once the scope is clear. Smaller ongoing work can be hourly.
 
 ## Contact
 
