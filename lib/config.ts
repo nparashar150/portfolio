@@ -27,8 +27,10 @@ export const config = {
     note: "Priced per project once the scope is clear. Smaller ongoing work can be hourly.",
   },
 
+  // Rendered at 34px display type, so it has to be short. Long enough to say
+  // something, short enough that the paragraph isn't the whole section.
   about:
-    "I build the front of voice AI products: realtime agents, the embeddable SDKs that ship them inside other people's apps, and the interfaces around both. At Ringg AI I built the voice and chat SDK across React, Flutter and Android, and co-led a TTS platform now past 7M generations. At Sylva I own Exchange, a members-only platform for 900+ Chiefs of Staff.",
+    "I sit between product and engineering: what to build, how it should feel, then shipping it. Lately that means voice AI.",
 
   work: [
     {
