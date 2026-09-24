@@ -1,18 +1,18 @@
 export const config = {
   name: "Naman Parashar",
   first: "naman",
-  role: "Engineer",
+  role: "Voice AI Frontend Engineer \u00b7 Consultant",
   status: "Open to work",
   location: "28.7035° N, 77.4175° E / New Delhi, IND",
   headline:
-    "Just an engineer who likes building products. I love playing with UI, and I've been deep in voice and video AI. This site can hear you. And it talks back.",
+    "I build realtime voice AI: agents that listen and answer, and the SDKs that ship them inside other people's products. This site is one of them.",
   email: "nparashar150@gmail.com",
   photo: "/me.jpg", // drop a portrait at public/me.jpg
 
+  // Shown in the hero's right-hand column, under the coordinates.
   meta: [
-    { label: "Open to", value: "Work & Collabs" },
-    { label: "Focus", value: "AI-First Web" },
-    { label: "Based", value: "India · Remote" },
+    { label: "Now", value: "SE II @ SYLVA, NY" },
+    { label: "Voice AI", value: "RINGG AI \u00b7 7M+ TTS" },
   ],
 
   // No published numbers, deliberately. A rate on a public page is an anchor
@@ -22,13 +22,15 @@ export const config = {
   // reaches the calendar before the call, which a rate card could never do.
   rates: {
     positioning:
-      "Realtime voice AI and front-of-stack product work — agents, embeddable SDKs, interfaces.",
+      "Realtime voice AI and front-of-stack product work, agents, embeddable SDKs, interfaces.",
     model: "Project-based: a fixed price against a defined scope and outcome.",
     note: "Priced per project once the scope is clear. Smaller ongoing work can be hourly.",
   },
 
+  // Rendered at 34px display type, so it has to be short. Long enough to say
+  // something, short enough that the paragraph isn't the whole section.
   about:
-    "I live where design meets systems. Lately that means voice and video AI: agents that sound human and interfaces that feel alive.",
+    "I sit between product and engineering: what to build, how it should feel, then shipping it. Lately that means voice AI.",
 
   work: [
     {
@@ -65,7 +67,7 @@ export const config = {
         "Built Ringg's embeddable voice and chat UI SDK across React, Flutter and Android, with realtime audio, transcription and data-channel messaging.",
         "Top contributor to the core agent frontend across 16 engineers: the visual flow builder, agent editor and realtime execution dashboards.",
         "Co-led the DesiVocal frontend monorepo across 5 applications, supporting 7M+ voice generations.",
-        "Authored the internal component library — components, editor, hooks, stores and providers.",
+        "Authored the internal component library, components, editor, hooks, stores and providers.",
         "Owned frontend architecture, state management, API patterns and performance as the product scaled.",
       ],
     },
@@ -121,7 +123,7 @@ export const config = {
   featured: {
     name: "QuikRun",
     tag: "Live",
-    desc: "QuikRun turns a plain-English prompt into a live URL that runs your code — no servers, no deploys.",
+    desc: "QuikRun turns a plain-English prompt into a live URL that runs your code. No servers, no deploys.",
     tech: ["TypeScript", "Cloudflare", "MCP"],
     display: "say it.\nship it.",
     host: "quik.run",
@@ -150,6 +152,15 @@ export const config = {
       url: "https://vipsace.org",
       preview: "/previews/ace.webp",
       embed: true,
+    },
+  ],
+
+  education: [
+    {
+      school: "Guru Gobind Singh Indraprastha University",
+      degree: "BCA, Computer Programming",
+      period: "2020 \u2192 2023",
+      note: "GPA 9.0",
     },
   ],
 

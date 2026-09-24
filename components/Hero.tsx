@@ -139,6 +139,16 @@ export function Hero() {
             >
               28.7035° N / 77.4175° E
             </Previewable>
+            {/* Where he works, above the fold. Previously the only way to
+                learn this was to scroll into the work section. */}
+            {config.meta.map((m) => (
+              <span
+                key={m.label}
+                className="font-mono text-xs tracking-[0.06em] text-cream"
+              >
+                {m.value}
+              </span>
+            ))}
             <span className="font-mono text-xs tracking-[0.06em] text-muted">
               NEW DELHI, IND · REMOTE OK
             </span>
