@@ -36,21 +36,21 @@ function pageMarkdown(page: PageContent): string {
 
 function homeMarkdown(): string {
   const out: string[] = [
-    `# ${config.name} — ${config.role}`,
+    `# ${config.name} · ${config.role}`,
     "",
     config.headline,
     "",
     "## Now",
     "",
     `- ${config.status}, focused on AI-first web, frontend and product engineering, and voice AI.`,
-    `- Based in ${config.location.split("/").pop()?.trim() ?? "New Delhi, India"} — remote-friendly.`,
+    `- Based in ${config.location.split("/").pop()?.trim() ?? "New Delhi, India"}, remote-friendly.`,
     "",
     "## Experience",
     "",
     // Bullets where we have them: the voice agent answers from this, and a
     // one-line summary per role isn't enough to hold a conversation.
     ...config.work.flatMap((w) => [
-      `- **${w.company}** — ${w.role} (${w.period}). ${w.desc}`,
+      `- **${w.company}** · ${w.role} (${w.period}). ${w.desc}`,
       ...("detail" in w && Array.isArray(w.detail)
         ? w.detail.map((d: string) => `  - ${d}`)
         : []),
@@ -58,13 +58,13 @@ function homeMarkdown(): string {
     "",
     "## Projects",
     "",
-    `- **${config.featured.name}** — ${config.featured.desc} (${config.featured.host})`,
-    ...config.projects.map((p) => `- **${p.name}** — ${p.desc}`),
+    `- **${config.featured.name}** · ${config.featured.desc} (${config.featured.host})`,
+    ...config.projects.map((p) => `- **${p.name}** · ${p.desc}`),
     "",
     "## Education",
     "",
     ...config.education.map(
-      (e) => `- **${e.school}** — ${e.degree} (${e.period}). ${e.note}`,
+      (e) => `- **${e.school}** · ${e.degree} (${e.period}). ${e.note}`,
     ),
     "",
     "## Working together",
@@ -99,17 +99,17 @@ function navFooter(currentPath: string): string {
 export function notFoundMarkdown(pathname: string): string {
   return (
     [
-      "# 404 — Page not found",
+      "# 404 · Page not found",
       "",
       `There is nothing at \`${pathname}\` on this site.`,
       "",
       "## Where to look instead",
       "",
-      "- [Home](/) — Naman Parashar, software engineer",
+      "- [Home](/) · Naman Parashar, software engineer",
       "- [About](/about)",
       "- [Contact](/contact)",
       "- [Privacy](/privacy)",
-      "- [llms.txt](/llms.txt) — structured summary for AI agents",
+      "- [llms.txt](/llms.txt) · structured summary for AI agents",
       "- [Sitemap](/sitemap.xml)",
     ].join("\n") + "\n"
   );

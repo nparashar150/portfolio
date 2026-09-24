@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Naman Parashar · Voice AI & Frontend Engineer",
     description:
-      "Realtime voice AI and the interfaces around it. SE II at Sylva; voice AI frontend at Ringg AI \u2014 7M+ TTS generations.",
+      "Realtime voice AI and the interfaces around it. SE II at Sylva, voice AI frontend at Ringg AI, 7M+ TTS generations.",
     url: SITE_URL,
     siteName: "Naman Parashar",
     type: "website",
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Naman Parashar · Voice AI & Frontend Engineer",
     description:
-      "Realtime voice AI and the interfaces around it. SE II at Sylva; voice AI frontend at Ringg AI \u2014 7M+ TTS generations.",
+      "Realtime voice AI and the interfaces around it. SE II at Sylva, voice AI frontend at Ringg AI, 7M+ TTS generations.",
     creator: "@nparashar150",
   },
   robots: {

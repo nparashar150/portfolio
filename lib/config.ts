@@ -5,17 +5,14 @@ export const config = {
   status: "Open to work",
   location: "28.7035° N, 77.4175° E / New Delhi, IND",
   headline:
-    "I build realtime voice AI and the interfaces around it \u2014 agents that listen and answer, and the embeddable SDKs that put them inside someone else's product. This site is one of them. Say something and it answers.",
+    "I build realtime voice AI: agents that listen and answer, and the SDKs that ship them inside other people's products. This site is one of them.",
   email: "nparashar150@gmail.com",
   photo: "/me.jpg", // drop a portrait at public/me.jpg
 
-  // The first screen has to answer "what does he do" and "where does he work"
-  // before anyone scrolls. These three chips are the only professional context
-  // above the fold, so they carry a current role and a number, not adjectives.
+  // Shown in the hero's right-hand column, under the coordinates.
   meta: [
-    { label: "Now", value: "SE II @ Sylva, NY" },
-    { label: "Voice AI", value: "Ringg AI \u00b7 7M+ generations" },
-    { label: "Based", value: "New Delhi \u00b7 Remote" },
+    { label: "Now", value: "SE II @ SYLVA, NY" },
+    { label: "Voice AI", value: "RINGG AI \u00b7 7M+ TTS" },
   ],
 
   // No published numbers, deliberately. A rate on a public page is an anchor
@@ -25,13 +22,13 @@ export const config = {
   // reaches the calendar before the call, which a rate card could never do.
   rates: {
     positioning:
-      "Realtime voice AI and front-of-stack product work — agents, embeddable SDKs, interfaces.",
+      "Realtime voice AI and front-of-stack product work, agents, embeddable SDKs, interfaces.",
     model: "Project-based: a fixed price against a defined scope and outcome.",
     note: "Priced per project once the scope is clear. Smaller ongoing work can be hourly.",
   },
 
   about:
-    "I build the front of voice AI products \u2014 realtime agents, the embeddable SDKs that ship them inside other people's apps, and the interfaces around both. At Ringg AI I built the voice and chat SDK across React, Flutter and Android, and co-led a TTS platform now past 7M generations. At Sylva I own Exchange, a members-only platform for 900+ Chiefs of Staff.",
+    "I build the front of voice AI products: realtime agents, the embeddable SDKs that ship them inside other people's apps, and the interfaces around both. At Ringg AI I built the voice and chat SDK across React, Flutter and Android, and co-led a TTS platform now past 7M generations. At Sylva I own Exchange, a members-only platform for 900+ Chiefs of Staff.",
 
   work: [
     {
@@ -68,7 +65,7 @@ export const config = {
         "Built Ringg's embeddable voice and chat UI SDK across React, Flutter and Android, with realtime audio, transcription and data-channel messaging.",
         "Top contributor to the core agent frontend across 16 engineers: the visual flow builder, agent editor and realtime execution dashboards.",
         "Co-led the DesiVocal frontend monorepo across 5 applications, supporting 7M+ voice generations.",
-        "Authored the internal component library — components, editor, hooks, stores and providers.",
+        "Authored the internal component library, components, editor, hooks, stores and providers.",
         "Owned frontend architecture, state management, API patterns and performance as the product scaled.",
       ],
     },
@@ -124,7 +121,7 @@ export const config = {
   featured: {
     name: "QuikRun",
     tag: "Live",
-    desc: "QuikRun turns a plain-English prompt into a live URL that runs your code — no servers, no deploys.",
+    desc: "QuikRun turns a plain-English prompt into a live URL that runs your code. No servers, no deploys.",
     tech: ["TypeScript", "Cloudflare", "MCP"],
     display: "say it.\nship it.",
     host: "quik.run",

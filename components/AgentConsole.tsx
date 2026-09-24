@@ -178,7 +178,7 @@ export function AgentConsole() {
         ? micOn
           ? "Mute"
           : "Unmute"
-        : "Talk — and book 30 min";
+        : "Talk and book 30 min";
 
   return (
     <div id="console" ref={rootRef} className="w-full">

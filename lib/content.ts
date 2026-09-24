@@ -24,13 +24,13 @@ export const aboutContent: PageContent = {
   label: "PROFILE",
   title: "About Naman Parashar",
   description:
-    "Naman Parashar is a product-minded software engineer in New Delhi who builds fast, considered web products — with a soft spot for interface craft and voice AI that sounds genuinely human.",
+    "Naman Parashar is a product-minded software engineer in New Delhi who builds fast, considered web products, with a soft spot for interface craft and voice AI that sounds genuinely human.",
   sections: [
     {
       heading: "What I do",
       body: [
-        "I design and build front-of-stack products end to end: React and Next.js interfaces, TypeScript everywhere, and Node services when the work calls for it. I care about the details most people scroll past — motion, typography, empty states, and the feel of a single click.",
-        "For the last while I've been deep in voice and video AI: agents that listen, reason, and talk back in real time, and pipelines that cut long-form video down to the parts worth watching. This very site is one of them — its commit graph doubles as a live voice agent you can actually speak to.",
+        "I design and build front-of-stack products end to end: React and Next.js interfaces, TypeScript everywhere, and Node services when the work calls for it. I care about the details most people scroll past, motion, typography, empty states, and the feel of a single click.",
+        "For the last while I've been deep in voice and video AI: agents that listen, reason, and talk back in real time, and pipelines that cut long-form video down to the parts worth watching. This very site is one of them, its commit graph doubles as a live voice agent you can actually speak to.",
       ],
     },
     {
@@ -95,14 +95,14 @@ export const privacyContent: PageContent = {
       heading: "What this site collects",
       body: [
         "The site uses privacy-friendly analytics (Ahrefs Web Analytics) to count visits and understand which pages are useful.",
-        "It also loads an OpenAI conversion pixel, which tells me whether someone who found this site through a ChatGPT ad went on to get in touch. It reports that a visit happened — it doesn't tell me who you are, and I don't use it to build a profile of you or to target you anywhere else.",
+        "It also loads an OpenAI conversion pixel, which tells me whether someone who found this site through a ChatGPT ad went on to get in touch. It reports that a visit happened, it doesn't tell me who you are, and I don't use it to build a profile of you or to target you anywhere else.",
       ],
     },
     {
       heading: "The voice agent",
       body: [
-        "The contact section includes an optional voice agent. Nothing happens until you start a call. If you do, your microphone audio is streamed and transcribed in real time so the agent can hold a conversation — speech recognition, language and speech synthesis are handled by Sarvam AI, and the realtime connection by LiveKit.",
-        "The agent can also do two things on my behalf, and only ever when you ask it to. If you give it a way to reach you — an email address, a phone number or a social handle — it saves that, along with a short note on what you wanted, so I can follow up. If you book a call, it writes the booking to my Google Calendar with your name, email and that same note. There is nothing else stored, and none of it is used for marketing.",
+        "The contact section includes an optional voice agent. Nothing happens until you start a call. If you do, your microphone audio is streamed and transcribed in real time so the agent can hold a conversation, speech recognition, language and speech synthesis are handled by Sarvam AI, and the realtime connection by LiveKit.",
+        "The agent can also do two things on my behalf, and only ever when you ask it to. If you give it a way to reach you, an email address, a phone number or a social handle, it saves that, along with a short note on what you wanted, so I can follow up. If you book a call, it writes the booking to my Google Calendar with your name, email and that same note. There is nothing else stored, and none of it is used for marketing.",
         "Please don't tell it anything sensitive. It's a way to talk to me, not a secure channel. If you'd like whatever you left removed, email me and it's gone.",
       ],
     },
