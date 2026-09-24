@@ -61,6 +61,12 @@ function homeMarkdown(): string {
     `- **${config.featured.name}** — ${config.featured.desc} (${config.featured.host})`,
     ...config.projects.map((p) => `- **${p.name}** — ${p.desc}`),
     "",
+    "## Education",
+    "",
+    ...config.education.map(
+      (e) => `- **${e.school}** — ${e.degree} (${e.period}). ${e.note}`,
+    ),
+    "",
     "## Working together",
     "",
     `- ${config.rates.positioning}`,

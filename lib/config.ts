@@ -1,18 +1,21 @@
 export const config = {
   name: "Naman Parashar",
   first: "naman",
-  role: "Engineer",
+  role: "Voice AI Frontend Engineer \u00b7 Consultant",
   status: "Open to work",
   location: "28.7035° N, 77.4175° E / New Delhi, IND",
   headline:
-    "Just an engineer who likes building products. I love playing with UI, and I've been deep in voice and video AI. This site can hear you. And it talks back.",
+    "I build realtime voice AI and the interfaces around it \u2014 agents that listen and answer, and the embeddable SDKs that put them inside someone else's product. This site is one of them. Say something and it answers.",
   email: "nparashar150@gmail.com",
   photo: "/me.jpg", // drop a portrait at public/me.jpg
 
+  // The first screen has to answer "what does he do" and "where does he work"
+  // before anyone scrolls. These three chips are the only professional context
+  // above the fold, so they carry a current role and a number, not adjectives.
   meta: [
-    { label: "Open to", value: "Work & Collabs" },
-    { label: "Focus", value: "AI-First Web" },
-    { label: "Based", value: "India · Remote" },
+    { label: "Now", value: "SE II @ Sylva, NY" },
+    { label: "Voice AI", value: "Ringg AI \u00b7 7M+ generations" },
+    { label: "Based", value: "New Delhi \u00b7 Remote" },
   ],
 
   // No published numbers, deliberately. A rate on a public page is an anchor
@@ -28,7 +31,7 @@ export const config = {
   },
 
   about:
-    "I live where design meets systems. Lately that means voice and video AI: agents that sound human and interfaces that feel alive.",
+    "I build the front of voice AI products \u2014 realtime agents, the embeddable SDKs that ship them inside other people's apps, and the interfaces around both. At Ringg AI I built the voice and chat SDK across React, Flutter and Android, and co-led a TTS platform now past 7M generations. At Sylva I own Exchange, a members-only platform for 900+ Chiefs of Staff.",
 
   work: [
     {
@@ -150,6 +153,15 @@ export const config = {
       url: "https://vipsace.org",
       preview: "/previews/ace.webp",
       embed: true,
+    },
+  ],
+
+  education: [
+    {
+      school: "Guru Gobind Singh Indraprastha University",
+      degree: "BCA, Computer Programming",
+      period: "2020 \u2192 2023",
+      note: "GPA 9.0",
     },
   ],
 

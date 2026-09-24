@@ -1,6 +1,6 @@
-# Naman Parashar — Engineer
+# Naman Parashar — Voice AI Frontend Engineer · Consultant
 
-Just an engineer who likes building products. I love playing with UI, and I've been deep in voice and video AI. This site can hear you. And it talks back.
+I build realtime voice AI and the interfaces around it — agents that listen and answer, and the embeddable SDKs that put them inside someone else's product. This site is one of them. Say something and it answers.
 
 ## Now
 
@@ -39,6 +39,10 @@ Just an engineer who likes building products. I love playing with UI, and I've b
 - **QuikRun** — QuikRun turns a plain-English prompt into a live URL that runs your code — no servers, no deploys. (quik.run)
 - **Pixio** — Long-form video into captioned shorts for Reels, TikTok and Shorts.
 - **ACE Monorepo** — Rebuilt vipsace.org with micro-frontends. 45% faster, 15+ devs led.
+
+## Education
+
+- **Guru Gobind Singh Indraprastha University** — BCA, Computer Programming (2020 → 2023). GPA 9.0
 
 ## Working together
 

@@ -34,9 +34,9 @@ const spaceMono = Space_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Naman Parashar · Engineer",
+  title: "Naman Parashar · Voice AI & Frontend Engineer",
   description:
-    "An engineer who likes building products. Loves playing with UI, and has spent a while deep in the voice and video AI space.",
+    "I build realtime voice AI and the interfaces around it. Software Engineer II at Sylva; voice AI frontend at Ringg AI, where the TTS platform has served 7M+ generations.",
   keywords: [
     "Naman Parashar",
     "software engineer",
@@ -55,9 +55,9 @@ export const metadata: Metadata = {
   creator: "Naman Parashar",
   alternates: { canonical: SITE_URL },
   openGraph: {
-    title: "Naman Parashar · Engineer",
+    title: "Naman Parashar · Voice AI & Frontend Engineer",
     description:
-      "An engineer who likes building products. Loves UI, deep in voice and video AI.",
+      "Realtime voice AI and the interfaces around it. SE II at Sylva; voice AI frontend at Ringg AI \u2014 7M+ TTS generations.",
     url: SITE_URL,
     siteName: "Naman Parashar",
     type: "website",
@@ -65,9 +65,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Naman Parashar · Engineer",
+    title: "Naman Parashar · Voice AI & Frontend Engineer",
     description:
-      "An engineer who likes building products. Loves UI, deep in voice and video AI.",
+      "Realtime voice AI and the interfaces around it. SE II at Sylva; voice AI frontend at Ringg AI \u2014 7M+ TTS generations.",
     creator: "@nparashar150",
   },
   robots: {
