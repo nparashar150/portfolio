@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Naman Parashar · Voice AI & Frontend Engineer",
   description:
-    "I build realtime voice AI and the interfaces around it. Software Engineer II at Sylva; voice AI frontend at Ringg AI, where the TTS platform has served 7M+ generations.",
+    "I build realtime voice AI and the interfaces around it. SE II at Sylva, voice AI frontend at Ringg AI, where the TTS platform has served 7M+ generations.",
   keywords: [
     "Naman Parashar",
     "software engineer",

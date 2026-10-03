@@ -2,11 +2,15 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 import { TRUST_PAGES } from "@/lib/content";
 
-// single-page portfolio: the root, the standalone trust pages, plus the in-page
-// section anchors so crawlers understand the structure.
+// Single-page portfolio: the root plus the standalone trust pages.
+//
+// In-page anchors (/#about, /#contact) used to be listed here too. They aren't
+// pages — a crawler resolves them to the root and throws the fragment away, so
+// they were four duplicate entries for one URL. Worse, /#about collided with
+// the real /about page, which is the kind of thing that makes a crawler pick
+// the wrong canonical.
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const sections = ["work", "projects", "about", "contact"];
   return [
     {
       url: SITE_URL,
@@ -19,12 +23,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "monthly" as const,
       priority: 0.8,
-    })),
-    ...sections.map((s) => ({
-      url: `${SITE_URL}/#${s}`,
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
     })),
   ];
 }

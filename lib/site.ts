@@ -1,6 +1,10 @@
 // single source of truth for the canonical production URL.
 // if you serve from a different domain, change this one line.
-export const SITE_URL = "https://nparashar150.com";
+// The deployment 308-redirects the apex to www, so www is the page that
+// actually serves. Pointing canonicals and the sitemap at the apex meant every
+// one of them resolved through a redirect, which an audit reads as a broken
+// canonical. Match reality instead of asserting a preference the host ignores.
+export const SITE_URL = "https://www.nparashar150.com";
 
 // Structured data (JSON-LD) — read by Google, Bing, and increasingly by LLM
 // answer engines for grounding. Emitted as one @graph of cross-linked nodes
