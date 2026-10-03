@@ -24,7 +24,7 @@ export const aboutContent: PageContent = {
   label: "PROFILE",
   title: "About Naman Parashar",
   description:
-    "Naman Parashar is a product-minded software engineer in New Delhi who builds fast, considered web products, with a soft spot for interface craft and voice AI that sounds genuinely human.",
+    "Naman Parashar builds realtime voice AI and the interfaces around it, from New Delhi. Agents, embeddable SDKs, and the products they ship inside.",
   sections: [
     {
       heading: "What I do",
